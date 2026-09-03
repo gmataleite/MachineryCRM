@@ -1,0 +1,77 @@
+openapi: 3.0.3
+info:
+  title: MachineryCRM API
+  version: 1.0.0
+  description: Core API for offline-first synchronization and machinery management.
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local Development Server
+
+paths:
+  /sync:
+    post:
+      summary: Bidirectional data synchronization
+      description: Receives offline maintenance logs from the PWA and returns updated global data.
+      operationId: syncData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncPayload'
+      responses:
+        '200':
+          description: Successful synchronization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+        '400':
+          description: Invalid payload
+
+components:
+  schemas:
+    SyncPayload:
+      type: object
+      properties:
+        lastSyncTimestamp:
+          type: string
+          format: date-time
+        pendingMaintenances:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaintenanceLog'
+            
+    SyncResponse:
+      type: object
+      properties:
+        serverTimestamp:
+          type: string
+          format: date-time
+        updatedMachines:
+          type: array
+          items:
+            $ref: '#/components/schemas/Machine'
+
+    MaintenanceLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        machineId:
+          type: integer
+        maintenanceDate:
+          type: string
+          format: date-time
+        partsUsed:
+          type: string
+
+    Machine:
+      type: object
+      properties:
+        id:
+          type: integer
+        serialNumber:
+          type: string
+        status:
+          type: string
