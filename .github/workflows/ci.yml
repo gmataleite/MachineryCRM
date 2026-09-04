@@ -23,13 +23,13 @@ jobs:
           dotnet-version: '9.0.x'
           
       - name: Restore dependencies
-        run: dotnet restore MachineryCRM.sln
+        run: dotnet restore MachineryCRM.slnx
         
       - name: Build
-        run: dotnet build MachineryCRM.sln --no-restore --configuration Release
+        run: dotnet build MachineryCRM.slnx --no-restore --configuration Release
         
       - name: Test
-        run: dotnet test MachineryCRM.sln --no-build --verbosity normal
+        run: dotnet test MachineryCRM.slnx --no-build --verbosity normal
 
   frontend:
     name: React Frontend Build
