@@ -1,0 +1,20 @@
+# version: '3.8'
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    container_name: machinerycrm_db
+    environment:
+      POSTGRES_USER: crm_admin
+      POSTGRES_PASSWORD: admin_password_123
+      POSTGRES_DB: machinerycrm
+    ports:
+      - "5432:5432"
+    volumes:
+      - machinerycrm_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  machinerycrm_data:
