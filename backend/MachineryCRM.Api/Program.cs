@@ -89,6 +89,20 @@ if (app.Environment.IsDevelopment())
         // Sets Swagger UI to open at the application root (localhost:<port>/)
         c.RoutePrefix = string.Empty; 
     });
+
+    // DB Seeder
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    try
+    {
+        DbSeeder.Seed(dbContext);
+    }
+    catch (Exception ex)
+    {
+        // Fallback robusto caso o container do banco não esteja pronto
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
 }
 
 app.UseHttpsRedirection();
