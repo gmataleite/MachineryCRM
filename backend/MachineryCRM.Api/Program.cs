@@ -6,6 +6,8 @@ using MachineryCRM.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using MachineryCRM.Domain.Interfaces;
 using MachineryCRM.Infrastructure.Repositories;
+using MachineryCRM.Application.Interfaces;
+using MachineryCRM.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // Register Repositories
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IMachineRepository, MachineRepository>();
+builder.Services.AddScoped<IMachineService, MachineService>();
 // Add subsequent repositories (Technician, MaintenanceOrder) here as they are created.
 
 // Configure JWT Authentication
