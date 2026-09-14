@@ -3,4 +3,5 @@
   <Project Path="MachineryCRM.Application/MachineryCRM.Application.csproj" />
   <Project Path="MachineryCRM.Domain/MachineryCRM.Domain.csproj" />
   <Project Path="MachineryCRM.Infrastructure/MachineryCRM.Infrastructure.csproj" />
+  <Project Path="MachineryCRM.UnitTests/MachineryCRM.UnitTests.csproj" />
 </Solution>
