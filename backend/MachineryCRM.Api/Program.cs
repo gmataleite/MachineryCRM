@@ -8,11 +8,24 @@ using MachineryCRM.Domain.Interfaces;
 using MachineryCRM.Infrastructure.Repositories;
 using MachineryCRM.Application.Interfaces;
 using MachineryCRM.Application.Services;
+using Asp.Versioning;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+})
+.AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
+
 builder.Services.AddEndpointsApiExplorer();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
@@ -98,8 +111,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "MachineryCRM API v1");
-        // Sets Swagger UI to open at the application root (localhost:<port>/)
+        var descriptions = app.DescribeApiVersions();
+        foreach (var description in descriptions)
+        {
+            var url = $"/swagger/{description.GroupName}/swagger.json";
+            var name = $"MachineryCRM API {description.GroupName.ToUpperInvariant()}";
+            c.SwaggerEndpoint(url, name);
+        }
         c.RoutePrefix = string.Empty; 
     });
 
