@@ -29,7 +29,7 @@ jobs:
         run: dotnet build MachineryCRM.slnx --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test MachineryCRM.UnitTests/MachineryCRM.UnitTests.csproj --no-build --verbosity normal
+        run: dotnet test MachineryCRM.UnitTests/MachineryCRM.UnitTests.csproj --no-build --configuration Release --verbosity normal
 
   frontend:
     name: React Frontend Build
