@@ -2,11 +2,13 @@ using MachineryCRM.Application.DTOs;
 using MachineryCRM.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Asp.Versioning;
 
 namespace MachineryCRM.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")] // Hardcoded versioning mapped prior to Issue #18
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")] // Versioned API routes
 [Authorize] // Enforces JWT authentication globally for this controller
 public class MachinesController : ControllerBase
 {
