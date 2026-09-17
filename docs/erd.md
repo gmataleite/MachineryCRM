@@ -1,3 +1,4 @@
+```mermaid
 erDiagram
     CUSTOMER ||--o{ FISCAL_ENTITY : has
     CUSTOMER ||--o{ SITE : has
@@ -113,3 +114,4 @@ erDiagram
         string channel
         string summary
     }
+```
