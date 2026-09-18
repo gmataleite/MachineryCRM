@@ -8,6 +8,7 @@ export function MainLayout() {
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Link to="/" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Dashboard</Link>
           <Link to="/machines" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Equipamentos</Link>
+          <Link to="/customer-registration" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Clientes</Link>
         </nav>
       </aside>
       <main style={{ flex: 1, padding: '2rem', backgroundColor: '#f8fafc' }}>
