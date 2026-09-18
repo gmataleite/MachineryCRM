@@ -11,6 +11,11 @@ public class AppDbContext : DbContext
     public DbSet<Technician> Technicians => Set<Technician>();
     public DbSet<Machine> Machines => Set<Machine>();
     public DbSet<MaintenanceOrder> MaintenanceOrders => Set<MaintenanceOrder>();
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<FiscalEntity> FiscalEntities => Set<FiscalEntity>();
+    public DbSet<Site> Sites => Set<Site>();
+    public DbSet<GeoPoint> GeoPoints => Set<GeoPoint>();
+    public DbSet<Contact> Contacts => Set<Contact>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,7 +25,7 @@ public class AppDbContext : DbContext
         modelBuilder.HasPostgresExtension("postgis");
         modelBuilder.HasPostgresExtension("vector");
 
-        // Automatically applies all IEntityTypeConfiguration classes found in this assembly
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        // Automatically applies all IEntityTypeConfiguration classes found in this assembly (Redundância removida)
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 }

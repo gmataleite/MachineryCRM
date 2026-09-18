@@ -28,8 +28,9 @@ public class MachineServiceTests
     public async Task CreateAsync_ShouldThrowException_WhenSerialNumberExists()
     {
         // Arrange
-        var dto = new CreateMachineDto("SN-12345", "Trator T-50", 2024);
-        var existingMachine = new Machine(dto.SerialNumber, dto.Model, dto.Year);
+        Guid fakeSiteId = Guid.NewGuid();
+        var dto = new CreateMachineDto(fakeSiteId, "SN-12345", "Trator T-50", 2024);
+        var existingMachine = new Machine(dto.SiteId, dto.SerialNumber, dto.Model, dto.Year);
         
         _machineRepositoryMock.Setup(repo => repo.GetBySerialNumberAsync(dto.SerialNumber))
             .ReturnsAsync(existingMachine);
@@ -48,7 +49,8 @@ public class MachineServiceTests
     public async Task CreateAsync_ShouldReturnMachineDto_WhenSuccessful()
     {
         // Arrange
-        var dto = new CreateMachineDto("SN-99999", "Colheitadeira AX-900", 2024);
+        Guid fakeSiteId = Guid.NewGuid();
+        var dto = new CreateMachineDto(fakeSiteId, "SN-99999", "Colheitadeira AX-900", 2024);
         
         _machineRepositoryMock.Setup(repo => repo.GetBySerialNumberAsync(dto.SerialNumber))
             .ReturnsAsync((Machine?)null);
@@ -59,6 +61,7 @@ public class MachineServiceTests
         // Assert
         result.Should().NotBeNull();
         result.SerialNumber.Should().Be(dto.SerialNumber);
+        result.SiteId.Should().Be(dto.SiteId); 
         
         _machineRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Machine>()), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CommitAsync(), Times.Once);
