@@ -45,4 +45,34 @@ public class CustomersController : ControllerBase
         
         return Ok(customer);
     }
+
+    [HttpPost("{id:guid}/sites")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<IActionResult> AddSite(Guid id, [FromBody] CreateSiteDto dto)
+    {
+        try
+        {
+            var result = await _customerService.AddSiteAsync(id, dto);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("{id:guid}/fiscal-entities")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<IActionResult> AddFiscalEntity(Guid id, [FromBody] CreateFiscalEntityDto dto)
+    {
+        try
+        {
+            var result = await _customerService.AddFiscalEntityAsync(id, dto);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
 }

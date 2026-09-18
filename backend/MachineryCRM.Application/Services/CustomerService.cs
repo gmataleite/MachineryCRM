@@ -61,4 +61,37 @@ public class CustomerService : ICustomerService
 
         return customerDto;
     }
+
+public async Task<SiteDto> AddSiteAsync(Guid customerId, CreateSiteDto dto)
+    {
+        var customer = await _customerRepository.GetCustomerWithDetailsAsync(customerId);
+        if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
+
+        var site = new Site(customerId, dto.Name, dto.Country, dto.State, dto.City);
+        // Supondo que você adicione um método UpdateObservation na entidade Site se for private set
+        
+        customer.Sites.Add(site);
+        await _unitOfWork.CommitAsync();
+
+        return new SiteDto 
+        { 
+            Id = site.Id, Name = site.Name, Country = site.Country, State = site.State, City = site.City 
+        };
+    }
+
+    public async Task<FiscalEntityDto> AddFiscalEntityAsync(Guid customerId, CreateFiscalEntityDto dto)
+    {
+        var customer = await _customerRepository.GetCustomerWithDetailsAsync(customerId);
+        if (customer == null) throw new KeyNotFoundException("Customer not found.");
+
+        var fiscal = new FiscalEntity(customerId, dto.Name, dto.Country, dto.State, dto.City);
+        
+        customer.FiscalEntities.Add(fiscal);
+        await _unitOfWork.CommitAsync();
+
+        return new FiscalEntityDto 
+        { 
+            Id = fiscal.Id, Name = fiscal.Name, Country = fiscal.Country, State = fiscal.State, City = fiscal.City 
+        };
+    }
 }
