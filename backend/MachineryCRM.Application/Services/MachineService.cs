@@ -24,12 +24,12 @@ public class MachineService : IMachineService
             throw new InvalidOperationException("A machine with this serial number already exists.");
         }
 
-        var machine = new Machine(dto.SerialNumber, dto.Model, dto.Year);
+        var machine = new Machine(dto.SiteId, dto.SerialNumber, dto.Model, dto.Year);
         
         await _machineRepository.AddAsync(machine);
         await _unitOfWork.CommitAsync();
 
-        return new MachineDto(machine.Id, machine.SerialNumber, machine.Model, machine.Year);
+        return new MachineDto(machine.Id, machine.SerialNumber, machine.Model, machine.Year, machine.SiteId);
     }
 
     public async Task<MachineDto?> GetByIdAsync(Guid id)
@@ -37,12 +37,12 @@ public class MachineService : IMachineService
         var machine = await _machineRepository.GetByIdAsync(id);
         if (machine == null) return null;
         
-        return new MachineDto(machine.Id, machine.SerialNumber, machine.Model, machine.Year);
+        return new MachineDto(machine.Id, machine.SerialNumber, machine.Model, machine.Year, machine.SiteId);
     }
 
     public async Task<IEnumerable<MachineDto>> GetAllAsync()
     {
         var machines = await _machineRepository.GetAllAsync();
-        return machines.Select(m => new MachineDto(m.Id, m.SerialNumber, m.Model, m.Year));
+        return machines.Select(m => new MachineDto(m.Id, m.SerialNumber, m.Model, m.Year, m.SiteId));
     }
 }

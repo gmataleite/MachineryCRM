@@ -20,9 +20,13 @@ public static class DbSeeder
         context.Technicians.AddRange(tech1, tech2);
         context.SaveChanges(); // Salva para gerar os GUIDs
 
-        var machine1 = new Machine("SN-77489-XYZ", "Colheitadeira AX-900", 2023);
-        var machine2 = new Machine("SN-11200-ABC", "Trator de Esteira T-50", 2021);
-        var machine3 = new Machine("SN-99882-QWE", "Pulverizador Autopropelido P-300", 2024);
+        Guid idMachine1 = Guid.NewGuid();
+        Guid idMachine2 = Guid.NewGuid();
+        Guid idMachine3 = Guid.NewGuid();
+
+        var machine1 = new Machine(idMachine1, "SN-77489-XYZ", "Colheitadeira AX-900", 2023);
+        var machine2 = new Machine(idMachine2, "SN-11200-ABC", "Trator de Esteira T-50", 2021);
+        var machine3 = new Machine(idMachine3, "SN-99882-QWE", "Pulverizador Autopropelido P-300", 2024);
 
         context.Machines.AddRange(machine1, machine2, machine3);
         context.SaveChanges();

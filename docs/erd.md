@@ -1,9 +1,12 @@
 ```mermaid
 erDiagram
-    ORGANIZATION ||--o{ BILLING_ADDRESS : has
-    ORGANIZATION ||--o{ SITE_ADDRESS : has
-    ORGANIZATION ||--o{ CONTACT : employs
-    SITE_ADDRESS ||--o{ MACHINE : houses
+    CUSTOMER ||--o{ FISCAL_ENTITY : has
+    CUSTOMER ||--o{ SITE : has
+    CUSTOMER ||--o{ CONTACT : has
+    SITE ||--o{ GEO_POINT : contains
+    SITE ||--o{ CONTACT : houses
+    FISCAL_ENTITY ||--o{ CONTACT : registers
+    SITE ||--o{ MACHINE : houses
     MACHINE ||--o{ TRANSFER_HISTORY : logs
     MACHINE ||--o{ MAINTENANCE : receives
     MACHINE ||--o{ COMMUNICATION : has
@@ -20,43 +23,61 @@ erDiagram
         boolean is_active
     }
 
-    ORGANIZATION {
+    CUSTOMER {
         int id PK
-        string legal_name
-        string trade_name
-        string status
+        string name "Grupo Econômico"
     }
 
-    BILLING_ADDRESS {
+    FISCAL_ENTITY {
         int id PK
-        int organization_id FK
-        string street_address
-        string number
-        string tax_id
-    }
-
-    SITE_ADDRESS {
-        int id PK
-        int organization_id FK
-        string site_name
-        string street_address
+        int customer_id FK
+        string sap_pn
+        string name "Razão Social"
+        string cpf
+        string cnpj
+        string ie
+        string country
+        string state
         string city
-        float latitude
-        float longitude
+        string fiscal_address
+        string postal_address
+        string observations
+    }
+
+    SITE {
+        int id PK
+        int customer_id FK
+        string name
+        string country
+        string state
+        string city
+        string observations
+    }
+    
+    GEO_POINT {
+        int id PK
+        int site_id FK
+        string description
+        string coordinates "lat,lng"
+        boolean is_machine_location
+        boolean is_waypoint
+        boolean is_office
     }
 
     CONTACT {
         int id PK
-        int organization_id FK
-        string full_name
+        int customer_id FK
+        int site_id FK "Nullable"
+        int fiscal_entity_id FK "Nullable"
+        string description
         string phone
         string email
-        string role
+        string observations
     }
 
     MACHINE {
         int id PK
-        int site_address_id FK
+        int site_id FK
         string serial_number
         string model
         string brand
@@ -67,8 +88,8 @@ erDiagram
     TRANSFER_HISTORY {
         int id PK
         int machine_id FK
-        int origin_address_id FK
-        int destination_address_id FK
+        int origin_site_id FK
+        int destination_site_id FK
         datetime transfer_date
         string reason
         string logged_by
