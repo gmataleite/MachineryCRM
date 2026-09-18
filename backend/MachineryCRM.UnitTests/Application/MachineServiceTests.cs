@@ -1,4 +1,3 @@
-using FluentAssertions;
 using MachineryCRM.Application.DTOs;
 using MachineryCRM.Application.Services;
 using MachineryCRM.Domain.Entities;
@@ -39,8 +38,8 @@ public class MachineServiceTests
         Func<Task> act = async () => await _machineService.CreateAsync(dto);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("A machine with this serial number already exists.");
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(act);
+        Assert.Equal("A machine with this serial number already exists.", exception.Message);
         
         _unitOfWorkMock.Verify(uow => uow.CommitAsync(), Times.Never);
     }
@@ -59,9 +58,9 @@ public class MachineServiceTests
         var result = await _machineService.CreateAsync(dto);
 
         // Assert
-        result.Should().NotBeNull();
-        result.SerialNumber.Should().Be(dto.SerialNumber);
-        result.SiteId.Should().Be(dto.SiteId); 
+        Assert.NotNull(result);
+        Assert.Equal(dto.SerialNumber, result.SerialNumber);
+        Assert.Equal(dto.SiteId, result.SiteId);
         
         _machineRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Machine>()), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CommitAsync(), Times.Once);

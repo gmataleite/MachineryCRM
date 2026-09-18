@@ -1,4 +1,3 @@
-using FluentAssertions;
 using MachineryCRM.Domain.Entities;
 using MachineryCRM.Domain.Enums;
 using Xunit;
@@ -17,8 +16,8 @@ public class MaintenanceOrderTests
         order.StartMaintenance();
 
         // Assert
-        order.Status.Should().Be(MaintenanceStatus.InProgress);
-        order.UpdatedAt.Should().NotBeNull();
+        Assert.Equal(MaintenanceStatus.InProgress, order.Status);
+        Assert.NotNull(order.UpdatedAt);
     }
 
     [Fact]
@@ -31,7 +30,7 @@ public class MaintenanceOrderTests
         Action act = () => order.CompleteMaintenance();
 
         // Assert
-        act.Should().Throw<InvalidOperationException>()
-           .WithMessage("Only in-progress orders can be completed.");
+        var exception = Assert.Throws<InvalidOperationException>(act);
+        Assert.Equal("Only in-progress orders can be completed.", exception.Message);
     }
 }
