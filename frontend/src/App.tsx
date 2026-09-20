@@ -5,7 +5,8 @@ import { MainLayout } from './layouts/MainLayout';
 import { Dashboard } from './pages/Dashboard';
 import { Machines } from './pages/Machines';
 import { Login } from './pages/Login';
-import { CustomerRegistration } from './pages/CustomerRegistration';
+import { Customers } from './pages/Customers';
+import { CustomerDetail } from './pages/CustomerDetail';
 
 export default function App() {
   return (
@@ -18,7 +19,8 @@ export default function App() {
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="machines" element={<Machines />} />
-              <Route path="customer-registration" element={<CustomerRegistration />} />
+              <Route path="customers" element={<Customers />} />
+              <Route path="/customers/:id" element={<CustomerDetail />} />
             </Route>
           </Route>
         </Routes>

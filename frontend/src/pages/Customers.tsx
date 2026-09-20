@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getCustomers, createCustomer, addSiteToCustomer, addFiscalEntityToCustomer, type CustomerDto } from "../services/customerService";
 import { Building2, MapPin, Landmark, X } from "lucide-react";
+import { Link } from 'react-router-dom';
 
-export function CustomerRegistration() {
+export function Customers() {
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [newCustomerName, setNewCustomerName] = useState<string>("");
@@ -124,13 +125,19 @@ export function CustomerRegistration() {
                   <React.Fragment key={cliente.id}>
                     <tr style={{ borderBottom: "1px solid #EAE8DD" }}>
                       <td style={{ padding: "12px 16px", fontFamily: "monospace", color: "#888", fontSize: 12 }}>{cliente.id.split('-')[0]}</td>
-                      <td style={{ padding: "12px 16px", fontWeight: 600, color: "#1F3B2C" }}>{cliente.name}</td>
+                      <td style={{ padding: "12px 16px", fontWeight: 600 }}>
+                        <Link to={`/customers/${cliente.id}`} style={{ color: "#1F3B2C", textDecoration: "none" }}>
+                          {cliente.name}
+                        </Link>
+                      </td>
+
                       <td style={{ padding: "12px 16px" }}>{cliente.sites?.length || 0}</td>
                       <td style={{ padding: "12px 16px" }}>{cliente.fiscalEntities?.length || 0}</td>
                       <td style={{ padding: "12px 16px", display: "flex", gap: 8 }}>
                         <button onClick={() => setActiveForm({ type: 'site', customerId: cliente.id })} style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", padding: "4px 8px", borderRadius: 4, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 12 }}><MapPin size={12}/> + Local</button>
                         <button onClick={() => setActiveForm({ type: 'fiscal', customerId: cliente.id })} style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", padding: "4px 8px", borderRadius: 4, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 12 }}><Landmark size={12}/> + Fiscal</button>
-                      </td>
+                        </td>
+
                     </tr>
                     
                     {/* FORMULÁRIO INLINE PARA LOCAL PRODUTIVO */}
