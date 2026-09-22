@@ -59,6 +59,13 @@ export interface CreateFiscalEntityDto {
   city: string;
 }
 
+export interface CreateContactDto {
+  siteId?: string;
+  fiscalEntityId?: string;
+  description: string;
+  phone?: string;
+  email?: string;
+}
 export const getCustomers = async (): Promise<CustomerDto[]> => {
   const response = await api.get<CustomerDto[]>('/customers');
   return response.data;
@@ -81,5 +88,10 @@ export const addSiteToCustomer = async (customerId: string, data: CreateSiteDto)
 
 export const addFiscalEntityToCustomer = async (customerId: string, data: CreateFiscalEntityDto): Promise<FiscalEntityDto> => {
   const response = await api.post<FiscalEntityDto>(`/customers/${customerId}/fiscal-entities`, data);
+  return response.data;
+};
+
+export const addContactToCustomer = async (customerId: string, data: CreateContactDto): Promise<ContactDto> => {
+  const response = await api.post<ContactDto>(`/customers/${customerId}/contacts`, data);
   return response.data;
 };
