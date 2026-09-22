@@ -101,4 +101,29 @@ public async Task<IEnumerable<CustomerDto>> GetAllAsync()
             Id = fiscal.Id, Name = fiscal.Name, Country = fiscal.Country, State = fiscal.State, City = fiscal.City 
         };
     }
+
+    public async Task<ContactDto> AddContactAsync(Guid customerId, CreateContactDto dto)
+    {
+        var customer = await _customerRepository.GetByIdAsync(customerId);
+        if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
+
+        var contact = new Contact(customerId, dto.Description, dto.Phone, dto.Email);
+        
+        // Se a entidade utilizar métodos para atribuir chaves estrangeiras opcionais:
+        if (dto.SiteId.HasValue) contact.ChangeSite(dto.SiteId.Value);
+        if (dto.FiscalEntityId.HasValue) contact.ChangeFiscalEntity(dto.FiscalEntityId.Value);
+        
+        _customerRepository.AddContact(contact);
+        await _unitOfWork.CommitAsync();
+
+        return new ContactDto 
+        { 
+            Id = contact.Id, 
+            SiteId = contact.SiteId, 
+            FiscalEntityId = contact.FiscalEntityId, 
+            Description = contact.Description, 
+            Phone = contact.Phone, 
+            Email = contact.Email 
+        };
+    }
 }

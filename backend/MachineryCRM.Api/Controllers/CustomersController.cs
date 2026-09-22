@@ -75,4 +75,19 @@ public class CustomersController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+
+    [HttpPost("{id:guid}/contacts")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<IActionResult> AddContact(Guid id, [FromBody] CreateContactDto dto)
+    {
+        try
+        {
+            var result = await _customerService.AddContactAsync(id, dto);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
 }

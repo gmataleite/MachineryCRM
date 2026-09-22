@@ -9,4 +9,5 @@ public interface ICustomerService
     Task<IEnumerable<CustomerDto>> GetAllAsync();
     Task<SiteDto> AddSiteAsync(Guid customerId, CreateSiteDto dto);
     Task<FiscalEntityDto> AddFiscalEntityAsync(Guid customerId, CreateFiscalEntityDto dto);
+    Task<ContactDto> AddContactAsync(Guid customerId, CreateContactDto dto);
 }

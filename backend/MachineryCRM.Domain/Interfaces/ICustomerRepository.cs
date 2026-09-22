@@ -10,4 +10,5 @@ public interface ICustomerRepository : IRepository<Customer>
 
     void AddSite(Site site);
     void AddFiscalEntity(FiscalEntity fiscalEntity);
+    void AddContact(Contact contact);
 }
