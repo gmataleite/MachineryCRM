@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { getCustomers, createCustomer, addSiteToCustomer, addFiscalEntityToCustomer, type CustomerDto } from "../services/customerService";
-import { Building2, MapPin, Landmark, X } from "lucide-react";
+import { Building2, MapPin, Landmark } from "lucide-react";
 import { Link } from 'react-router-dom';
+import { getCustomers, createCustomer, type CustomerDto } from "../services/customerService";
+import { SiteFormModal } from "../components/SiteFormModal";
+import { FiscalFormModal } from "../components/FiscalFormModal";
 
 export function Customers() {
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
@@ -9,12 +11,12 @@ export function Customers() {
   const [newCustomerName, setNewCustomerName] = useState<string>("");
   const [successMsg, setSuccessMsg] = useState<string>("");
 
-  // Controles de UI para os formulários de agregados
   const [activeForm, setActiveForm] = useState<{ type: 'site' | 'fiscal' | null, customerId: string | null }>({ type: null, customerId: null });
-  
-  // Estados para os formulários
-  const [siteForm, setSiteForm] = useState({ name: "", country: "Brasil", state: "", city: "" });
-  const [fiscalForm, setFiscalForm] = useState({ name: "", cnpj: "", cpf: "", country: "Brasil", state: "", city: "" });
+
+  const handleModalSuccess = async (msg: string) => {
+    showSuccess(msg);
+    await fetchCustomers();
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -42,7 +44,7 @@ export function Customers() {
     if (!trimmedName) return;
 
     if (customers.some(c => c.name.toLowerCase() === trimmedName.toLowerCase())) {
-      if (!window.confirm("Já existe um grupo econômico com este nome. Deseja criar um novo registo mesmo assim?")) return;
+      if (!window.confirm("Já existe um grupo econômico com este nome. Deseja criar um novo registro mesmo assim?")) return;
     }
 
     try {
@@ -56,38 +58,26 @@ export function Customers() {
     }
   };
 
-  const handleSaveSite = async (customerId: string) => {
-    if (!siteForm.name) return alert("O nome do local é obrigatório.");
-    try {
-      await addSiteToCustomer(customerId, siteForm);
-      setActiveForm({ type: null, customerId: null });
-      setSiteForm({ name: "", country: "Brasil", state: "", city: "" });
-      showSuccess("Local Produtivo adicionado com sucesso.");
-      await fetchCustomers();
-    } catch (error) {
-      console.error("Falha", error);
-      alert("Erro ao adicionar local.");
-    }
-  };
-
-  const handleSaveFiscal = async (customerId: string) => {
-    if (!fiscalForm.name) return alert("A Razão Social é obrigatória.");
-    try {
-      await addFiscalEntityToCustomer(customerId, fiscalForm);
-      setActiveForm({ type: null, customerId: null });
-      setFiscalForm({ name: "", cnpj: "", cpf: "", country: "Brasil", state: "", city: "" });
-      showSuccess("Ente Fiscal adicionado com sucesso.");
-      await fetchCustomers();
-    } catch (error) {
-      console.error("Falha", error);
-      alert("Erro ao adicionar ente fiscal.");
-    }
-  };
-
   if (loading) return <div style={{ padding: 20 }}>A carregar dados do servidor...</div>;
 
   return (
     <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", background: "#F2F0E9", minHeight: "100vh", color: "#23291F" }}>
+        {activeForm.type === 'site' && activeForm.customerId && (
+        <SiteFormModal 
+          customerId={activeForm.customerId} 
+          onClose={() => setActiveForm({ type: null, customerId: null })}
+          onSuccess={handleModalSuccess} 
+        />
+      )}
+
+      {activeForm.type === 'fiscal' && activeForm.customerId && (
+        <FiscalFormModal 
+          customerId={activeForm.customerId} 
+          onClose={() => setActiveForm({ type: null, customerId: null })}
+          onSuccess={handleModalSuccess} 
+        />
+      )}
+
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "30px 28px 80px" }}>
         
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
@@ -97,7 +87,7 @@ export function Customers() {
         
         {/* FORMULÁRIO DE NOVO CLIENTE */}
         <div style={{ background: "#FFF", padding: 20, marginBottom: 22, borderLeft: "4px solid #1F3B2C", borderRadius: 4, boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-          <h2 style={{ fontSize: 14, marginBottom: 12, color: "#6E6C61" }}>CADASTRAR NOVO GRUPO econômico</h2>
+          <h2 style={{ fontSize: 14, marginBottom: 12, color: "#6E6C61" }}>CADASTRAR NOVO GRUPO ECONÔMICO</h2>
           <div style={{ display: "flex", gap: 10 }}>
             <input type="text" placeholder="Ex: Luis Pereira de Barros e Ricardo Barros" value={newCustomerName} onChange={(e) => setNewCustomerName(e.target.value)} style={{ flex: 1, padding: "9px 10px", border: "1px solid #DEDCD0", borderRadius: 4, fontSize: 14 }} />
             <button onClick={handleSaveCustomer} style={{ background: "#1F3B2C", color: "#fff", border: "none", padding: "9px 20px", borderRadius: 4, cursor: "pointer", fontWeight: 600, fontSize: 14 }}>Registar</button>
@@ -130,48 +120,13 @@ export function Customers() {
                           {cliente.name}
                         </Link>
                       </td>
-
                       <td style={{ padding: "12px 16px" }}>{cliente.sites?.length || 0}</td>
                       <td style={{ padding: "12px 16px" }}>{cliente.fiscalEntities?.length || 0}</td>
                       <td style={{ padding: "12px 16px", display: "flex", gap: 8 }}>
                         <button onClick={() => setActiveForm({ type: 'site', customerId: cliente.id })} style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", padding: "4px 8px", borderRadius: 4, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 12 }}><MapPin size={12}/> + Local</button>
                         <button onClick={() => setActiveForm({ type: 'fiscal', customerId: cliente.id })} style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", padding: "4px 8px", borderRadius: 4, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, fontSize: 12 }}><Landmark size={12}/> + Fiscal</button>
-                        </td>
-
+                      </td>
                     </tr>
-                    
-                    {/* FORMULÁRIO INLINE PARA LOCAL PRODUTIVO */}
-                    {activeForm.type === 'site' && activeForm.customerId === cliente.id && (
-                      <tr style={{ background: "#fafaf9" }}>
-                        <td colSpan={5} style={{ padding: "16px", borderBottom: "1px solid #EAE8DD" }}>
-                          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                            <span style={{ fontWeight: 600, fontSize: 13, color: "#6E6C61" }}>Novo Local:</span>
-                            <input type="text" placeholder="Nome da Fazenda/Local" value={siteForm.name} onChange={e => setSiteForm({...siteForm, name: e.target.value})} style={{ padding: "6px", border: "1px solid #DEDCD0", borderRadius: 4, flex: 1 }} />
-                            <input type="text" placeholder="Estado (UF)" value={siteForm.state} onChange={e => setSiteForm({...siteForm, state: e.target.value})} style={{ padding: "6px", border: "1px solid #DEDCD0", borderRadius: 4, width: 100 }} />
-                            <input type="text" placeholder="Cidade" value={siteForm.city} onChange={e => setSiteForm({...siteForm, city: e.target.value})} style={{ padding: "6px", border: "1px solid #DEDCD0", borderRadius: 4, width: 150 }} />
-                            <button onClick={() => handleSaveSite(cliente.id)} style={{ background: "#1F3B2C", color: "#fff", border: "none", padding: "6px 12px", borderRadius: 4, cursor: "pointer" }}>Salvar</button>
-                            <button onClick={() => setActiveForm({ type: null, customerId: null })} style={{ background: "transparent", border: "none", cursor: "pointer" }}><X size={16} color="#888" /></button>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-
-                    {/* FORMULÁRIO INLINE PARA ENTE FISCAL */}
-                    {activeForm.type === 'fiscal' && activeForm.customerId === cliente.id && (
-                      <tr style={{ background: "#fafaf9" }}>
-                        <td colSpan={5} style={{ padding: "16px", borderBottom: "1px solid #EAE8DD" }}>
-                          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                            <span style={{ fontWeight: 600, fontSize: 13, color: "#6E6C61" }}>Novo Fiscal:</span>
-                            <input type="text" placeholder="Razão Social" value={fiscalForm.name} onChange={e => setFiscalForm({...fiscalForm, name: e.target.value})} style={{ padding: "6px", border: "1px solid #DEDCD0", borderRadius: 4, flex: 1 }} />
-                            <input type="text" placeholder="CNPJ/CPF" value={fiscalForm.cnpj} onChange={e => setFiscalForm({...fiscalForm, cnpj: e.target.value})} style={{ padding: "6px", border: "1px solid #DEDCD0", borderRadius: 4, width: 140 }} />
-                            <input type="text" placeholder="UF" value={fiscalForm.state} onChange={e => setFiscalForm({...fiscalForm, state: e.target.value})} style={{ padding: "6px", border: "1px solid #DEDCD0", borderRadius: 4, width: 60 }} />
-                            <input type="text" placeholder="Cidade" value={fiscalForm.city} onChange={e => setFiscalForm({...fiscalForm, city: e.target.value})} style={{ padding: "6px", border: "1px solid #DEDCD0", borderRadius: 4, width: 120 }} />
-                            <button onClick={() => handleSaveFiscal(cliente.id)} style={{ background: "#1F3B2C", color: "#fff", border: "none", padding: "6px 12px", borderRadius: 4, cursor: "pointer" }}>Salvar</button>
-                            <button onClick={() => setActiveForm({ type: null, customerId: null })} style={{ background: "transparent", border: "none", cursor: "pointer" }}><X size={16} color="#888" /></button>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
                   </React.Fragment>
                 ))
               )}

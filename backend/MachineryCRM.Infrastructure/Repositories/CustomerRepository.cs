@@ -37,4 +37,9 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
             .Include(c => c.Contacts)
             .ToListAsync();
     }
+
+    public void AddContact(Contact contact)
+    {
+        _context.Add(contact);
+    }
 }
