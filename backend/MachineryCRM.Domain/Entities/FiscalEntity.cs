@@ -14,7 +14,6 @@ public class FiscalEntity : Entity
     public string? FiscalAddress { get; private set; }
     public string? PostalAddress { get; private set; }
     public string? Observations { get; private set; }
-
     public Customer? Customer { get; private set; }
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
 
@@ -22,6 +21,17 @@ public class FiscalEntity : Entity
     {
         CustomerId = customerId;
         Name = name;
+        Country = country;
+        State = state;
+        City = city;
+    }
+
+    public void UpdateDetails(string name, string? sapPn, string? cnpj, string? cpf, string country, string state, string city)
+    {
+        Name = name;
+        SapPn = sapPn;
+        Cnpj = cnpj;
+        Cpf = cpf;
         Country = country;
         State = state;
         City = city;
