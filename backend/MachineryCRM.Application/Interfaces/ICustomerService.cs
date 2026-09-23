@@ -22,4 +22,9 @@ public interface ICustomerService
 
     Task UpdateContactAsync(Guid contactId, UpdateContactDto dto);
     Task DeleteContactAsync(Guid contactId);
+
+    Task<GeoPointDto> AddGeoPointAsync(Guid siteId, CreateGeoPointDto dto);
+    Task UpdateGeoPointAsync(Guid geoPointId, UpdateGeoPointDto dto);
+    Task DeleteGeoPointAsync(Guid geoPointId);
+    Task ReorderGeoPointsAsync(Guid siteId, List<ReorderGeoPointDto> dtos);
 }

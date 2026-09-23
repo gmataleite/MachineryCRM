@@ -10,7 +10,8 @@ public interface ICustomerRepository : IRepository<Customer>
     Task<Site?> GetSiteByIdAsync(Guid id);
     Task<FiscalEntity?> GetFiscalEntityByIdAsync(Guid id);
     Task<Contact?> GetContactByIdAsync(Guid id);
-
+    Task<GeoPoint?> GetGeoPointByIdAsync(Guid id);
+    Task<List<GeoPoint>> GetGeoPointsBySiteIdAsync(Guid siteId);
     void AddSite(Site site);
     void AddFiscalEntity(FiscalEntity fiscalEntity);
     void AddContact(Contact contact);
@@ -18,4 +19,6 @@ public interface ICustomerRepository : IRepository<Customer>
     void RemoveSite(Site site);
     void RemoveFiscalEntity(FiscalEntity fiscalEntity);
     void RemoveContact(Contact contact);
+    void AddGeoPoint(GeoPoint geoPoint);
+    void RemoveGeoPoint(GeoPoint geoPoint);
 }

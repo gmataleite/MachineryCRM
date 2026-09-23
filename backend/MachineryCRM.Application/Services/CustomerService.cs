@@ -52,7 +52,14 @@ public async Task<CustomerDto?> GetByIdWithDetailsAsync(Guid id)
         Name = customer.Name,
         Sites = customer.Sites.Select(s => new SiteDto 
         { 
-            Id = s.Id, Name = s.Name, Country = s.Country, State = s.State, City = s.City, Observations = s.Observations 
+            Id = s.Id, Name = s.Name, Country = s.Country, State = s.State, City = s.City, Observations = s.Observations, GeoPoints = s.GeoPoints.OrderBy(g => g.Order).Select(g => new GeoPointDto
+            {
+                Id = g.Id,
+                Description = g.Description,
+                Latitude = g.Latitude,
+                Longitude = g.Longitude,
+                LocationType = g.LocationType,
+                Order = g.Order }).ToList()
         }).ToList(),
         FiscalEntities = customer.FiscalEntities.Select(f => new FiscalEntityDto 
         { 
@@ -199,6 +206,50 @@ public async Task DeleteContactAsync(Guid contactId)
     var contact = await _customerRepository.GetContactByIdAsync(contactId);
     if (contact == null) throw new KeyNotFoundException("Contato não encontrado.");
     _customerRepository.RemoveContact(contact);
+    await _unitOfWork.CommitAsync();
+}
+
+// --- GEO POINT ---
+public async Task<GeoPointDto> AddGeoPointAsync(Guid siteId, CreateGeoPointDto dto)
+{
+    var site = await _customerRepository.GetSiteByIdAsync(siteId);
+    if (site == null) throw new KeyNotFoundException("Local produtivo não encontrado.");
+
+    var geoPoint = new GeoPoint(siteId, dto.Description, dto.Latitude, dto.Longitude, dto.LocationType, dto.Order);
+    _customerRepository.AddGeoPoint(geoPoint);
+    await _unitOfWork.CommitAsync();
+
+    return new GeoPointDto { Id = geoPoint.Id, Description = geoPoint.Description, Latitude = geoPoint.Latitude, Longitude = geoPoint.Longitude, Order = geoPoint.Order };
+}
+
+public async Task UpdateGeoPointAsync(Guid geoPointId, UpdateGeoPointDto dto)
+{
+    var geoPoint = await _customerRepository.GetGeoPointByIdAsync(geoPointId);
+    if (geoPoint == null) throw new KeyNotFoundException("Ponto geográfico não encontrado.");
+
+    geoPoint.UpdateDetails(dto.Description, dto.Latitude, dto.Longitude);
+    await _unitOfWork.CommitAsync();
+}
+
+public async Task DeleteGeoPointAsync(Guid geoPointId)
+{
+    var geoPoint = await _customerRepository.GetGeoPointByIdAsync(geoPointId);
+    if (geoPoint == null) throw new KeyNotFoundException("Ponto geográfico não encontrado.");
+
+    _customerRepository.RemoveGeoPoint(geoPoint);
+    await _unitOfWork.CommitAsync();
+}
+
+public async Task ReorderGeoPointsAsync(Guid siteId, List<ReorderGeoPointDto> dtos)
+{
+    var geoPoints = await _customerRepository.GetGeoPointsBySiteIdAsync(siteId);
+    
+    foreach (var dto in dtos)
+    {
+        var point = geoPoints.FirstOrDefault(g => g.Id == dto.Id);
+        if (point != null) point.SetOrder(dto.Order);
+    }
+
     await _unitOfWork.CommitAsync();
 }
 }

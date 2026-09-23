@@ -103,7 +103,7 @@ public class CustomersController : ControllerBase
     {
         await _customerService.DeleteCustomerAsync(id);
         return NoContent();
-    }
+    } 
 
     // ---- SITES CRUD ----
     [HttpPut("sites/{siteId:guid}")]
@@ -147,6 +147,35 @@ public class CustomersController : ControllerBase
     public async Task<IActionResult> DeleteContact(Guid contactId)
     {
         await _customerService.DeleteContactAsync(contactId);
+        return NoContent();
+    }
+
+    // ---- GEOPOINTS CRUD ----
+    [HttpPost("sites/{siteId:guid}/geopoints")]
+    public async Task<IActionResult> AddGeoPoint(Guid siteId, [FromBody] CreateGeoPointDto dto)
+    {
+        var result = await _customerService.AddGeoPointAsync(siteId, dto);
+        return Ok(result);
+    }
+
+    [HttpPut("geopoints/{geoPointId:guid}")]
+    public async Task<IActionResult> UpdateGeoPoint(Guid geoPointId, [FromBody] UpdateGeoPointDto dto)
+    {
+        await _customerService.UpdateGeoPointAsync(geoPointId, dto);
+        return NoContent();
+    }
+
+    [HttpDelete("geopoints/{geoPointId:guid}")]
+    public async Task<IActionResult> DeleteGeoPoint(Guid geoPointId)
+    {
+        await _customerService.DeleteGeoPointAsync(geoPointId);
+        return NoContent();
+    }
+
+    [HttpPut("sites/{siteId:guid}/geopoints/reorder")]
+    public async Task<IActionResult> ReorderGeoPoints(Guid siteId, [FromBody] List<ReorderGeoPointDto> dtos)
+    {
+        await _customerService.ReorderGeoPointsAsync(siteId, dtos);
         return NoContent();
     }
 }
