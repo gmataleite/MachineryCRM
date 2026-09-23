@@ -90,4 +90,63 @@ public class CustomersController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+    // ---- CUSTOMERS CRUD ----
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] UpdateCustomerDto dto)
+    {
+        await _customerService.UpdateCustomerAsync(id, dto);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteCustomer(Guid id)
+    {
+        await _customerService.DeleteCustomerAsync(id);
+        return NoContent();
+    }
+
+    // ---- SITES CRUD ----
+    [HttpPut("sites/{siteId:guid}")]
+    public async Task<IActionResult> UpdateSite(Guid siteId, [FromBody] UpdateSiteDto dto)
+    {
+        await _customerService.UpdateSiteAsync(siteId, dto);
+        return NoContent();
+    }
+
+    [HttpDelete("sites/{siteId:guid}")]
+    public async Task<IActionResult> DeleteSite(Guid siteId)
+    {
+        await _customerService.DeleteSiteAsync(siteId);
+        return NoContent();
+    }
+
+    // ---- FISCAL ENTITIES CRUD ----
+    [HttpPut("fiscal-entities/{fiscalId:guid}")]
+    public async Task<IActionResult> UpdateFiscalEntity(Guid fiscalId, [FromBody] UpdateFiscalEntityDto dto)
+    {
+        await _customerService.UpdateFiscalEntityAsync(fiscalId, dto);
+        return NoContent();
+    }
+
+    [HttpDelete("fiscal-entities/{fiscalId:guid}")]
+    public async Task<IActionResult> DeleteFiscalEntity(Guid fiscalId)
+    {
+        await _customerService.DeleteFiscalEntityAsync(fiscalId);
+        return NoContent();
+    }
+
+    // ---- CONTACTS CRUD ----
+    [HttpPut("contacts/{contactId:guid}")]
+    public async Task<IActionResult> UpdateContact(Guid contactId, [FromBody] UpdateContactDto dto)
+    {
+        await _customerService.UpdateContactAsync(contactId, dto);
+        return NoContent();
+    }
+
+    [HttpDelete("contacts/{contactId:guid}")]
+    public async Task<IActionResult> DeleteContact(Guid contactId)
+    {
+        await _customerService.DeleteContactAsync(contactId);
+        return NoContent();
+    }
 }

@@ -22,4 +22,12 @@ public class Site : Entity
         State = state;
         City = city;
     }
+
+    public void UpdateDetails(string name, string country, string state, string city)
+    {
+        Name = name;
+        Country = country;
+        State = state;
+        City = city;
+    }
 }

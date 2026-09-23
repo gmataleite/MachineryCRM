@@ -12,4 +12,9 @@ public class Customer : Entity
     {
         Name = name;
     }
+
+    public void UpdateName(string name)
+    {
+        Name = name;
+    }   
 }
