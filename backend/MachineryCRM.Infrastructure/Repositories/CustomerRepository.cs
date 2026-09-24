@@ -23,6 +23,7 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
     {
         return await _context.Customers
             .Include(c => c.Sites)
+                .ThenInclude(s => s.GeoPoints)
             .Include(c => c.FiscalEntities)
             .Include(c => c.Contacts)
             .ToListAsync();
@@ -33,6 +34,10 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
     public async Task<FiscalEntity?> GetFiscalEntityByIdAsync(Guid id) => await _context.FiscalEntities.FirstOrDefaultAsync(x => x.Id == id);
 
     public async Task<Contact?> GetContactByIdAsync(Guid id) => await _context.Contacts.FirstOrDefaultAsync(x => x.Id == id);
+
+    public async Task<GeoPoint?> GetGeoPointByIdAsync(Guid id) => await _context.Set<GeoPoint>().FirstOrDefaultAsync(x => x.Id == id);
+
+    public async Task<List<GeoPoint>> GetGeoPointsBySiteIdAsync(Guid siteId) => await _context.Set<GeoPoint>().Where(x => x.SiteId == siteId).ToListAsync();
 
     public void AddSite(Site site) => _context.Sites.Add(site);
 
@@ -47,5 +52,9 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
     public void AddContact(Contact contact) => _context.Contacts.Add(contact);
 
     public void RemoveContact(Contact contact) => _context.Contacts.Remove(contact);
+
+    public void AddGeoPoint(GeoPoint geoPoint) => _context.Set<GeoPoint>().Add(geoPoint);
+    
+    public void RemoveGeoPoint(GeoPoint geoPoint) => _context.Set<GeoPoint>().Remove(geoPoint);
 
 }

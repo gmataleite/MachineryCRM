@@ -8,6 +8,7 @@ public class SiteDto
     public string State { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string? Observations { get; set; }
+    public List<GeoPointDto> GeoPoints { get; set; } = new List<GeoPointDto>();
 }
 
 public class CreateSiteDto
@@ -17,6 +18,7 @@ public class CreateSiteDto
     public string State { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string? Observations { get; set; }
+    public List<GeoPointDto> GeoPoints { get; set; } = new List<GeoPointDto>();
 }
 
 public class UpdateSiteDto : CreateSiteDto { } 
