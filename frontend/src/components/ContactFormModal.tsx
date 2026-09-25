@@ -46,7 +46,7 @@ export function ContactFormModal({ customerId, siteId, fiscalEntityId, onClose, 
         </div>
         
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <input type="text" placeholder="Nome / Função (Ex: João, Gerente)" value={form.description} onChange={e => setForm({...form, description: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} required />
+          <input autoFocus type="text" placeholder="Nome / Função (Ex: João, Gerente)" value={form.description} onChange={e => setForm({...form, description: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} required />
           <input type="text" placeholder="Telefone" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} />
           <input type="email" placeholder="E-mail" value={form.email} onChange={e => setForm({...form, email: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} />
           

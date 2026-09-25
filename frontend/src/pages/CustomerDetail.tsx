@@ -5,17 +5,20 @@ import { Building2, MapPin, Landmark, ArrowLeft, Users } from "lucide-react";
 import { SiteFormModal } from "../components/SiteFormModal";
 import { FiscalFormModal } from "../components/FiscalFormModal";
 import { ContactFormModal } from "../components/ContactFormModal";
+import { Toast, type ToastData } from "../components/Toast";
+import { GeoPointMapModal } from "../components/GeoPointMapModal";
 
 export function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<CustomerDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<ToastData | null>(null);
 
   // Estado unificado para controle dos modais
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
-    type: 'site' | 'fiscal' | 'contact' | null;
+    type: 'site' | 'fiscal' | 'contact' | 'geopoint' | null;
     siteId?: string;
     fiscalEntityId?: string;
   }>({ isOpen: false, type: null });
@@ -37,9 +40,8 @@ export function CustomerDetail() {
   };
 
   const handleModalSuccess = async (msg: string) => {
-    // Alerta temporário simples. Pode substituir por um toast/snackbar futuramente.
-    alert(msg);
-    await fetchCustomerData(); // Recarrega os dados do cliente para atualizar a tela
+    await fetchCustomerData();
+    setToast({ message: msg, type: "success" });
   };
 
   const closeModal = () => setModalConfig({ isOpen: false, type: null });
@@ -49,6 +51,7 @@ export function CustomerDetail() {
 
   return (
     <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", background: "#F2F0E9", minHeight: "100vh", color: "#23291F" }}>
+      <Toast toast={toast} onClose={() => setToast(null)} />
       
       {/* RENDERIZAÇÃO DOS MODAIS */}
       {modalConfig.isOpen && modalConfig.type === 'site' && (
@@ -66,6 +69,17 @@ export function CustomerDetail() {
           fiscalEntityId={modalConfig.fiscalEntityId}
           onClose={closeModal} 
           onSuccess={handleModalSuccess} 
+        />
+      )}
+
+      {modalConfig.isOpen && modalConfig.type === 'geopoint' && modalConfig.siteId && (
+        <GeoPointMapModal
+          siteId={modalConfig.siteId}
+          existingWaypointsCount={
+            customer.sites.find(s => s.id === modalConfig.siteId)?.geoPoints?.length || 0
+          }
+          onClose={closeModal}
+          onSuccess={handleModalSuccess}
         />
       )}
 
@@ -124,8 +138,31 @@ export function CustomerDetail() {
         
         {customer.sites.map(site => (
           <div key={site.id} style={{ background: "#FFF", padding: 18, marginBottom: 14, borderRadius: 4, border: "1px solid #DEDCD0" }}>
-            <div style={{ fontWeight: 700, fontSize: 16 }}>{site.name}</div>
-            <div style={{ fontSize: 13, color: "#6E6C61", marginTop: 4 }}>{site.city} — {site.state} — {site.country}</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 16 }}>{site.name}</div>
+                <div style={{ fontSize: 13, color: "#6E6C61", marginTop: 4 }}>{site.city} — {site.state} — {site.country}</div>
+              </div>
+              <button
+                onClick={() => setModalConfig({ isOpen: true, type: 'geopoint', siteId: site.id })}
+                style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", color: "#1F3B2C", padding: "4px 10px", borderRadius: 4, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+              >
+                + Ponto
+              </button>
+            </div>
+
+            {site.geoPoints && site.geoPoints.length > 0 && (
+              <div style={{ marginTop: 12, borderTop: "1px solid #EAE8DD", paddingTop: 8 }}>
+                {site.geoPoints.map(gp => (
+                  <div key={gp.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0" }}>
+                    <span>{gp.description}</span>
+                    <span style={{ fontFamily: "monospace", color: "#6E6C61" }}>
+                      {gp.latitude.toFixed(4)}, {gp.longitude.toFixed(4)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
 

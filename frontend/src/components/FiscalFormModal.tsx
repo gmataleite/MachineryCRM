@@ -38,7 +38,7 @@ export function FiscalFormModal({ customerId, onClose, onSuccess }: FiscalFormMo
         </div>
         
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <input type="text" placeholder="Razão Social" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} required />
+          <input autoFocus type="text" placeholder="Razão Social" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} required />
           <input type="text" placeholder="CNPJ/CPF" value={form.cnpj} onChange={e => setForm({...form, cnpj: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} />
           <div style={{ display: "flex", gap: 10 }}>
             <input type="text" placeholder="UF" value={form.state} onChange={e => setForm({...form, state: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4, width: "30%" }} />
