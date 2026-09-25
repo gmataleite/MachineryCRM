@@ -12,6 +12,7 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
     public async Task<Customer?> GetCustomerWithDetailsAsync(Guid id)
     {
         return await _context.Customers
+            .AsSplitQuery()
             .Include(c => c.Sites)
                 .ThenInclude(s => s.GeoPoints)
             .Include(c => c.FiscalEntities)
@@ -22,6 +23,7 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
     public async Task<IEnumerable<Customer>> GetAllWithDetailsAsync()
     {
         return await _context.Customers
+            .AsSplitQuery()
             .Include(c => c.Sites)
                 .ThenInclude(s => s.GeoPoints)
             .Include(c => c.FiscalEntities)

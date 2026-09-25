@@ -38,7 +38,7 @@ export function SiteFormModal({ customerId, onClose, onSuccess }: SiteFormModalP
         </div>
         
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <input type="text" placeholder="Nome da Fazenda/Local" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} required />
+          <input autoFocus type="text" placeholder="Nome da Fazenda/Local" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} required />
           <div style={{ display: "flex", gap: 10 }}>
             <input type="text" placeholder="Estado (UF)" value={form.state} onChange={e => setForm({...form, state: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4, width: "30%" }} />
             <input type="text" placeholder="Cidade" value={form.city} onChange={e => setForm({...form, city: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4, flex: 1 }} />

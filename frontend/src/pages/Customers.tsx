@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom';
 import { getCustomers, createCustomer, type CustomerDto } from "../services/customerService";
 import { SiteFormModal } from "../components/SiteFormModal";
 import { FiscalFormModal } from "../components/FiscalFormModal";
+import { Toast, type ToastData } from "../components/Toast";
 
 export function Customers() {
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [newCustomerName, setNewCustomerName] = useState<string>("");
-  const [successMsg, setSuccessMsg] = useState<string>("");
-
+  const [toast, setToast] = useState<ToastData | null>(null);
+  
   const [activeForm, setActiveForm] = useState<{ type: 'site' | 'fiscal' | null, customerId: string | null }>({ type: null, customerId: null });
 
   const handleModalSuccess = async (msg: string) => {
@@ -35,8 +36,8 @@ export function Customers() {
   };
 
   const showSuccess = (msg: string) => {
-    setSuccessMsg(msg);
-    setTimeout(() => setSuccessMsg(""), 3500);
+    setToast({ message: msg, type: "success" });
+    setTimeout(() => setToast(null), 3500);
   };
 
   const handleSaveCustomer = async () => {
@@ -62,7 +63,9 @@ export function Customers() {
 
   return (
     <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", background: "#F2F0E9", minHeight: "100vh", color: "#23291F" }}>
-        {activeForm.type === 'site' && activeForm.customerId && (
+      <Toast toast={toast} onClose={() => setToast(null)} />
+
+      {activeForm.type === 'site' && activeForm.customerId && (
         <SiteFormModal 
           customerId={activeForm.customerId} 
           onClose={() => setActiveForm({ type: null, customerId: null })}
@@ -92,7 +95,6 @@ export function Customers() {
             <input type="text" placeholder="Ex: Luis Pereira de Barros e Ricardo Barros" value={newCustomerName} onChange={(e) => setNewCustomerName(e.target.value)} style={{ flex: 1, padding: "9px 10px", border: "1px solid #DEDCD0", borderRadius: 4, fontSize: 14 }} />
             <button onClick={handleSaveCustomer} style={{ background: "#1F3B2C", color: "#fff", border: "none", padding: "9px 20px", borderRadius: 4, cursor: "pointer", fontWeight: 600, fontSize: 14 }}>Registar</button>
           </div>
-          {successMsg && <div style={{ marginTop: 10, color: "#2F5240", fontSize: 13.5, fontWeight: 600 }}>✓ {successMsg}</div>}
         </div>
 
         {/* TABELA DE CLIENTES */}
