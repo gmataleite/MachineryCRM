@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { getMachines, type MachineDto } from '../services/machineService';
+import { useEffect, useState } from "react";
+import { Wrench } from "lucide-react";
+import { getMachines, type MachineDto } from "../services/machineService";
 
 export function Machines() {
   const [machines, setMachines] = useState<MachineDto[]>([]);
@@ -12,7 +13,7 @@ export function Machines() {
         const data = await getMachines();
         setMachines(data);
       } catch (err) {
-        setError('Falha ao carregar os dados dos equipamentos.');
+        setError("Falha ao carregar os dados dos equipamentos.");
       } finally {
         setLoading(false);
       }
@@ -21,35 +22,40 @@ export function Machines() {
     fetchMachines();
   }, []);
 
-  if (loading) return <div>Carregando equipamentos...</div>;
-  if (error) return <div style={{ color: 'red', padding: '1rem' }}>{error}</div>;
+  if (loading) return <div className="crm-status">A carregar equipamentos...</div>;
+  if (error) return <div className="crm-error">{error}</div>;
 
   return (
     <div>
-      <h1 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Gestão de Equipamentos</h1>
-      
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '8px' }}>
+      <div className="crm-page-header">
+        <Wrench size={24} color="#1F3B2C" />
+        <h1 className="crm-page-title">Gestão de Equipamentos</h1>
+      </div>
+
+      <div className="crm-table-wrapper">
+        <table className="crm-table">
           <thead>
-            <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
-              <th style={{ padding: '1rem' }}>Número de Série</th>
-              <th style={{ padding: '1rem' }}>Modelo</th>
-              <th style={{ padding: '1rem' }}>Ano</th>
+            <tr>
+              <th>Número de Série</th>
+              <th>Modelo</th>
+              <th style={{ textAlign: "center" }}>Ano</th>
             </tr>
           </thead>
           <tbody>
             {machines.length === 0 ? (
               <tr>
-                <td colSpan={3} style={{ padding: '1.5rem', textAlign: 'center', color: '#64748b' }}>
+                <td colSpan={3} className="crm-table-empty">
                   Nenhum equipamento registrado.
                 </td>
               </tr>
             ) : (
               machines.map((machine) => (
-                <tr key={machine.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '1rem' }}>{machine.serialNumber}</td>
-                  <td style={{ padding: '1rem' }}>{machine.model}</td>
-                  <td style={{ padding: '1rem' }}>{machine.year}</td>
+                <tr key={machine.id}>
+                  <td className="crm-mono-id" style={{ fontSize: 13, color: "#23291F", fontWeight: 600 }}>
+                    {machine.serialNumber}
+                  </td>
+                  <td>{machine.model}</td>
+                  <td style={{ textAlign: "center" }}>{machine.year}</td>
                 </tr>
               ))
             )}
