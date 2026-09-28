@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { APIProvider, Map, AdvancedMarker, Pin, useMapsLibrary, useMap } from "@vis.gl/react-google-maps";
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  Pin,
+  useMapsLibrary,
+  useMap,
+} from "@vis.gl/react-google-maps";
 import { addGeoPointToSite, GeoLocationType } from "../services/customerService";
 import { X, MapPin } from "lucide-react";
 
@@ -13,13 +20,15 @@ interface GeoPointMapModalProps {
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 const MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || "DEMO_MAP_ID";
 
-// Subcomponente conectado ao contexto do APIProvider para instanciar o Places Autocomplete
-function PlaceAutocompleteInput({ onPlaceSelect }: { onPlaceSelect: (lat: number, lng: number) => void }) {
+function PlaceAutocompleteInput({
+  onPlaceSelect,
+}: {
+  onPlaceSelect: (lat: number, lng: number) => void;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const placesLib = useMapsLibrary("places");
-  const map = useMap(); // Hook para controlar a câmera imperativamente apenas quando necessário
+  const map = useMap();
 
-  // Mantém a referência atualizada do callback sem engatilhar re-execuções do useEffect
   const onPlaceSelectRef = useRef(onPlaceSelect);
   onPlaceSelectRef.current = onPlaceSelect;
 
@@ -39,7 +48,6 @@ function PlaceAutocompleteInput({ onPlaceSelect }: { onPlaceSelect: (lat: number
 
         onPlaceSelectRef.current(lat, lng);
 
-        // Move a câmera suavemente e aproxima o zoom apenas quando um endereço é escolhido no Autocomplete
         if (map) {
           map.panTo({ lat, lng });
           map.setZoom(17);
@@ -54,27 +62,31 @@ function PlaceAutocompleteInput({ onPlaceSelect }: { onPlaceSelect: (lat: number
 
   return (
     <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-      <MapPin size={15} color="#6E6C61" style={{ position: "absolute", left: 10, pointerEvents: "none" }} />
+      <MapPin
+        size={15}
+        color="#6E6C61"
+        style={{ position: "absolute", left: 10, pointerEvents: "none" }}
+      />
       <input
         ref={inputRef}
         type="text"
+        className="crm-input"
         placeholder="Digite um endereço, rodovia ou cidade (Autocomplete)..."
         onKeyDown={(e) => {
           if (e.key === "Enter") e.preventDefault();
         }}
-        style={{
-          padding: "9px 10px 9px 32px",
-          border: "1px solid #DEDCD0",
-          borderRadius: 4,
-          width: "100%",
-          fontSize: 13,
-        }}
+        style={{ paddingLeft: 32, fontSize: 13 }}
       />
     </div>
   );
 }
 
-export function GeoPointMapModal({ siteId, existingWaypointsCount, onClose, onSuccess }: GeoPointMapModalProps) {
+export function GeoPointMapModal({
+  siteId,
+  existingWaypointsCount,
+  onClose,
+  onSuccess,
+}: GeoPointMapModalProps) {
   const [description, setDescription] = useState("");
   const [locationType, setLocationType] = useState<GeoLocationType>(GeoLocationType.Office);
   const [position, setPosition] = useState<{ lat: number; lng: number }>({
@@ -101,7 +113,8 @@ export function GeoPointMapModal({ siteId, existingWaypointsCount, onClose, onSu
         latitude: Number(position.lat.toFixed(6)),
         longitude: Number(position.lng.toFixed(6)),
         locationType,
-        order: locationType === GeoLocationType.Waypoint ? existingWaypointsCount + 1 : undefined,
+        order:
+          locationType === GeoLocationType.Waypoint ? existingWaypointsCount + 1 : undefined,
       });
       onSuccess("Ponto geográfico adicionado com sucesso.");
       onClose();
@@ -114,68 +127,63 @@ export function GeoPointMapModal({ siteId, existingWaypointsCount, onClose, onSu
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          background: "#FFF",
-          width: 560,
-          borderRadius: 8,
-          padding: 24,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-        }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h3 style={{ margin: 0, color: "#1F3B2C", fontSize: 16 }}>Novo Ponto Geográfico</h3>
-          <button type="button" onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer" }}>
-            <X size={20} color="#6E6C61" />
+    <div className="crm-modal-overlay">
+      <div className="crm-modal crm-modal-lg">
+        <div className="crm-modal-header">
+          <h3 className="crm-modal-title">Novo Ponto Geográfico</h3>
+          <button type="button" onClick={onClose} className="crm-btn-icon">
+            <X size={18} />
           </button>
         </div>
 
         <APIProvider apiKey={API_KEY}>
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <form onSubmit={handleSubmit} className="crm-form">
             <div style={{ display: "flex", gap: 10 }}>
-              <input
-                autoFocus
-                type="text"
-                placeholder="Descrição (Ex: Escritório, Entrada, Galpão)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4, flex: 1 }}
-                required
-              />
-              <select
-                value={locationType}
-                onChange={(e) => setLocationType(Number(e.target.value) as GeoLocationType)}
-                style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4, width: 180, background: "#FFF" }}
-              >
-                <option value={GeoLocationType.Office}>Escritório</option>
-                <option value={GeoLocationType.Waypoint}>Ponto de Rota (Entrada)</option>
-                <option value={GeoLocationType.MachineLocation}>Local de Máquinas</option>
-              </select>
+              <div style={{ flex: 1 }}>
+                <label className="crm-label">Descrição</label>
+                <input
+                  autoFocus
+                  type="text"
+                  className="crm-input"
+                  placeholder="Ex: Escritório, Entrada, Galpão"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ width: 190 }}>
+                <label className="crm-label">Tipo de Ponto</label>
+                <select
+                  value={locationType}
+                  onChange={(e) => setLocationType(Number(e.target.value) as GeoLocationType)}
+                  className="crm-input"
+                >
+                  <option value={GeoLocationType.Office}>Escritório</option>
+                  <option value={GeoLocationType.Waypoint}>Ponto de Rota (Entrada)</option>
+                  <option value={GeoLocationType.MachineLocation}>Local de Máquinas</option>
+                </select>
+              </div>
             </div>
 
-            {/* Campo integrado ao Google Places Autocomplete */}
-            <PlaceAutocompleteInput
-              onPlaceSelect={(lat, lng) => {
-                setPosition({ lat, lng });
-              }}
-            />
+            <div>
+              <label className="crm-label">Pesquisar Endereço</label>
+              <PlaceAutocompleteInput
+                onPlaceSelect={(lat, lng) => {
+                  setPosition({ lat, lng });
+                }}
+              />
+            </div>
 
-            {/* Mapa Interativo com AdvancedMarkerElement */}
-            <div style={{ height: 300, width: "100%", borderRadius: 4, overflow: "hidden", border: "1px solid #DEDCD0" }}>
+            <div
+              style={{
+                height: 300,
+                width: "100%",
+                borderRadius: 4,
+                overflow: "hidden",
+                border: "1px solid #DEDCD0",
+              }}
+            >
               <Map
                 mapId={MAP_ID}
                 defaultCenter={position}
@@ -196,7 +204,11 @@ export function GeoPointMapModal({ siteId, existingWaypointsCount, onClose, onSu
                     }
                   }}
                 >
-                  <Pin background={"#1F3B2C"} glyphColor={"#CDE06E"} borderColor={"#1F3B2C"} />
+                  <Pin
+                    background={"#1F3B2C"}
+                    glyphColor={"#CDE06E"}
+                    borderColor={"#1F3B2C"}
+                  />
                 </AdvancedMarker>
               </Map>
             </div>
@@ -211,6 +223,7 @@ export function GeoPointMapModal({ siteId, existingWaypointsCount, onClose, onSu
                 background: "#F8F7F2",
                 padding: "8px 12px",
                 borderRadius: 4,
+                border: "1px solid #EAE8DD",
               }}
             >
               <span>Arraste o pino ou clique no mapa para ajustar</span>
@@ -219,23 +232,13 @@ export function GeoPointMapModal({ siteId, existingWaypointsCount, onClose, onSu
               </span>
             </div>
 
-            {errorMsg && (
-              <div style={{ color: "#DC2626", fontSize: 12.5, fontWeight: 600 }}>{errorMsg}</div>
-            )}
+            {errorMsg && <div className="crm-error">{errorMsg}</div>}
 
             <button
               type="submit"
               disabled={isSubmitting}
-              style={{
-                background: "#1F3B2C",
-                color: "#fff",
-                border: "none",
-                padding: "10px",
-                borderRadius: 4,
-                cursor: isSubmitting ? "not-allowed" : "pointer",
-                fontWeight: 600,
-                marginTop: 4,
-              }}
+              className="crm-btn-primary"
+              style={{ marginTop: 4 }}
             >
               {isSubmitting ? "A gravar..." : "Confirmar e Salvar Ponto"}
             </button>

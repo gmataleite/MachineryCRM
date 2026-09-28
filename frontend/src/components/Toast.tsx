@@ -36,11 +36,11 @@ export function Toast({ toast, onClose, duration = 3500 }: ToastProps) {
         display: "flex",
         alignItems: "center",
         gap: 10,
-        background: isError ? "#FEF2F2" : "#1F3B2C",
-        color: isError ? "#991B1B" : "#CDE06E", // Usando o verde RGB(205, 224, 110) no destaque
-        border: isError ? "1px solid #F87171" : "1px solid #2F5240",
+        background: isError ? "#F5E6E4" : "#1F3B2C",
+        color: isError ? "#9E3F33" : "#CDE06E",
+        border: isError ? "1px solid #E5C5C0" : "1px solid #2F5240",
         padding: "12px 18px",
-        borderRadius: 6,
+        borderRadius: 4,
         boxShadow: "0 8px 20px rgba(0,0,0,0.18)",
         fontSize: 13.5,
         fontWeight: 600,
@@ -49,12 +49,13 @@ export function Toast({ toast, onClose, duration = 3500 }: ToastProps) {
       }}
     >
       {isError ? (
-        <AlertCircle size={18} color="#DC2626" />
+        <AlertCircle size={18} color="#9E3F33" />
       ) : (
         <CheckCircle2 size={18} color="#CDE06E" />
       )}
-      <span style={{ color: isError ? "#991B1B" : "#FFFFFF" }}>{toast.message}</span>
+      <span style={{ color: isError ? "#9E3F33" : "#FFFFFF" }}>{toast.message}</span>
       <button
+        type="button"
         onClick={onClose}
         style={{
           background: "none",
@@ -64,7 +65,7 @@ export function Toast({ toast, onClose, duration = 3500 }: ToastProps) {
           alignItems: "center",
           marginLeft: 8,
           padding: 0,
-          color: isError ? "#991B1B" : "#A3B1A8",
+          color: isError ? "#9E3F33" : "#A3B1A8",
         }}
       >
         <X size={15} />

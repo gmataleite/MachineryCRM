@@ -9,42 +9,108 @@ interface FiscalFormModalProps {
 }
 
 export function FiscalFormModal({ customerId, onClose, onSuccess }: FiscalFormModalProps) {
-  const [form, setForm] = useState({ name: "", cnpj: "", cpf: "", country: "Brasil", state: "", city: "" });
+  const [form, setForm] = useState({
+    name: "",
+    cnpj: "",
+    cpf: "",
+    country: "Brasil",
+    state: "",
+    city: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name) return alert("A Razão Social é obrigatória.");
-    
+    setErrorMsg("");
+
+    if (!form.name.trim()) {
+      setErrorMsg("A Razão Social é obrigatória.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await addFiscalEntityToCustomer(customerId, form);
+      await addFiscalEntityToCustomer(customerId, {
+        ...form,
+        name: form.name.trim(),
+      });
       onSuccess("Ente Fiscal adicionado com sucesso.");
       onClose();
     } catch (error) {
       console.error(error);
-      alert("Erro ao adicionar ente fiscal.");
+      setErrorMsg("Erro ao adicionar ente fiscal.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <div style={{ background: "#FFF", width: 400, borderRadius: 8, padding: 24, boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h3 style={{ margin: 0, color: "#1F3B2C", fontSize: 16 }}>Novo Ente Fiscal</h3>
-          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer" }}><X size={20} color="#6E6C61" /></button>
+    <div className="crm-modal-overlay">
+      <div className="crm-modal">
+        <div className="crm-modal-header">
+          <h3 className="crm-modal-title">Novo Ente Fiscal</h3>
+          <button type="button" onClick={onClose} className="crm-btn-icon">
+            <X size={18} />
+          </button>
         </div>
-        
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <input autoFocus type="text" placeholder="Razão Social" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} required />
-          <input type="text" placeholder="CNPJ/CPF" value={form.cnpj} onChange={e => setForm({...form, cnpj: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4 }} />
-          <div style={{ display: "flex", gap: 10 }}>
-            <input type="text" placeholder="UF" value={form.state} onChange={e => setForm({...form, state: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4, width: "30%" }} />
-            <input type="text" placeholder="Cidade" value={form.city} onChange={e => setForm({...form, city: e.target.value})} style={{ padding: "10px", border: "1px solid #DEDCD0", borderRadius: 4, flex: 1 }} />
+
+        <form onSubmit={handleSubmit} className="crm-form">
+          <div>
+            <label className="crm-label">Razão Social</label>
+            <input
+              autoFocus
+              type="text"
+              className="crm-input"
+              placeholder="Razão Social"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              required
+            />
           </div>
-          <button type="submit" disabled={isSubmitting} style={{ background: "#1F3B2C", color: "#fff", border: "none", padding: "10px", borderRadius: 4, cursor: isSubmitting ? "not-allowed" : "pointer", fontWeight: 600, marginTop: 10 }}>
+
+          <div>
+            <label className="crm-label">CNPJ / CPF</label>
+            <input
+              type="text"
+              className="crm-input"
+              placeholder="CNPJ ou CPF"
+              value={form.cnpj}
+              onChange={(e) => setForm({ ...form, cnpj: e.target.value })}
+            />
+          </div>
+
+          <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ width: "30%" }}>
+              <label className="crm-label">UF</label>
+              <input
+                type="text"
+                className="crm-input"
+                placeholder="UF"
+                value={form.state}
+                onChange={(e) => setForm({ ...form, state: e.target.value })}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label className="crm-label">Cidade</label>
+              <input
+                type="text"
+                className="crm-input"
+                placeholder="Cidade"
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {errorMsg && <div className="crm-error">{errorMsg}</div>}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="crm-btn-primary"
+            style={{ marginTop: 6 }}
+          >
             {isSubmitting ? "A gravar..." : "Salvar Ente Fiscal"}
           </button>
         </form>
