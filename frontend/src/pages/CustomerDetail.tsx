@@ -1,12 +1,370 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCustomerById, type CustomerDto } from "../services/customerService";
-import { Building2, MapPin, Landmark, ArrowLeft, Users } from "lucide-react";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  getCustomerById,
+  updateContact,
+  reorderGeoPoints,
+  GeoLocationType,
+  type CustomerDto,
+  type ContactDto,
+  type GeoPointDto,
+} from "../services/customerService";
+import {
+  Building2,
+  MapPin,
+  Landmark,
+  ArrowLeft,
+  Users,
+  Phone,
+  Mail,
+  Pencil,
+  Trash2,
+  GripVertical,
+  Briefcase,
+  Signpost,
+  Warehouse,
+} from "lucide-react";
 import { SiteFormModal } from "../components/SiteFormModal";
 import { FiscalFormModal } from "../components/FiscalFormModal";
 import { ContactFormModal } from "../components/ContactFormModal";
 import { Toast, type ToastData } from "../components/Toast";
 import { GeoPointMapModal } from "../components/GeoPointMapModal";
+
+function GeoPointBadge({ type }: { type: GeoLocationType }) {
+  const base: React.CSSProperties = {
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  };
+
+  if (type === GeoLocationType.Office) {
+    return (
+      <span title="Escritório (Office)" style={{ ...base, background: "#F5E6E4", color: "#9E3F33" }}>
+        <Briefcase size={13} />
+      </span>
+    );
+  }
+  if (type === GeoLocationType.Waypoint) {
+    return (
+      <span title="Ponto de Passagem (Waypoint)" style={{ ...base, background: "#E4ECE6", color: "#2F5240" }}>
+        <Signpost size={13} />
+      </span>
+    );
+  }
+  return (
+    <span title="Local de Máquina (MachineLocation)" style={{ ...base, background: "#F7EBDC", color: "#B26B1F" }}>
+      <Warehouse size={13} />
+    </span>
+  );
+}
+
+interface ContactDropTargetData {
+  kind: "contact-drop";
+  siteId: string | null;
+  fiscalEntityId: string | null;
+}
+
+interface WaypointDragDropData {
+  kind: "waypoint";
+  siteId: string;
+  geoPoint: GeoPointDto;
+}
+
+function ContactDropZone({
+  id,
+  siteId = null,
+  fiscalEntityId = null,
+  children,
+}: {
+  id: string;
+  siteId?: string | null;
+  fiscalEntityId?: string | null;
+  children: React.ReactNode;
+}) {
+  const { isOver, active, setNodeRef } = useDroppable({
+    id,
+    data: {
+      kind: "contact-drop",
+      siteId,
+      fiscalEntityId,
+    } satisfies ContactDropTargetData,
+  });
+
+  const isContactDragging = active?.data.current?.kind === "contact";
+  const highlight = isOver && isContactDragging;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        borderRadius: 6,
+        padding: highlight ? "6px" : "2px 0",
+        background: highlight ? "#F4F8E6" : "transparent",
+        border: highlight ? "1px dashed #94B03E" : "1px dashed transparent",
+        transition: "all 0.15s ease",
+        minHeight: 34,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function ContactRow({
+  contact,
+  onEdit,
+  onDelete,
+}: {
+  contact: ContactDto;
+  onEdit?: (contact: ContactDto) => void;
+  onDelete?: (contact: ContactDto) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `contact-${contact.id}`,
+    data: { kind: "contact", contact },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        background: "#F8F7F2",
+        padding: "10px 12px",
+        borderRadius: 4,
+        marginBottom: 6,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 10,
+        transform: CSS.Translate.toString(transform),
+        opacity: isDragging ? 0.65 : 1,
+        boxShadow: isDragging ? "0 6px 16px rgba(0,0,0,0.14)" : "none",
+        position: "relative",
+        zIndex: isDragging ? 50 : 1,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10, textAlign: "left" }}>
+        <span
+          {...listeners}
+          {...attributes}
+          title="Arraste para mover este contato para outro card"
+          style={{
+            cursor: isDragging ? "grabbing" : "grab",
+            display: "inline-flex",
+            alignItems: "center",
+            padding: "2px",
+            touchAction: "none",
+          }}
+        >
+          <GripVertical size={15} color="#9E9B8F" style={{ flexShrink: 0 }} />
+        </span>
+
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 13.5, color: "#23291F" }}>
+            {contact.description}
+          </div>
+          {(contact.phone || contact.email) && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                color: "#6E6C61",
+                fontSize: 12.5,
+                marginTop: 3,
+              }}
+            >
+              {contact.phone && (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <Phone size={12} color="#6E6C61" /> {contact.phone}
+                </span>
+              )}
+              {contact.email && (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <Mail size={12} color="#6E6C61" /> {contact.email}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+        <button
+          type="button"
+          title="Editar contato"
+          onClick={() => onEdit?.(contact)}
+          className="crm-btn-icon"
+        >
+          <Pencil size={14} />
+        </button>
+        {onDelete && (
+          <button
+            type="button"
+            title="Excluir contato"
+            onClick={() => onDelete(contact)}
+            className="crm-btn-icon"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StaticGeoPointRow({ geoPoint }: { geoPoint: GeoPointDto }) {
+  return (
+    <div
+      style={{
+        background: "#F8F7F2",
+        padding: "8px 12px",
+        borderRadius: 4,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        fontSize: 13.5,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ width: 19, display: "inline-block" }} />
+        <GeoPointBadge type={geoPoint.locationType} />
+        <span style={{ color: "#23291F", fontWeight: 500 }}>{geoPoint.description}</span>
+      </div>
+      <span className="crm-mono-id" style={{ fontSize: 12.5, color: "#6E6C61" }}>
+        {geoPoint.latitude.toFixed(4)}, {geoPoint.longitude.toFixed(4)}
+      </span>
+    </div>
+  );
+}
+
+function WaypointSortableRow({
+  siteId,
+  geoPoint,
+  sequenceIndex,
+}: {
+  siteId: string;
+  geoPoint: GeoPointDto;
+  sequenceIndex: number;
+}) {
+  const itemData: WaypointDragDropData = {
+    kind: "waypoint",
+    siteId,
+    geoPoint,
+  };
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setDragRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: `waypoint-drag-${geoPoint.id}`,
+    data: itemData,
+  });
+
+  const { isOver, active, setNodeRef: setDropRef } = useDroppable({
+    id: `waypoint-drop-${geoPoint.id}`,
+    data: itemData,
+  });
+
+  const isSameSiteWaypointOver =
+    isOver &&
+    active?.data.current?.kind === "waypoint" &&
+    active?.data.current?.siteId === siteId &&
+    active?.data.current?.geoPoint?.id !== geoPoint.id;
+
+  const setCombinedRef = (node: HTMLDivElement | null) => {
+    setDragRef(node);
+    setDropRef(node);
+  };
+
+  return (
+    <div
+      ref={setCombinedRef}
+      style={{
+        background: isSameSiteWaypointOver ? "#F4F8E6" : "#F8F7F2",
+        border: isSameSiteWaypointOver ? "1px dashed #94B03E" : "1px solid transparent",
+        padding: "8px 12px",
+        borderRadius: 4,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        fontSize: 13.5,
+        transform: CSS.Translate.toString(transform),
+        opacity: isDragging ? 0.65 : 1,
+        boxShadow: isDragging ? "0 6px 16px rgba(0,0,0,0.14)" : "none",
+        position: "relative",
+        zIndex: isDragging ? 50 : 1,
+        transition: isDragging ? "none" : "background 0.15s ease, border 0.15s ease",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span
+          {...listeners}
+          {...attributes}
+          title="Arraste para alterar a ordem deste ponto de passagem"
+          style={{
+            cursor: isDragging ? "grabbing" : "grab",
+            display: "inline-flex",
+            alignItems: "center",
+            padding: "2px",
+            touchAction: "none",
+          }}
+        >
+          <GripVertical size={15} color="#9E9B8F" style={{ flexShrink: 0 }} />
+        </span>
+
+        <GeoPointBadge type={geoPoint.locationType} />
+
+        <span
+          style={{
+            fontSize: 11.5,
+            fontWeight: 700,
+            color: "#2F5240",
+            background: "#E4ECE6",
+            padding: "1px 6px",
+            borderRadius: 4,
+            fontFamily: "monospace",
+          }}
+        >
+          #{sequenceIndex}
+        </span>
+
+        <span style={{ color: "#23291F", fontWeight: 500 }}>{geoPoint.description}</span>
+      </div>
+
+      <span className="crm-mono-id" style={{ fontSize: 12.5, color: "#6E6C61" }}>
+        {geoPoint.latitude.toFixed(4)}, {geoPoint.longitude.toFixed(4)}
+      </span>
+    </div>
+  );
+}
+
+function sortSiteGeoPoints(geoPoints: GeoPointDto[] = []) {
+  const offices = geoPoints.filter((gp) => gp.locationType === GeoLocationType.Office);
+  const machines = geoPoints.filter((gp) => gp.locationType === GeoLocationType.MachineLocation);
+  const waypoints = geoPoints
+    .filter((gp) => gp.locationType === GeoLocationType.Waypoint)
+    .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER));
+
+  return { offices, machines, waypoints };
+}
 
 export function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -15,10 +373,133 @@ export function CustomerDetail() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<ToastData | null>(null);
 
-  // Estado unificado para controle dos modais
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || !customer) return;
+
+    const activeKind = active.data.current?.kind;
+
+    if (activeKind === "contact") {
+      const draggedContact = active.data.current?.contact as ContactDto | undefined;
+      const target = over.data.current as ContactDropTargetData | undefined;
+      if (!draggedContact || !target || target.kind !== "contact-drop") return;
+
+      const currentSiteId = draggedContact.siteId ?? null;
+      const currentFiscalId = draggedContact.fiscalEntityId ?? null;
+
+      if (currentSiteId === target.siteId && currentFiscalId === target.fiscalEntityId) {
+        return;
+      }
+
+      setCustomer((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          contacts: prev.contacts.map((c) =>
+            c.id === draggedContact.id
+              ? {
+                  ...c,
+                  siteId: target.siteId ?? undefined,
+                  fiscalEntityId: target.fiscalEntityId ?? undefined,
+                }
+              : c
+          ),
+        };
+      });
+
+      try {
+        await updateContact(draggedContact.id, {
+          description: draggedContact.description,
+          phone: draggedContact.phone,
+          email: draggedContact.email,
+          siteId: target.siteId,
+          fiscalEntityId: target.fiscalEntityId,
+        });
+        setToast({ message: "Contato movido com sucesso.", type: "success" });
+      } catch (err) {
+        console.error("Erro ao mover contato:", err);
+        setToast({ message: "Erro ao mover contato. Revertendo...", type: "error" });
+        await fetchCustomerData();
+      }
+      return;
+    }
+
+    if (activeKind === "waypoint") {
+      const sourceData = active.data.current as WaypointDragDropData | undefined;
+      const targetData = over.data.current as WaypointDragDropData | undefined;
+
+      if (
+        !sourceData ||
+        !targetData ||
+        targetData.kind !== "waypoint" ||
+        sourceData.siteId !== targetData.siteId ||
+        sourceData.geoPoint.id === targetData.geoPoint.id
+      ) {
+        return;
+      }
+
+      const site = customer.sites.find((s) => s.id === sourceData.siteId);
+      if (!site || !site.geoPoints) return;
+
+      const { offices, machines, waypoints } = sortSiteGeoPoints(site.geoPoints);
+      const oldIndex = waypoints.findIndex((w) => w.id === sourceData.geoPoint.id);
+      const newIndex = waypoints.findIndex((w) => w.id === targetData.geoPoint.id);
+
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const reorderedWaypoints = [...waypoints];
+      const [movedItem] = reorderedWaypoints.splice(oldIndex, 1);
+      reorderedWaypoints.splice(newIndex, 0, movedItem);
+
+      const updatedWaypoints = reorderedWaypoints.map((wp, idx) => ({
+        ...wp,
+        order: idx + 1,
+      }));
+
+      setCustomer((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          sites: prev.sites.map((s) =>
+            s.id === site.id
+              ? {
+                  ...s,
+                  geoPoints: [...offices, ...machines, ...updatedWaypoints],
+                }
+              : s
+          ),
+        };
+      });
+
+      try {
+        await reorderGeoPoints(
+          site.id,
+          updatedWaypoints.map((wp) => ({ id: wp.id, order: wp.order! }))
+        );
+        setToast({
+          message: "Ordem dos pontos de passagem atualizada.",
+          type: "success",
+        });
+      } catch (err) {
+        console.error("Erro ao reordenar pontos geográficos:", err);
+        setToast({
+          message: "Erro ao atualizar ordem dos pontos. Revertendo...",
+          type: "error",
+        });
+        await fetchCustomerData();
+      }
+    }
+  };
+
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
-    type: 'site' | 'fiscal' | 'contact' | 'geopoint' | null;
+    type: "site" | "fiscal" | "contact" | "geopoint" | null;
     siteId?: string;
     fiscalEntityId?: string;
   }>({ isOpen: false, type: null });
@@ -46,149 +527,395 @@ export function CustomerDetail() {
 
   const closeModal = () => setModalConfig({ isOpen: false, type: null });
 
-  if (loading) return <div style={{ padding: 20 }}>A carregar perfil...</div>;
-  if (!customer) return <div style={{ padding: 20 }}>Cliente não encontrado.</div>;
+  if (loading) return <div className="crm-status">A carregar perfil...</div>;
+  if (!customer) return <div className="crm-status">Cliente não encontrado.</div>;
+
+  const generalContacts = customer.contacts.filter((c) => !c.siteId && !c.fiscalEntityId);
 
   return (
-    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", background: "#F2F0E9", minHeight: "100vh", color: "#23291F" }}>
+    <div>
       <Toast toast={toast} onClose={() => setToast(null)} />
-      
-      {/* RENDERIZAÇÃO DOS MODAIS */}
-      {modalConfig.isOpen && modalConfig.type === 'site' && (
-        <SiteFormModal customerId={customer.id} onClose={closeModal} onSuccess={handleModalSuccess} />
-      )}
-      
-      {modalConfig.isOpen && modalConfig.type === 'fiscal' && (
-        <FiscalFormModal customerId={customer.id} onClose={closeModal} onSuccess={handleModalSuccess} />
-      )}
 
-      {modalConfig.isOpen && modalConfig.type === 'contact' && (
-        <ContactFormModal 
-          customerId={customer.id} 
-          siteId={modalConfig.siteId}
-          fiscalEntityId={modalConfig.fiscalEntityId}
-          onClose={closeModal} 
-          onSuccess={handleModalSuccess} 
+      {modalConfig.isOpen && modalConfig.type === "site" && (
+        <SiteFormModal
+          customerId={customer.id}
+          onClose={closeModal}
+          onSuccess={handleModalSuccess}
         />
       )}
 
-      {modalConfig.isOpen && modalConfig.type === 'geopoint' && modalConfig.siteId && (
+      {modalConfig.isOpen && modalConfig.type === "fiscal" && (
+        <FiscalFormModal
+          customerId={customer.id}
+          onClose={closeModal}
+          onSuccess={handleModalSuccess}
+        />
+      )}
+
+      {modalConfig.isOpen && modalConfig.type === "contact" && (
+        <ContactFormModal
+          customerId={customer.id}
+          siteId={modalConfig.siteId}
+          fiscalEntityId={modalConfig.fiscalEntityId}
+          onClose={closeModal}
+          onSuccess={handleModalSuccess}
+        />
+      )}
+
+      {modalConfig.isOpen && modalConfig.type === "geopoint" && modalConfig.siteId && (
         <GeoPointMapModal
           siteId={modalConfig.siteId}
           existingWaypointsCount={
-            customer.sites.find(s => s.id === modalConfig.siteId)?.geoPoints?.length || 0
+            customer.sites
+              .find((s) => s.id === modalConfig.siteId)
+              ?.geoPoints?.filter((gp) => gp.locationType === GeoLocationType.Waypoint).length || 0
           }
           onClose={closeModal}
           onSuccess={handleModalSuccess}
         />
       )}
 
-      <div style={{ maxWidth: 880, margin: "0 auto", padding: "30px 28px 80px" }}>
-        
-        <button onClick={() => navigate('/customers')} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: "#6E6C61", marginBottom: 20, padding: 0 }}>
-          <ArrowLeft size={16} /> Voltar para lista
-        </button>
+      <button
+        type="button"
+        onClick={() => navigate("/customers")}
+        className="crm-btn-back"
+      >
+        <ArrowLeft size={16} /> Voltar para lista
+      </button>
 
-        {/* CABEÇALHO DO CLIENTE */}
-        <div style={{ background: "#FFF", padding: 20, marginBottom: 22, borderLeft: "4px solid #1F3B2C", borderRadius: 4 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+      <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+        <div className="crm-card-accent" style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
             <Building2 size={18} color="#1F3B2C" />
-            <span style={{ fontSize: 13, color: "#6E6C61", fontWeight: 600, letterSpacing: "0.03em" }}>CLIENTE</span>
-            <span style={{ fontSize: 12, color: "#6E6C61", marginLeft: "auto", fontFamily: "monospace" }}>{customer.id}</span>
+            <span
+              style={{
+                fontSize: 13,
+                color: "#6E6C61",
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+              }}
+            >
+              CLIENTE
+            </span>
+            <span className="crm-mono-id" style={{ marginLeft: "auto" }}>
+              {customer.id.split("-")[0].toUpperCase()}
+            </span>
           </div>
-          <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 16 }}>{customer.name}</div>
-          
-          {/* Contatos Gerais */}
-          <div style={{ marginTop: 16, borderTop: "1px solid #EAE8DD", paddingTop: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#6E6C61" }}>
-                <Users size={14} /> <span style={{ fontSize: 13, fontWeight: 600 }}>Contatos gerais do cliente</span>
+
+          <div style={{ marginBottom: 18 }}>
+            <label className="crm-label">Nome do cliente (grupo econômico)</label>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                border: "1px solid #DEDCD0",
+                borderRadius: 4,
+                padding: "9px 12px",
+                background: "#FFFFFF",
+              }}
+            >
+              <span style={{ fontSize: 15, fontWeight: 500, color: "#23291F" }}>
+                {customer.name}
+              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <button type="button" title="Editar cliente" className="crm-btn-icon">
+                  <Pencil size={14} />
+                </button>
               </div>
-              <button 
-                onClick={() => setModalConfig({ isOpen: true, type: 'contact' })}
-                style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", color: "#1F3B2C", padding: "4px 12px", borderRadius: 4, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+            </div>
+          </div>
+
+          <div className="crm-card-divider" style={{ marginTop: 0 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 10,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#6E6C61" }}>
+                <Users size={14} />
+                <span style={{ fontSize: 13, fontWeight: 600 }}>Contatos gerais do cliente</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setModalConfig({ isOpen: true, type: "contact" })}
+                className="crm-btn-outline"
               >
                 + Contato
               </button>
             </div>
-            {customer.contacts.filter(c => !c.siteId && !c.fiscalEntityId).map(c => (
-              <div key={c.id} style={{ background: "#F8F7F2", padding: "8px 12px", borderRadius: 4, fontSize: 13, marginBottom: 4, display: "flex", justifyContent: "space-between" }}>
-                <div>
-                  <div style={{ fontWeight: 600 }}>{c.description}</div>
-                  <div style={{ color: "#6E6C61", marginTop: 2 }}>{c.phone} | {c.email}</div>
+            <ContactDropZone id="drop-general" siteId={null} fiscalEntityId={null}>
+              {generalContacts.length === 0 ? (
+                <div className="crm-empty-hint">
+                  Nenhum contato cadastrado. Arraste um contato para cá, ou:
                 </div>
-              </div>
-            ))}
+              ) : (
+                generalContacts.map((c) => <ContactRow key={c.id} contact={c} />)
+              )}
+            </ContactDropZone>
           </div>
         </div>
 
-        {/* LOCAIS PRODUTIVOS */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, marginTop: 30 }}>
+        <div className="crm-section-header">
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <MapPin size={18} color="#1F3B2C" />
-            <h2 style={{ fontSize: 18, margin: 0, fontWeight: 700 }}>Locais produtivos</h2>
+            <h2 className="crm-section-title">Locais produtivos</h2>
           </div>
-          <button 
-            onClick={() => setModalConfig({ isOpen: true, type: 'site' })}
-            style={{ background: "#1F3B2C", color: "#fff", border: "none", padding: "6px 12px", borderRadius: 4, cursor: "pointer", fontSize: 13, fontWeight: 600 }}
+          <button
+            type="button"
+            onClick={() => setModalConfig({ isOpen: true, type: "site" })}
+            className="crm-btn-primary"
+            style={{ padding: "7px 14px", fontSize: 13 }}
           >
             + Novo local
           </button>
         </div>
-        
-        {customer.sites.map(site => (
-          <div key={site.id} style={{ background: "#FFF", padding: 18, marginBottom: 14, borderRadius: 4, border: "1px solid #DEDCD0" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 16 }}>{site.name}</div>
-                <div style={{ fontSize: 13, color: "#6E6C61", marginTop: 4 }}>{site.city} — {site.state} — {site.country}</div>
-              </div>
-              <button
-                onClick={() => setModalConfig({ isOpen: true, type: 'geopoint', siteId: site.id })}
-                style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", color: "#1F3B2C", padding: "4px 10px", borderRadius: 4, cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+
+        {customer.sites.map((site) => {
+          const siteContacts = customer.contacts.filter((c) => c.siteId === site.id);
+          const locationLine = [site.city, site.state, site.country].filter(Boolean).join(" — ");
+          const { offices, machines, waypoints } = sortSiteGeoPoints(site.geoPoints);
+          const hasGeoPoints =
+            offices.length > 0 || machines.length > 0 || waypoints.length > 0;
+
+          return (
+            <div key={site.id} className="crm-card">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                }}
               >
-                + Ponto
-              </button>
-            </div>
-
-            {site.geoPoints && site.geoPoints.length > 0 && (
-              <div style={{ marginTop: 12, borderTop: "1px solid #EAE8DD", paddingTop: 8 }}>
-                {site.geoPoints.map(gp => (
-                  <div key={gp.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "4px 0" }}>
-                    <span>{gp.description}</span>
-                    <span style={{ fontFamily: "monospace", color: "#6E6C61" }}>
-                      {gp.latitude.toFixed(4)}, {gp.longitude.toFixed(4)}
-                    </span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 16, color: "#23291F" }}>
+                    {site.name}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+                  {locationLine && (
+                    <div style={{ fontSize: 13.5, color: "#6E6C61", marginTop: 3 }}>
+                      {locationLine}
+                    </div>
+                  )}
+                  {site.observations && (
+                    <div
+                      style={{
+                        fontSize: 13,
+                        color: "#6E6C61",
+                        fontStyle: "italic",
+                        marginTop: 4,
+                      }}
+                    >
+                      {site.observations}
+                    </div>
+                  )}
+                </div>
 
-        {/* ENTES FISCAIS */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, marginTop: 30 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <button type="button" title="Excluir local" className="crm-btn-icon">
+                    <Trash2 size={15} />
+                  </button>
+                  <button type="button" title="Editar local" className="crm-btn-icon">
+                    <Pencil size={15} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="crm-card-divider">
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#6E6C61" }}>
+                    <Users size={14} />
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>Contatos deste local</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setModalConfig({ isOpen: true, type: "contact", siteId: site.id })
+                    }
+                    className="crm-btn-outline"
+                  >
+                    + Contato
+                  </button>
+                </div>
+                <ContactDropZone id={`drop-site-${site.id}`} siteId={site.id} fiscalEntityId={null}>
+                  {siteContacts.length === 0 ? (
+                    <div className="crm-empty-hint">
+                      Nenhum contato cadastrado. Arraste um contato para cá, ou:
+                    </div>
+                  ) : (
+                    siteContacts.map((c) => <ContactRow key={c.id} contact={c} />)
+                  )}
+                </ContactDropZone>
+              </div>
+
+              <div className="crm-card-divider">
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#6E6C61" }}>
+                    <MapPin size={14} />
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>Pontos geográficos</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setModalConfig({ isOpen: true, type: "geopoint", siteId: site.id })
+                    }
+                    className="crm-btn-outline"
+                  >
+                    + Ponto
+                  </button>
+                </div>
+
+                {!hasGeoPoints ? (
+                  <div className="crm-empty-hint">Nenhum ponto geográfico cadastrado.</div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {offices.map((gp) => (
+                      <StaticGeoPointRow key={gp.id} geoPoint={gp} />
+                    ))}
+
+                    {machines.map((gp) => (
+                      <StaticGeoPointRow key={gp.id} geoPoint={gp} />
+                    ))}
+
+                    {waypoints.map((gp, idx) => (
+                      <WaypointSortableRow
+                        key={gp.id}
+                        siteId={site.id}
+                        geoPoint={gp}
+                        sequenceIndex={idx + 1}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        <div className="crm-section-header" style={{ marginTop: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Landmark size={18} color="#1F3B2C" />
-            <h2 style={{ fontSize: 18, margin: 0, fontWeight: 700 }}>Entes fiscais</h2>
+            <h2 className="crm-section-title">Entes fiscais</h2>
           </div>
-          <button 
-            onClick={() => setModalConfig({ isOpen: true, type: 'fiscal' })}
-            style={{ background: "#1F3B2C", color: "#fff", border: "none", padding: "6px 12px", borderRadius: 4, cursor: "pointer", fontSize: 13, fontWeight: 600 }}
+          <button
+            type="button"
+            onClick={() => setModalConfig({ isOpen: true, type: "fiscal" })}
+            className="crm-btn-primary"
+            style={{ padding: "7px 14px", fontSize: 13 }}
           >
             + Novo fiscal
           </button>
         </div>
 
-        {customer.fiscalEntities.map(fiscal => (
-          <div key={fiscal.id} style={{ background: "#FFF", padding: 18, marginBottom: 14, borderRadius: 4, border: "1px solid #DEDCD0" }}>
-            <div style={{ fontWeight: 700, fontSize: 16 }}>{fiscal.name}</div>
-            <div style={{ fontSize: 13, color: "#6E6C61", marginTop: 4 }}>CNPJ/CPF: {fiscal.cnpj || fiscal.cpf}</div>
-            <div style={{ fontSize: 13, color: "#6E6C61", marginTop: 2 }}>{fiscal.city} — {fiscal.state} — {fiscal.country}</div>
-          </div>
-        ))}
+        {customer.fiscalEntities.map((fiscal) => {
+          const fiscalContacts = customer.contacts.filter((c) => c.fiscalEntityId === fiscal.id);
+          const docText = fiscal.cnpj
+            ? `CNPJ ${fiscal.cnpj}`
+            : fiscal.cpf
+            ? `CPF ${fiscal.cpf}`
+            : "";
+          const sapText = fiscal.sapPn ? `PN SAP ${fiscal.sapPn}` : "";
+          const docAndSapLine = [docText, sapText].filter(Boolean).join(" · ");
+          const locationLine = [fiscal.city, fiscal.state, fiscal.country]
+            .filter(Boolean)
+            .join(" — ");
 
-      </div>
+          return (
+            <div key={fiscal.id} className="crm-card">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 16, color: "#23291F" }}>
+                    {fiscal.name}
+                  </div>
+                  {docAndSapLine && (
+                    <div style={{ fontSize: 13.5, color: "#6E6C61", marginTop: 3 }}>
+                      {docAndSapLine}
+                    </div>
+                  )}
+                  {locationLine && (
+                    <div style={{ fontSize: 13.5, color: "#6E6C61", marginTop: 2 }}>
+                      {locationLine}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <button type="button" title="Excluir ente fiscal" className="crm-btn-icon">
+                    <Trash2 size={15} />
+                  </button>
+                  <button type="button" title="Editar ente fiscal" className="crm-btn-icon">
+                    <Pencil size={15} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="crm-card-divider">
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#6E6C61" }}>
+                    <Users size={14} />
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>Contatos deste fiscal</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setModalConfig({
+                        isOpen: true,
+                        type: "contact",
+                        fiscalEntityId: fiscal.id,
+                      })
+                    }
+                    className="crm-btn-outline"
+                  >
+                    + Contato
+                  </button>
+                </div>
+                <ContactDropZone
+                  id={`drop-fiscal-${fiscal.id}`}
+                  siteId={null}
+                  fiscalEntityId={fiscal.id}
+                >
+                  {fiscalContacts.length === 0 ? (
+                    <div className="crm-empty-hint">
+                      Nenhum contato cadastrado. Arraste um contato para cá, ou:
+                    </div>
+                  ) : (
+                    fiscalContacts.map((c) => <ContactRow key={c.id} contact={c} />)
+                  )}
+                </ContactDropZone>
+              </div>
+            </div>
+          );
+        })}
+      </DndContext>
     </div>
   );
 }
