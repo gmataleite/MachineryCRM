@@ -37,7 +37,7 @@ public async Task<IEnumerable<CustomerDto>> GetAllAsync()
         // O mapeamento das listas é obrigatório para que o frontend consiga calcular o ".length"
         Sites = c.Sites.Select(s => new SiteDto { Id = s.Id, Name = s.Name, Country = s.Country, State = s.State, City = s.City }).ToList(),
         FiscalEntities = c.FiscalEntities.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, Country = f.Country, State = f.State, City = f.City }).ToList(),
-        Contacts = c.Contacts.Select(ct => new ContactDto { Id = ct.Id, Description = ct.Description }).ToList()
+        Contacts = c.Contacts.Select(ct => new ContactDto { Id = ct.Id, Description = ct.Name }).ToList()
     });
 }
 
@@ -67,7 +67,7 @@ public async Task<CustomerDto?> GetByIdWithDetailsAsync(Guid id)
         }).ToList(),
         Contacts = customer.Contacts.Select(c => new ContactDto 
         { 
-            Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Description = c.Description, Phone = c.Phone, Email = c.Email 
+            Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Description = c.Name, Phone = c.Phone, Email = c.Email 
         }).ToList()
     };
 
@@ -128,7 +128,7 @@ public async Task<ContactDto> AddContactAsync(Guid customerId, CreateContactDto 
         Id = contact.Id, 
         SiteId = contact.SiteId, 
         FiscalEntityId = contact.FiscalEntityId, 
-        Description = contact.Description, 
+        Description = contact.Name, 
         Phone = contact.Phone, 
         Email = contact.Email 
     };
