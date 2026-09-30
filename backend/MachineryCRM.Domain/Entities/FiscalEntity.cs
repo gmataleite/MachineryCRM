@@ -3,37 +3,68 @@ namespace MachineryCRM.Domain.Entities;
 public class FiscalEntity : Entity
 {
     public Guid CustomerId { get; private set; }
-    public string? SapPn { get; private set; }
     public string Name { get; private set; }
-    public string? Cpf { get; private set; }
     public string? Cnpj { get; private set; }
-    public string? Ie { get; private set; }
-    public string Country { get; private set; }
-    public string State { get; private set; }
-    public string City { get; private set; }
-    public string? FiscalAddress { get; private set; }
-    public string? PostalAddress { get; private set; }
-    public string? Observations { get; private set; }
-    public Customer? Customer { get; private set; }
+    public string? Cpf { get; private set; }
+    public string Locality { get; private set; }
+    public string AdministrativeArea { get; private set; }
+    public string CountryCode { get; private set; }
+    public string? BillingAddress { get; private set; }
+    public string? ShippingAddress { get; private set; }
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
 
-    public FiscalEntity(Guid customerId, string name, string country, string state, string city)
+    public FiscalEntity(Guid customerId, string name, string? cnpj, string? cpf,
+        string? billingAddressLine1, 
+        string? billingAddressLine2, 
+        string? billingDistrict, 
+        string billingLocality, 
+        string billingAdministrativeArea, 
+        string? billingPostalCode, 
+        string billingCountryCode,
+        string? shippingAddressLine1, 
+        string? shippingAddressLine2, 
+        string? shippingDistrict, 
+        string shippingLocality, 
+        string shippingAdministrativeArea, 
+        string? shippingPostalCode, 
+        string shippingCountryCode)
     {
         CustomerId = customerId;
         Name = name;
-        Country = country;
-        State = state;
-        City = city;
-    }
-
-    public void UpdateDetails(string name, string? sapPn, string? cnpj, string? cpf, string country, string state, string city)
-    {
-        Name = name;
-        SapPn = sapPn;
         Cnpj = cnpj;
         Cpf = cpf;
-        Country = country;
-        State = state;
-        City = city;
+        Locality = shippingLocality;
+        AdministrativeArea = shippingAdministrativeArea;
+        CountryCode = shippingCountryCode;
+        
+        BillingAddress = new Address(billingAddressLine1, billingAddressLine2, billingDistrict, billingLocality, billingAdministrativeArea, billingPostalCode, billingCountryCode).GetFormattedAddress();
+        ShippingAddress = new Address(shippingAddressLine1, shippingAddressLine2, shippingDistrict, shippingLocality, shippingAdministrativeArea, shippingPostalCode, shippingCountryCode).GetFormattedAddress();
+    }
+
+    public void UpdateDetails(string name, string? cnpj, string? cpf,
+        string? billingAddressLine1, 
+        string? billingAddressLine2, 
+        string? billingDistrict, 
+        string billingLocality, 
+        string billingAdministrativeArea, 
+        string? billingPostalCode, 
+        string billingCountryCode,
+        string? shippingAddressLine1, 
+        string? shippingAddressLine2, 
+        string? shippingDistrict, 
+        string shippingLocality, 
+        string shippingAdministrativeArea, 
+        string? shippingPostalCode, 
+        string shippingCountryCode)
+    {
+        Name = name;
+        Cnpj = cnpj;
+        Cpf = cpf;
+        Locality = shippingLocality;
+        AdministrativeArea = shippingAdministrativeArea;
+        CountryCode = shippingCountryCode;
+        
+        BillingAddress = new Address(billingAddressLine1, billingAddressLine2, billingDistrict, billingLocality, billingAdministrativeArea, billingPostalCode, billingCountryCode).GetFormattedAddress();
+        ShippingAddress = new Address(shippingAddressLine1, shippingAddressLine2, shippingDistrict, shippingLocality, shippingAdministrativeArea, shippingPostalCode, shippingCountryCode).GetFormattedAddress();
     }
 }

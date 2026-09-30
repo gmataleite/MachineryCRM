@@ -35,9 +35,9 @@ public async Task<IEnumerable<CustomerDto>> GetAllAsync()
         Id = c.Id, 
         Name = c.Name,
         // O mapeamento das listas é obrigatório para que o frontend consiga calcular o ".length"
-        Sites = c.Sites.Select(s => new SiteDto { Id = s.Id, Name = s.Name, Country = s.Country, State = s.State, City = s.City }).ToList(),
-        FiscalEntities = c.FiscalEntities.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, Country = f.Country, State = f.State, City = f.City }).ToList(),
-        Contacts = c.Contacts.Select(ct => new ContactDto { Id = ct.Id, Description = ct.Name }).ToList()
+        Sites = c.Sites.Select(s => new SiteDto { Id = s.Id, Name = s.Name, Locality = s.Locality, AdministrativeArea = s.AdministrativeArea, CountryCode = s.CountryCode }).ToList(),
+        FiscalEntities = c.FiscalEntities.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, Cnpj = f.Cnpj, Cpf = f.Cpf, Locality = f.Locality, AdministrativeArea = f.AdministrativeArea, CountryCode = f.CountryCode, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList(),
+        Contacts = c.Contacts.Select(ct => new ContactDto { Id = ct.Id, Name = ct.Name }).ToList()
     });
 }
 
@@ -52,7 +52,7 @@ public async Task<CustomerDto?> GetByIdWithDetailsAsync(Guid id)
         Name = customer.Name,
         Sites = customer.Sites.Select(s => new SiteDto 
         { 
-            Id = s.Id, Name = s.Name, Country = s.Country, State = s.State, City = s.City, Observations = s.Observations, GeoPoints = s.GeoPoints.OrderBy(g => g.Order).Select(g => new GeoPointDto
+            Id = s.Id, Name = s.Name, CountryCode = s.CountryCode, AdministrativeArea = s.AdministrativeArea, Locality = s.Locality, Observations = s.Observations, GeoPoints = s.GeoPoints.OrderBy(g => g.Order).Select(g => new GeoPointDto
             {
                 Id = g.Id,
                 Description = g.Description,
@@ -63,11 +63,11 @@ public async Task<CustomerDto?> GetByIdWithDetailsAsync(Guid id)
         }).ToList(),
         FiscalEntities = customer.FiscalEntities.Select(f => new FiscalEntityDto 
         { 
-            Id = f.Id, Name = f.Name, SapPn = f.SapPn, Cnpj = f.Cnpj, Cpf = f.Cpf, Country = f.Country, State = f.State, City = f.City 
+            Id = f.Id, Name = f.Name, Cnpj = f.Cnpj, Cpf = f.Cpf, Locality = f.Locality, AdministrativeArea = f.AdministrativeArea, CountryCode = f.CountryCode 
         }).ToList(),
         Contacts = customer.Contacts.Select(c => new ContactDto 
         { 
-            Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Description = c.Name, Phone = c.Phone, Email = c.Email 
+            Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Name = c.Name, Phone = c.Phone, Email = c.Email 
         }).ToList()
     };
 
@@ -128,7 +128,7 @@ public async Task<ContactDto> AddContactAsync(Guid customerId, CreateContactDto 
         Id = contact.Id, 
         SiteId = contact.SiteId, 
         FiscalEntityId = contact.FiscalEntityId, 
-        Description = contact.Name, 
+        Name = contact.Name, 
         Phone = contact.Phone, 
         Email = contact.Email 
     };
@@ -174,7 +174,7 @@ public async Task UpdateFiscalEntityAsync(Guid fiscalId, UpdateFiscalEntityDto d
 {
     var fiscal = await _customerRepository.GetFiscalEntityByIdAsync(fiscalId);
     if (fiscal == null) throw new KeyNotFoundException("Ente fiscal não encontrado.");
-    fiscal.UpdateDetails(dto.Name, dto.SapPn, dto.Cnpj, dto.Cpf, dto.Country, dto.State, dto.City);
+    fiscal.UpdateDetails(dto.Name, dto.Cnpj, dto.Cpf, dto.Country, dto.State, dto.City);
     await _unitOfWork.CommitAsync();
 }
 

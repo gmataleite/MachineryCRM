@@ -73,4 +73,79 @@ public class ContactTests
         var exception = Assert.Throws<FormatException>(() => new Contact(Guid.NewGuid(), name, phone, email));
         Assert.Equal("Invalid phone number format.", exception.Message);
     } 
+
+    [Fact]
+    public void ChangeSite_ShouldSetSiteIdAndClearFiscalEntityId()
+    {
+        // Arrange
+        var contact = new Contact(Guid.NewGuid(), "John Doe");
+        var newSiteId = Guid.NewGuid();
+
+        // Act
+        contact.ChangeSite(newSiteId);
+
+        // Assert
+        Assert.Equal(newSiteId, contact.SiteId);
+        Assert.Null(contact.FiscalEntityId);
+    }
+
+    [Fact]
+    public void ChangeFiscalEntity_ShouldSetFiscalEntityIdAndClearSiteId()
+    {
+        // Arrange
+        var contact = new Contact(Guid.NewGuid(), "John Doe");
+        var newFiscalEntityId = Guid.NewGuid();
+
+        // Act
+        contact.ChangeFiscalEntity(newFiscalEntityId);
+
+        // Assert
+        Assert.Equal(newFiscalEntityId, contact.FiscalEntityId);
+        Assert.Null(contact.SiteId);
+    }
+
+    [Fact]
+    public void ChangeSite_ForNull_ShouldClearFiscalEntityIdandSiteId()
+    {
+        // Arrange
+        var contact = new Contact(Guid.NewGuid(), "John Doe");
+
+        // Act
+        contact.ChangeSite(Guid.NewGuid());
+        contact.ChangeSite(null);
+
+        // Assert
+        Assert.Null(contact.SiteId);
+        Assert.Null(contact.FiscalEntityId);
+    }
+
+    [Fact]
+    public void ChangeFiscalEntity_ForNull_ShouldClearFiscalEntityIdandSiteId()
+    {
+        // Arrange
+        var contact = new Contact(Guid.NewGuid(), "John Doe");
+
+        // Act
+        contact.ChangeFiscalEntity(Guid.NewGuid());
+        contact.ChangeFiscalEntity(null);
+
+        // Assert
+        Assert.Null(contact.SiteId);
+        Assert.Null(contact.FiscalEntityId);
+    }
+
+    [Fact]
+    public void SetFiscalEntityAndSite_ForNull_ShouldClearFiscalEntityIdandSiteId()
+    {
+        // Arrange
+        var contact = new Contact(Guid.NewGuid(), "John Doe");
+
+        // Act
+        contact.ChangeFiscalEntity(null);
+        contact.ChangeFiscalEntity(null);
+
+        // Assert
+        Assert.Null(contact.SiteId);
+        Assert.Null(contact.FiscalEntityId);
+    }
 }
