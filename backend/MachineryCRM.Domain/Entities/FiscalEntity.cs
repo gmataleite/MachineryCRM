@@ -4,85 +4,86 @@ public class FiscalEntity : Entity
 {
     public Guid CustomerId { get; private set; }
     public string Name { get; private set; }
-    public string? Cnpj { get; private set; }
-    public string? Cpf { get; private set; }
+    public string? TaxId { get; private set; }
     public string? BillingAddressLine { get; private set; }
     public string? BillingNeighborhood { get; private set; }
     public string BillingCity { get; private set; }
     public string BillingState { get; private set; }
     public string? BillingPostalCode { get; private set; }
-    public string BillingCountry { get; private set; }
+    public string BillingCountryCode { get; private set; }
     public string? ShippingAddressLine { get; private set; }
     public string? ShippingNeighborhood { get; private set; }
     public string ShippingCity { get; private set; }
     public string ShippingState { get; private set; }
     public string? ShippingPostalCode { get; private set; }
-    public string ShippingCountry { get; private set; }
+    public string ShippingCountryCode { get; private set; }
     public string? BillingAddress { get; private set; }
     public string? ShippingAddress { get; private set; }
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
 
-    public FiscalEntity(Guid customerId, string name, string? cnpj, string? cpf,
+    public FiscalEntity(Guid customerId, 
+        string name, 
+        string? taxId, 
         string? billingAddressLine, 
         string? billingNeighborhood, 
         string billingCity, 
         string billingState, 
         string? billingPostalCode,
-        string billingCountry, 
+        string billingCountryCode, 
         string? shippingAddressLine, 
         string? shippingNeighborhood, 
         string shippingCity, 
         string shippingState, 
         string? shippingPostalCode,
-        string shippingCountry)
+        string shippingCountryCode)
     {
         CustomerId = customerId;
         Name = name;
-        Cnpj = cnpj;
-        Cpf = cpf;
+        TaxId = taxId;
         BillingAddressLine = billingAddressLine;
         BillingNeighborhood = billingNeighborhood;
         BillingCity = billingCity;
         BillingState = billingState;
         BillingPostalCode = billingPostalCode;
-        BillingCountry = billingCountry;
+        BillingCountryCode = billingCountryCode;
         ShippingAddressLine = shippingAddressLine;
         ShippingNeighborhood = shippingNeighborhood;
         ShippingCity = shippingCity;
         ShippingState = shippingState;
         ShippingPostalCode = shippingPostalCode;
-        ShippingCountry = shippingCountry;
+        ShippingCountryCode = shippingCountryCode;
     }
 
-    public void UpdateDetails(string name, string? cnpj, string? cpf,
+    public void UpdateDetails(
+        string name, 
+        string? taxId, 
         string? billingAddressLine, 
         string? billingNeighborhood, 
         string billingCity, 
         string billingState, 
         string? billingPostalCode,
-        string billingCountry, 
+        string billingCountryCode, 
         string? shippingAddressLine, 
         string? shippingNeighborhood, 
         string shippingCity, 
         string shippingState, 
         string? shippingPostalCode,
-        string shippingCountry)
+        string shippingCountryCode)
     {
         Name = name;
-        Cnpj = cnpj;
-        Cpf = cpf;
+        TaxId = taxId;
         BillingAddressLine = billingAddressLine;
         BillingNeighborhood = billingNeighborhood;
         BillingCity = billingCity;
         BillingState = billingState;
         BillingPostalCode = billingPostalCode;
-        BillingCountry = billingCountry;
+        BillingCountryCode = billingCountryCode;
         ShippingAddressLine = shippingAddressLine;
         ShippingNeighborhood = shippingNeighborhood;
         ShippingCity = shippingCity;
         ShippingState = shippingState;
         ShippingPostalCode = shippingPostalCode;
-        ShippingCountry = shippingCountry;
+        ShippingCountryCode = shippingCountryCode;
     }
 
 }

@@ -6,7 +6,7 @@ public class Site : Entity
     public string Name { get; private set; }
     public string? City { get; private set; }
     public string? State { get; private set; }
-    public string? Country { get; private set; }
+    public string? CountryCode { get; private set; }
     public string? Observations { get; private set; }
     public ICollection<GeoPoint> GeoPoints { get; private set; } = new List<GeoPoint>();
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
@@ -16,7 +16,7 @@ public class Site : Entity
         string name,
         string? city, 
         string? state, 
-        string? country,
+        string? countryCode,
         string? observations = null)
     {
         CustomerId = customerId;
@@ -24,24 +24,22 @@ public class Site : Entity
         Name = name;
         City = city;
         State = state;
-        Country = country;
+        CountryCode = countryCode;
         Observations = observations;
-
-        
     }
 
     public void UpdateDetails(
         string name,
         string? city, 
         string? state, 
-        string? country,
+        string? countryCode,
         string? observations = null)
     {
         ValidateName(name);
         Name = name;
         City = city;
         State = state;
-        Country = country;
+        CountryCode = countryCode;
         Observations = observations;
     }
 

@@ -1,5 +1,4 @@
 using MachineryCRM.Domain.Entities;
-using MachineryCRM.Domain.Enums;
 using Xunit;
 
 namespace MachineryCRM.UnitTests.Domain;

@@ -7,44 +7,44 @@ namespace MachineryCRM.UnitTests.Domain;
 public class SiteTests
 {
     [Theory]
-    [InlineData("Farm", "Belo Horizonte", "MG", "Brasil")]
-    [InlineData("Farm", null, "SP", "Brasil")]
-    [InlineData("Farm", "São Paulo", null, "Brasil")]
+    [InlineData("Farm", "Belo Horizonte", "MG", "BR")]
+    [InlineData("Farm", null, "SP", "BR")]
+    [InlineData("Farm", "São Paulo", null, "BR")]
     [InlineData("Farm", "Rio de Janeiro", "RJ", null)]
     [InlineData("Farm", "", "", "")]
     [InlineData("Farm", null, null, null)]
 
-    public void CreateSite_ShouldInitializePropertiesCorrectly(string name, string? city, string? state, string? country)
+    public void CreateSite_ShouldInitializePropertiesCorrectly(string name, string? city, string? state, string? countryCode)
     {
         // Arrange & Act
-        var site = new Site(Guid.NewGuid(), name, city, state, country);
+        var site = new Site(Guid.NewGuid(), name, city, state, countryCode);
         
         // Assert
         Assert.Equal(name, site.Name);
         Assert.Equal(city, site.City);
         Assert.Equal(state, site.State);
-        Assert.Equal(country, site.Country);
+        Assert.Equal(countryCode, site.CountryCode);
     }
 
     [Theory]
-    [InlineData("Farm", null, "SP", "Brasil")]
-    [InlineData("Farm", "São Paulo", null, "Brasil")]
+    [InlineData("Farm", null, "SP", "BR")]
+    [InlineData("Farm", "São Paulo", null, "BR")]
     [InlineData("Farm", "Rio de Janeiro", "RJ", null)]
     [InlineData("Farm", "", "", "")]
     [InlineData("Farm", null, null, null)]
-    public void UpdateDetails_ShouldUpdatePropertiesCorrectly(string name, string? city, string? state, string? country)
+    public void UpdateDetails_ShouldUpdatePropertiesCorrectly(string name, string? city, string? state, string? countryCode)
     {
         // Arrange
-        var site = new Site(Guid.NewGuid(), "Plantation", "Salvador", "BH", "Brasil");
+        var site = new Site(Guid.NewGuid(), "Plantation", "Salvador", "BH", "BR");
 
         // Act
-        site.UpdateDetails(name, city, state, country);
+        site.UpdateDetails(name, city, state, countryCode);
 
         // Assert
         Assert.Equal(name, site.Name);
         Assert.Equal(city, site.City);
         Assert.Equal(state, site.State);
-        Assert.Equal(country, site.Country);
+        Assert.Equal(countryCode, site.CountryCode);
     }
 
     [Fact]
