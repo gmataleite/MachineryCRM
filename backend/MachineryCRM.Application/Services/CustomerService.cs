@@ -35,8 +35,8 @@ public async Task<IEnumerable<CustomerDto>> GetAllAsync()
         Id = c.Id, 
         Name = c.Name,
         // O mapeamento das listas é obrigatório para que o frontend consiga calcular o ".length"
-        Sites = c.Sites.Select(s => new SiteDto { Id = s.Id, Name = s.Name, Locality = s.Locality, AdministrativeArea = s.AdministrativeArea, CountryCode = s.CountryCode }).ToList(),
-        FiscalEntities = c.FiscalEntities.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, Cnpj = f.Cnpj, Cpf = f.Cpf, Locality = f.Locality, AdministrativeArea = f.AdministrativeArea, CountryCode = f.CountryCode, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList(),
+        Sites = c.Sites.Select(s => new SiteDto { Id = s.Id, Name = s.Name, City = s.City, State = s.State, Country = s.Country }).ToList(),
+        FiscalEntities = c.FiscalEntities.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, Cnpj = f.Cnpj, Cpf = f.Cpf, BillingAddressLine = f.BillingAddressLine, BillingNeighborhood = f.BillingNeighborhood, BillingCity = f.BillingCity, BillingState = f.BillingState, BillingPostalCode = f.BillingPostalCode, BillingCountry = f.BillingCountry, ShippingAddressLine = f.ShippingAddressLine, ShippingNeighborhood = f.ShippingNeighborhood, ShippingCity = f.ShippingCity, ShippingState = f.ShippingState, ShippingPostalCode = f.ShippingPostalCode, ShippingCountry = f.ShippingCountry }).ToList(),
         Contacts = c.Contacts.Select(ct => new ContactDto { Id = ct.Id, Name = ct.Name }).ToList()
     });
 }
@@ -52,7 +52,7 @@ public async Task<CustomerDto?> GetByIdWithDetailsAsync(Guid id)
         Name = customer.Name,
         Sites = customer.Sites.Select(s => new SiteDto 
         { 
-            Id = s.Id, Name = s.Name, CountryCode = s.CountryCode, AdministrativeArea = s.AdministrativeArea, Locality = s.Locality, Observations = s.Observations, GeoPoints = s.GeoPoints.OrderBy(g => g.Order).Select(g => new GeoPointDto
+            Id = s.Id, Name = s.Name, Country = s.Country, State = s.State, City = s.City, Observations = s.Observations, GeoPoints = s.GeoPoints.OrderBy(g => g.Order).Select(g => new GeoPointDto
             {
                 Id = g.Id,
                 Description = g.Description,
@@ -63,7 +63,7 @@ public async Task<CustomerDto?> GetByIdWithDetailsAsync(Guid id)
         }).ToList(),
         FiscalEntities = customer.FiscalEntities.Select(f => new FiscalEntityDto 
         { 
-            Id = f.Id, Name = f.Name, Cnpj = f.Cnpj, Cpf = f.Cpf, Locality = f.Locality, AdministrativeArea = f.AdministrativeArea, CountryCode = f.CountryCode 
+            Id = f.Id, Name = f.Name, Cnpj = f.Cnpj, Cpf = f.Cpf, BillingAddressLine = f.BillingAddressLine, BillingNeighborhood = f.BillingNeighborhood, BillingCity = f.BillingCity, BillingState = f.BillingState, BillingPostalCode = f.BillingPostalCode, BillingCountry = f.BillingCountry, ShippingAddressLine = f.ShippingAddressLine, ShippingNeighborhood = f.ShippingNeighborhood, ShippingCity = f.ShippingCity, ShippingState = f.ShippingState, ShippingPostalCode = f.ShippingPostalCode, ShippingCountry = f.ShippingCountry 
         }).ToList(),
         Contacts = customer.Contacts.Select(c => new ContactDto 
         { 
@@ -80,7 +80,7 @@ public async Task<SiteDto> AddSiteAsync(Guid customerId, CreateSiteDto dto)
     var customer = await _customerRepository.GetByIdAsync(customerId);
     if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
 
-    var site = new Site(customerId, dto.Name, dto.Country, dto.State, dto.City);
+    var site = new Site(customerId, dto.Name, dto.City, dto.State, dto.Country, dto.Observations);
     
     // Inserção direta sem modificar a entidade Customer
     _customerRepository.AddSite(site);
@@ -88,7 +88,7 @@ public async Task<SiteDto> AddSiteAsync(Guid customerId, CreateSiteDto dto)
 
     return new SiteDto 
     { 
-        Id = site.Id, Name = site.Name, Country = site.Country, State = site.State, City = site.City 
+        Id = site.Id, Name = site.Name, City = site.City, State = site.State, Country = site.Country, Observations = site.Observations 
     };
 }
 
@@ -97,7 +97,7 @@ public async Task<FiscalEntityDto> AddFiscalEntityAsync(Guid customerId, CreateF
     var customer = await _customerRepository.GetByIdAsync(customerId);
     if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
 
-    var fiscal = new FiscalEntity(customerId, dto.Name, dto.Country, dto.State, dto.City);
+    var fiscal = new FiscalEntity(customerId, dto.Name, dto.Cnpj, dto.Cpf, dto.BillingAddressLine, dto.BillingNeighborhood, dto.BillingCity, dto.BillingState, dto.BillingPostalCode, dto.BillingCountry, dto.ShippingAddressLine, dto.ShippingNeighborhood, dto.ShippingCity, dto.ShippingState, dto.ShippingPostalCode, dto.ShippingCountry);
     
     // Inserção direta sem modificar a entidade Customer
     _customerRepository.AddFiscalEntity(fiscal);
@@ -105,7 +105,7 @@ public async Task<FiscalEntityDto> AddFiscalEntityAsync(Guid customerId, CreateF
 
     return new FiscalEntityDto 
     { 
-        Id = fiscal.Id, Name = fiscal.Name, Country = fiscal.Country, State = fiscal.State, City = fiscal.City 
+        Id = fiscal.Id, Name = fiscal.Name, Cnpj = fiscal.Cnpj, Cpf = fiscal.Cpf, BillingAddressLine = fiscal.BillingAddressLine, BillingNeighborhood = fiscal.BillingNeighborhood, BillingCity = fiscal.BillingCity, BillingState = fiscal.BillingState, BillingPostalCode = fiscal.BillingPostalCode, BillingCountry = fiscal.BillingCountry, ShippingAddressLine = fiscal.ShippingAddressLine, ShippingNeighborhood = fiscal.ShippingNeighborhood, ShippingCity = fiscal.ShippingCity, ShippingState = fiscal.ShippingState, ShippingPostalCode = fiscal.ShippingPostalCode, ShippingCountry = fiscal.ShippingCountry 
     };
 }
 
@@ -114,7 +114,7 @@ public async Task<ContactDto> AddContactAsync(Guid customerId, CreateContactDto 
     var customer = await _customerRepository.GetByIdAsync(customerId);
     if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
 
-    var contact = new Contact(customerId, dto.Description, dto.Phone, dto.Email);
+    var contact = new Contact(customerId, dto.Name, dto.Phone, dto.Email);
     
     // Se a entidade utilizar métodos para atribuir chaves estrangeiras opcionais:
     if (dto.SiteId.HasValue) contact.ChangeSite(dto.SiteId.Value);
@@ -157,7 +157,7 @@ public async Task UpdateSiteAsync(Guid siteId, UpdateSiteDto dto)
 {
     var site = await _customerRepository.GetSiteByIdAsync(siteId);
     if (site == null) throw new KeyNotFoundException("Local não encontrado.");
-    site.UpdateDetails(dto.Name, dto.Country, dto.State, dto.City);
+    site.UpdateDetails(dto.Name, dto.City, dto.State, dto.Country, dto.Observations);
     await _unitOfWork.CommitAsync(); // O EF rastreia a mudança da entidade carregada
 }
 
@@ -174,7 +174,7 @@ public async Task UpdateFiscalEntityAsync(Guid fiscalId, UpdateFiscalEntityDto d
 {
     var fiscal = await _customerRepository.GetFiscalEntityByIdAsync(fiscalId);
     if (fiscal == null) throw new KeyNotFoundException("Ente fiscal não encontrado.");
-    fiscal.UpdateDetails(dto.Name, dto.Cnpj, dto.Cpf, dto.Country, dto.State, dto.City);
+    fiscal.UpdateDetails(dto.Name, dto.Cnpj, dto.Cpf, dto.BillingAddressLine, dto.BillingNeighborhood, dto.BillingCity, dto.BillingState, dto.BillingPostalCode, dto.BillingCountry, dto.ShippingAddressLine, dto.ShippingNeighborhood, dto.ShippingCity, dto.ShippingState, dto.ShippingPostalCode, dto.ShippingCountry);
     await _unitOfWork.CommitAsync();
 }
 
@@ -192,7 +192,7 @@ public async Task UpdateContactAsync(Guid contactId, UpdateContactDto dto)
     var contact = await _customerRepository.GetContactByIdAsync(contactId);
     if (contact == null) throw new KeyNotFoundException("Contato não encontrado.");
     
-    contact.UpdateDetails(dto.Description, dto.Phone, dto.Email, null);
+    contact.UpdateDetails(dto.Name, dto.Phone, dto.Email, null);
     
     // Lógica para permitir arrastar/mover contatos entre cards no frontend
     if (contact.SiteId != dto.SiteId) contact.ChangeSite(dto.SiteId);

@@ -2,54 +2,46 @@ namespace MachineryCRM.Domain.Entities;
 
 public class Address
 {
-    public string? AddressLine1 { get; private set; }
-    public string? AddressLine2 { get; private set; }
-    public string? District { get; private set; }
-    public string Locality { get; private set; }
-    public string AdministrativeArea { get; private set;}
+    public string? AddressLine { get; private set; }
+    public string? Neighborhood { get; private set; }
+    public string City { get; private set; }
+    public string State { get; private set;}
     public string? PostalCode { get; private set; }
+    public string Country { get; private set; }
 
-    // ISO 3166-1 alpha-2 two-letter country code (e.g., "US", "BR", "JP")
-    public string CountryCode { get; private set; }
-
-    // Primary Constructor
     public Address(
-        string? addressLine1, 
-        string? addressLine2, 
-        string? district, 
-        string locality, 
-        string administrativeArea, 
-        string? postalCode, 
-        string countryCode)
+        string? addressLine, 
+        string? neighborhood, 
+        string city, 
+        string state, 
+        string? postalCode,
+        string country)
     {
-        if (string.IsNullOrWhiteSpace(locality)) 
-            throw new ArgumentException("Locality is required.", nameof(locality));
-        if (string.IsNullOrWhiteSpace(administrativeArea)) 
-            throw new ArgumentException("Administrative Area is required.", nameof(administrativeArea));
-        if (string.IsNullOrWhiteSpace(countryCode) || countryCode.Length != 2) 
-            throw new ArgumentException("A valid 2-letter ISO country code is required.", nameof(countryCode));
+        if (string.IsNullOrWhiteSpace(city)) 
+            throw new ArgumentException("City is required.", nameof(city));
+        if (string.IsNullOrWhiteSpace(state)) 
+            throw new ArgumentException("State is required.", nameof(state));
+        if (string.IsNullOrWhiteSpace(country)) 
+            throw new ArgumentException("Country is required.", nameof(country));
 
-        AddressLine1 = addressLine1;
-        AddressLine2 = addressLine2;
-        District = district;
-        Locality = locality;
-        AdministrativeArea = administrativeArea;
+        AddressLine = addressLine;
+        Neighborhood = neighborhood;
+        City = city;
+        State = state;
         PostalCode = postalCode;
-        CountryCode = countryCode.ToUpper();
+        Country = country;
     }
 
-    // Computed Property to format the address nicely based on country formatting rules
     public string GetFormattedAddress()
     {
         var address = new[]
         {
-            AddressLine1,
-            AddressLine2,
-            District,
-            Locality,
-            AdministrativeArea,
+            AddressLine,
+            Neighborhood,
+            City,
+            State,
             PostalCode,
-            CountryCode
+            Country
         };
 
         return string.Join(Environment.NewLine, address.Where(p => !string.IsNullOrWhiteSpace(p)));
@@ -59,16 +51,14 @@ public class Address
     {
         var address = new[]
         {
-            AddressLine1,
-            AddressLine2,
-            District,
-            Locality,
-            AdministrativeArea,
+            AddressLine,
+            Neighborhood,
+            City,
+            State,
             PostalCode,
-            CountryCode
+            Country
         };
 
-        // Removes empty or null lines dynamically
         return string.Join(", ", address.Where(p => !string.IsNullOrWhiteSpace(p)));
     }
     

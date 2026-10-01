@@ -1,19 +1,48 @@
-using System;
 using MachineryCRM.Domain.Entities;
 using MachineryCRM.Domain.Enums;
+using Xunit;
 
-namespace MyApp;
-class Program
+namespace MachineryCRM.UnitTests.Domain;
+
+public class SiteTests
 {
-    public void Main()
-    {   
-        var fazenda = new Site(Guid.NewGuid(), "Fazenda", "Bauru", "SP", "BR");
+    [Fact]
+    public void CreateSite_ShouldInitializePropertiesCorrectly()
+    {
+        // Arrange & Act
+        var site = new Site(Guid.NewGuid(), "Farm", "Belo Horizonte", "MG", "BR");
+        
+        // Assert
+        Assert.Equal("Farm", site.Name);
+        Assert.Equal("Belo Horizonte", site.City);
+        Assert.Equal("MG", site.State);
+        Assert.Equal("BR", site.Country);
+    }
 
-        var portaria = new GeoPoint(fazenda.Id, "portaria", 15.123, 20.456, GeoLocationType.Office, 2);
-        var passagem = new GeoPoint(fazenda.Id, "passagem", 15.123, 20.456, GeoLocationType.Office, 1);
-        var escritorio = new GeoPoint(fazenda.Id, "escritorio", 20.123, 45.456, GeoLocationType.Office, null);
-        var maquina = new GeoPoint(fazenda.Id, "maquina", 10.123, 15.456, GeoLocationType.MachineLocation, null);
+    [Fact]
+    public void UpdateDetails_ShouldUpdatePropertiesCorrectly()
+    {
+        // Arrange
+        var site = new Site(Guid.NewGuid(), "Farm", "Belo Horizonte", "MG", "BR");
 
-        Console.Write(fazenda.GeoPoints);
+        // Act
+        site.UpdateDetails("New Farm", "São Paulo", "SP", "BR");
+
+        // Assert
+        Assert.Equal("New Farm", site.Name);
+        Assert.Equal("São Paulo", site.City);
+        Assert.Equal("SP", site.State);
+        Assert.Equal("BR", site.Country);
+    }
+
+    [Fact]
+    public void UpdateDetails_ShouldThrowArgumentException_WhenNameIsEmpty()
+    {
+        // Arrange
+        var site = new Site(Guid.NewGuid(), "Farm", "Belo Horizonte", "MG", "BR");
+
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() => site.UpdateDetails("", "São Paulo", "SP", "BR"));
+        Assert.Equal("Site name cannot be empty.", exception.Message);
     }
 }
