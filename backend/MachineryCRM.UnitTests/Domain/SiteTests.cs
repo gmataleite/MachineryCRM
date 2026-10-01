@@ -6,33 +6,53 @@ namespace MachineryCRM.UnitTests.Domain;
 
 public class SiteTests
 {
-    [Fact]
-    public void CreateSite_ShouldInitializePropertiesCorrectly()
+    [Theory]
+    [InlineData("Farm", "Belo Horizonte", "MG", "Brasil")]
+    [InlineData("Farm", null, "SP", "Brasil")]
+    [InlineData("Farm", "São Paulo", null, "Brasil")]
+    [InlineData("Farm", "Rio de Janeiro", "RJ", null)]
+    [InlineData("Farm", "", "", "")]
+    [InlineData("Farm", null, null, null)]
+
+    public void CreateSite_ShouldInitializePropertiesCorrectly(string name, string? city, string? state, string? country)
     {
         // Arrange & Act
-        var site = new Site(Guid.NewGuid(), "Farm", "Belo Horizonte", "MG", "BR");
+        var site = new Site(Guid.NewGuid(), name, city, state, country);
         
         // Assert
-        Assert.Equal("Farm", site.Name);
-        Assert.Equal("Belo Horizonte", site.City);
-        Assert.Equal("MG", site.State);
-        Assert.Equal("BR", site.Country);
+        Assert.Equal(name, site.Name);
+        Assert.Equal(city, site.City);
+        Assert.Equal(state, site.State);
+        Assert.Equal(country, site.Country);
+    }
+
+    [Theory]
+    [InlineData("Farm", null, "SP", "Brasil")]
+    [InlineData("Farm", "São Paulo", null, "Brasil")]
+    [InlineData("Farm", "Rio de Janeiro", "RJ", null)]
+    [InlineData("Farm", "", "", "")]
+    [InlineData("Farm", null, null, null)]
+    public void UpdateDetails_ShouldUpdatePropertiesCorrectly(string name, string? city, string? state, string? country)
+    {
+        // Arrange
+        var site = new Site(Guid.NewGuid(), "Plantation", "Salvador", "BH", "Brasil");
+
+        // Act
+        site.UpdateDetails(name, city, state, country);
+
+        // Assert
+        Assert.Equal(name, site.Name);
+        Assert.Equal(city, site.City);
+        Assert.Equal(state, site.State);
+        Assert.Equal(country, site.Country);
     }
 
     [Fact]
-    public void UpdateDetails_ShouldUpdatePropertiesCorrectly()
+    public void CreateSite_ShouldThrowArgumentException_WhenNameIsEmpty()
     {
-        // Arrange
-        var site = new Site(Guid.NewGuid(), "Farm", "Belo Horizonte", "MG", "BR");
-
-        // Act
-        site.UpdateDetails("New Farm", "São Paulo", "SP", "BR");
-
-        // Assert
-        Assert.Equal("New Farm", site.Name);
-        Assert.Equal("São Paulo", site.City);
-        Assert.Equal("SP", site.State);
-        Assert.Equal("BR", site.Country);
+        // Arrange, Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() => new Site(Guid.NewGuid(), "", "Belo Horizonte", "MG", "BR"));
+        Assert.Equal("Site name cannot be empty.", exception.Message);
     }
 
     [Fact]

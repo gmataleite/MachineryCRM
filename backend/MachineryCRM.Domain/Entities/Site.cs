@@ -4,21 +4,40 @@ public class Site : Entity
 {
     public Guid CustomerId { get; private set; }
     public string Name { get; private set; }
-    public string City { get; private set; }
-    public string State { get; private set; }
-    public string Country { get; private set; }
+    public string? City { get; private set; }
+    public string? State { get; private set; }
+    public string? Country { get; private set; }
     public string? Observations { get; private set; }
     public ICollection<GeoPoint> GeoPoints { get; private set; } = new List<GeoPoint>();
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
     public ICollection<Machine> Machines { get; private set; } = new List<Machine>();
 
-    public Site(Guid customerId, string name,
-        string city, 
-        string state, 
-        string country,
+    public Site(Guid customerId, 
+        string name,
+        string? city, 
+        string? state, 
+        string? country,
         string? observations = null)
     {
         CustomerId = customerId;
+        ValidateName(name);
+        Name = name;
+        City = city;
+        State = state;
+        Country = country;
+        Observations = observations;
+
+        
+    }
+
+    public void UpdateDetails(
+        string name,
+        string? city, 
+        string? state, 
+        string? country,
+        string? observations = null)
+    {
+        ValidateName(name);
         Name = name;
         City = city;
         State = state;
@@ -26,16 +45,9 @@ public class Site : Entity
         Observations = observations;
     }
 
-    public void UpdateDetails(string name,
-        string city, 
-        string state, 
-        string country,
-        string? observations = null)
+    private void ValidateName(string name)
     {
-        Name = name;
-        City = city;
-        State = state;
-        Country = country;
-        Observations = observations;
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Site name cannot be empty.");
     }
 }
