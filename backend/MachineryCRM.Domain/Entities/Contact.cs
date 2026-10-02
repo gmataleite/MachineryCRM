@@ -14,6 +14,8 @@ public class Contact : Entity
 
     public Contact(Guid customerId, string name, string? phone = null, string? email = null, string? observations = null)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
         CustomerId = customerId;
         Name = name;
         
@@ -25,6 +27,8 @@ public class Contact : Entity
 
     public void UpdateDetails(string name, string? phone, string? email, string? observations)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
         Name = name;
 
         SetPhone(phone);

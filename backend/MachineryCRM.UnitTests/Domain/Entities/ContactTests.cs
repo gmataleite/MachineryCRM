@@ -24,7 +24,7 @@ public class ContactTests
 
     [Fact]
     public void UpdateDetails_ShouldUpdatePropertiesCorrectly()
-    {
+{
         // Arrange
         var contact = new Contact(Guid.NewGuid(), "John Doe", "1234567890", "john.doe@example.com");
 
@@ -36,6 +36,15 @@ public class ContactTests
         Assert.Equal("jane.doe@example.com", contact.Email);
         Assert.Equal("0987654321", contact.Phone);
         Assert.Equal("Updated observations", contact.Observations);
+    }
+
+
+    [Fact]
+    public void CreateContact_ShouldThrowArgumentException_WhenNameIsEmpty()
+    {
+        // Arrange, Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() => new Contact(Guid.NewGuid(), "", null, null));
+        Assert.Equal("name", exception.ParamName);
     }
 
     [Theory]

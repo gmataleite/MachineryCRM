@@ -17,8 +17,9 @@ public class Site : Entity
         Address? address,
         string? observations = null)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
         CustomerId = customerId;
-        ValidateName(name);
         Name = name;
         Address = address;
         Observations = observations;
@@ -29,15 +30,10 @@ public class Site : Entity
         Address? address,
         string? observations = null)
     {
-        ValidateName(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
         Name = name;
         Address = address;
         Observations = observations;
-    }
-
-    private static void ValidateName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Site name cannot be empty.");
     }
 }

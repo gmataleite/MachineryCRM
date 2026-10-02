@@ -10,11 +10,13 @@ public class Customer : Entity
 
     public Customer(string name)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
         Name = name;
     }
 
     public void UpdateName(string name)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
         Name = name;
     }   
 }

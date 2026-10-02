@@ -79,7 +79,7 @@ public class FiscalEntityTests
     {
         // Arrange, Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => new FiscalEntity(Guid.NewGuid(), "", null, null, null));
-        Assert.Equal("Name cannot be null or whitespace.", exception.Message);
+        Assert.Equal("name", exception.ParamName);
     }
 
     [Fact]
@@ -90,6 +90,6 @@ public class FiscalEntityTests
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => fiscalEntity.UpdateDetails("", null, null, null));
-        Assert.Equal("Name cannot be null or whitespace.", exception.Message);
+        Assert.Equal("name", exception.ParamName);
     }
 }

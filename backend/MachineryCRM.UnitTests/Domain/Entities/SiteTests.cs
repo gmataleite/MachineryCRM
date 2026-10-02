@@ -54,7 +54,7 @@ public class SiteTests
     {
         // Arrange, Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => new Site(Guid.NewGuid(), "", null));
-        Assert.Equal("Site name cannot be empty.", exception.Message);
+        Assert.Equal("name", exception.ParamName);
     }
 
     [Fact]
@@ -65,6 +65,6 @@ public class SiteTests
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => site.UpdateDetails("", null));
-        Assert.Equal("Site name cannot be empty.", exception.Message);
+        Assert.Equal("name", exception.ParamName);
     }
 }

@@ -17,10 +17,7 @@ public class FiscalEntity : Entity
         Address? billingAddress,
         Address? shippingAddress)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Name cannot be null or whitespace.");
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         CustomerId = customerId;
         Name = name;
@@ -35,10 +32,7 @@ public class FiscalEntity : Entity
         Address? billingAddress,
         Address? shippingAddress)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Name cannot be null or whitespace.");
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         Name = name;    
         TaxId = taxId;
