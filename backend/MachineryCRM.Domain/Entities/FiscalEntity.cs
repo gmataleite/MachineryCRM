@@ -1,10 +1,13 @@
+using MachineryCRM.Domain.DomainServices;
+using MachineryCRM.Domain.ValueObjects;
+
 namespace MachineryCRM.Domain.Entities;
 
 public class FiscalEntity : Entity
 {
     public Guid CustomerId { get; private set; }
     public string Name { get; private set; }
-    public string? TaxId { get; private set; }
+    public TaxId? TaxId { get; private set; }
     public string? BillingAddressLine { get; private set; }
     public string? BillingNeighborhood { get; private set; }
     public string BillingCity { get; private set; }
@@ -17,8 +20,8 @@ public class FiscalEntity : Entity
     public string ShippingState { get; private set; }
     public string? ShippingPostalCode { get; private set; }
     public string ShippingCountryCode { get; private set; }
-    public string? BillingAddress { get; private set; }
-    public string? ShippingAddress { get; private set; }
+    // public string? BillingAddress { get; private set; }
+    // public string? ShippingAddress { get; private set; }
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
 
     public FiscalEntity(Guid customerId, 
@@ -37,9 +40,15 @@ public class FiscalEntity : Entity
         string? shippingPostalCode,
         string shippingCountryCode)
     {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Name cannot be null or whitespace.");
+        }
+        
+        TaxId = string.IsNullOrWhiteSpace(taxId) ? null : new TaxId(taxId, billingCountryCode);
+
         CustomerId = customerId;
         Name = name;
-        TaxId = taxId;
         BillingAddressLine = billingAddressLine;
         BillingNeighborhood = billingNeighborhood;
         BillingCity = billingCity;
@@ -70,8 +79,14 @@ public class FiscalEntity : Entity
         string? shippingPostalCode,
         string shippingCountryCode)
     {
-        Name = name;
-        TaxId = taxId;
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Name cannot be null or whitespace.");
+        }
+
+        TaxId = string.IsNullOrWhiteSpace(taxId) ? null : new TaxId(taxId, billingCountryCode);
+
+        Name = name;    
         BillingAddressLine = billingAddressLine;
         BillingNeighborhood = billingNeighborhood;
         BillingCity = billingCity;
@@ -85,5 +100,4 @@ public class FiscalEntity : Entity
         ShippingPostalCode = shippingPostalCode;
         ShippingCountryCode = shippingCountryCode;
     }
-
 }

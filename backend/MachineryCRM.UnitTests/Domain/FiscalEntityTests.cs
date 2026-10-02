@@ -13,6 +13,8 @@ public class FiscalEntityTests
                 "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
     [InlineData("Farm", null, null, null, "Belo Horizonte", "MG", null, "BR",
                 null, null, "São Paulo", "SP", null, "BR")]
+    [InlineData("Farm", "12ABC345000188", "Rua Dois, 1122", "Bairro Dois", "Belo Horizonte", "MG", "30170-190", "BR",
+                "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
 
     public void CreateFiscalEntity_ShouldInitializePropertiesCorrectly(
         string name, 
@@ -35,7 +37,7 @@ public class FiscalEntityTests
         
         // Assert
         Assert.Equal(name, fiscalEntity.Name);
-        Assert.Equal(taxId, fiscalEntity.TaxId);
+        Assert.Equal(taxId, fiscalEntity.TaxId?.Value);
         Assert.Equal(billingAddressLine, fiscalEntity.BillingAddressLine);
         Assert.Equal(billingNeighborhood, fiscalEntity.BillingNeighborhood);
         Assert.Equal(billingCity, fiscalEntity.BillingCity);
@@ -55,6 +57,8 @@ public class FiscalEntityTests
                 "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
     [InlineData("Farm", "85150611000179", "Rua Dois, 1122", "Bairro Dois", "Belo Horizonte", "MG", "30170-190", "BR",
                 "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
+    [InlineData("Farm", "12ABC345000188", "Rua Dois, 1122", "Bairro Dois", "Belo Horizonte", "MG", "30170-190", "BR",
+                "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
 
     public void UpdateDetails_ShouldUpdatePropertiesCorrectly(string name, string? taxId, string? billingAddressLine, string? billingNeighborhood, string billingCity, string billingState, string? billingPostalCode, string billingCountryCode, string? shippingAddressLine, string? shippingNeighborhood, string shippingCity, string shippingState, string? shippingPostalCode, string shippingCountryCode)
     {
@@ -67,7 +71,7 @@ public class FiscalEntityTests
 
         // Assert
         Assert.Equal(name, fiscalEntity.Name);
-        Assert.Equal(taxId, fiscalEntity.TaxId);
+        Assert.Equal(taxId, fiscalEntity.TaxId?.Value);
         Assert.Equal(billingAddressLine, fiscalEntity.BillingAddressLine);
         Assert.Equal(billingNeighborhood, fiscalEntity.BillingNeighborhood);
         Assert.Equal(billingCity, fiscalEntity.BillingCity);
@@ -88,7 +92,7 @@ public class FiscalEntityTests
         // Arrange, Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => new FiscalEntity(Guid.NewGuid(), "", null, null, null, "Belo Horizonte", "MG", null, "BR",
                 null, null, "São Paulo", "SP", null, "BR"));
-        Assert.Equal("Fiscal entity name cannot be empty.", exception.Message);
+        Assert.Equal("Name cannot be null or whitespace.", exception.Message);
     }
 
     [Fact]
@@ -100,7 +104,7 @@ public class FiscalEntityTests
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => fiscalEntity.UpdateDetails("", null, null, null, "Belo Horizonte", "MG", null, "BR", null, null, "São Paulo", "SP", null, "BR"));
-        Assert.Equal("Fiscal entity name cannot be empty.", exception.Message);
+        Assert.Equal("Name cannot be null or whitespace.", exception.Message);
     }
 
     [Fact]
@@ -109,7 +113,7 @@ public class FiscalEntityTests
         // Arrange, Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => new FiscalEntity(Guid.NewGuid(), "Farm", "12345678901234", null, null, "Belo Horizonte", "MG", null, "BR",
                 null, null, "São Paulo", "SP", null, "BR"));
-        Assert.Equal("Invalid CNPJ format.", exception.Message);
+        Assert.Equal("Invalid Tax ID format for country code BR.", exception.Message);
     }
 
     [Fact]
@@ -118,7 +122,7 @@ public class FiscalEntityTests
         // Arrange, Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => new FiscalEntity(Guid.NewGuid(), "Farm", "12345678901", null, null, "Belo Horizonte", "MG", null, "BR",
                 null, null, "São Paulo", "SP", null, "BR"));
-        Assert.Equal("Invalid CPF format.", exception.Message);
+        Assert.Equal("Invalid Tax ID format for country code BR.", exception.Message);
     }
 
     [Fact]
@@ -127,6 +131,16 @@ public class FiscalEntityTests
         // Arrange, Act & Assert
         var exception = Assert.Throws<ArgumentException>(() => new FiscalEntity(Guid.NewGuid(), "Farm", "abc85150611000179", null, null, "Belo Horizonte", "MG", null, "BR",
                 null, null, "São Paulo", "SP", null, "BR"));
-        Assert.Equal("Invalid tax ID format.", exception.Message);
+        Assert.Equal("Invalid Tax ID format for country code BR.", exception.Message);
+    }
+
+    [Fact]
+    public void CreateFiscalEntity_ShouldThrowArgumentException_WhenCnpjVerificationDigitsAreLetters()
+    {
+        // Arrange, Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() => new FiscalEntity(
+            Guid.NewGuid(), "Farm", "12ABC3450001XX", null, null, "Belo Horizonte", "MG", null, "BR",
+            null, null, "São Paulo", "SP", null, "BR"));
+        Assert.Equal("Invalid Tax ID format for country code BR.", exception.Message);
     }
 }

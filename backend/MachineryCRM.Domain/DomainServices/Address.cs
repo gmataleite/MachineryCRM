@@ -1,4 +1,4 @@
-namespace MachineryCRM.Domain.Entities;
+namespace MachineryCRM.Domain.DomainServices;
 
 public class Address
 {
