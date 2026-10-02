@@ -9,7 +9,6 @@ public class Contact : Entity
     public string? Phone { get; private set; }
     public string? Email { get; private set; }
     public string? Observations { get; private set; }
-    public Customer? Customer { get; private set; }
     public Site? Site { get; private set; }
     public FiscalEntity? FiscalEntity { get; private set; }
 

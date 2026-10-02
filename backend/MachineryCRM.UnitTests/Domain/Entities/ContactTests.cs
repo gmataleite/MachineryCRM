@@ -1,7 +1,7 @@
 using MachineryCRM.Domain.Entities;
 using Xunit;
 
-namespace MachineryCRM.UnitTests.Domain;
+namespace MachineryCRM.UnitTests.Domain.Entities;
 
 public class ContactTests
 {

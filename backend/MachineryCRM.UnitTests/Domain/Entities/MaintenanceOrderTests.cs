@@ -2,7 +2,7 @@ using MachineryCRM.Domain.Entities;
 using MachineryCRM.Domain.Enums;
 using Xunit;
 
-namespace MachineryCRM.UnitTests.Domain;
+namespace MachineryCRM.UnitTests.Domain.Entities;
 
 public class MaintenanceOrderTests
 {

@@ -1,12 +1,12 @@
+using MachineryCRM.Domain.ValueObjects;
+
 namespace MachineryCRM.Application.DTOs;
 
 public class SiteDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? City { get; set; } = string.Empty;
-    public string? State { get; set; } = string.Empty;
-    public string? CountryCode { get; set; } = string.Empty;
+    public Address? Address { get; set; }
     public string? Observations { get; set; }
     public List<GeoPointDto> GeoPoints { get; set; } = new();
     public List<ContactDto> Contacts { get; set; } = new();
@@ -16,9 +16,7 @@ public class SiteDto
 public class CreateSiteDto
 {
     public string Name { get; set; } = string.Empty;
-    public string? City { get; set; } = string.Empty;
-    public string? State { get; set; } = string.Empty;
-    public string? CountryCode { get; set; } = string.Empty;
+    public Address? Address { get; set; }
     public string? Observations { get; set; }
 }
 

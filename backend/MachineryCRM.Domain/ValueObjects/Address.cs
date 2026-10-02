@@ -1,35 +1,28 @@
-namespace MachineryCRM.Domain.DomainServices;
+namespace MachineryCRM.Domain.ValueObjects;
 
 public class Address
 {
     public string? AddressLine { get; private set; }
     public string? Neighborhood { get; private set; }
-    public string City { get; private set; }
-    public string State { get; private set;}
+    public string? City { get; private set; }
+    public string? State { get; private set;}
     public string? PostalCode { get; private set; }
-    public string Country { get; private set; }
+    public string? CountryCode { get; private set; }
 
     public Address(
         string? addressLine, 
         string? neighborhood, 
-        string city, 
-        string state, 
+        string? city, 
+        string? state, 
         string? postalCode,
-        string country)
+        string? countryCode)
     {
-        if (string.IsNullOrWhiteSpace(city)) 
-            throw new ArgumentException("City is required.", nameof(city));
-        if (string.IsNullOrWhiteSpace(state)) 
-            throw new ArgumentException("State is required.", nameof(state));
-        if (string.IsNullOrWhiteSpace(country)) 
-            throw new ArgumentException("Country is required.", nameof(country));
-
         AddressLine = addressLine;
         Neighborhood = neighborhood;
         City = city;
         State = state;
         PostalCode = postalCode;
-        Country = country;
+        CountryCode = countryCode;
     }
 
     public string GetFormattedAddress()
@@ -41,7 +34,7 @@ public class Address
             City,
             State,
             PostalCode,
-            Country
+            CountryCode
         };
 
         return string.Join(Environment.NewLine, address.Where(p => !string.IsNullOrWhiteSpace(p)));
@@ -56,10 +49,13 @@ public class Address
             City,
             State,
             PostalCode,
-            Country
+            CountryCode
         };
 
         return string.Join(", ", address.Where(p => !string.IsNullOrWhiteSpace(p)));
     }
     
+    public override string ToString() => GetFormattedAddressInSingleLine();
+
+    public static implicit operator string?(Address? address) => address?.GetFormattedAddressInSingleLine();
 }

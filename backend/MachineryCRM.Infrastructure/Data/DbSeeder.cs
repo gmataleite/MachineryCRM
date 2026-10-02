@@ -23,7 +23,7 @@ public static class DbSeeder
         context.Customers.Add(customer);
         context.SaveChanges();
 
-        var site1 = new Site(customer.Id, "Sede Fazenda Bela Vista", "Brasil", "SP", "Ribeirão Preto");
+        var site1 = new Site(customer.Id, "Sede Fazenda Bela Vista", null, null);
         context.Sites.Add(site1);
         context.SaveChanges();
 
