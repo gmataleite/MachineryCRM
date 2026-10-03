@@ -2,7 +2,7 @@ namespace MachineryCRM.Domain.Entities;
 
 public class Customer : Entity
 {
-    public string Name { get; private set; }
+    public string Name { get; private set; } = null!;
 
     public ICollection<FiscalEntity> FiscalEntities { get; private set; } = new List<FiscalEntity>();
     public ICollection<Site> Sites { get; private set; } = new List<Site>();
@@ -10,11 +10,10 @@ public class Customer : Entity
 
     public Customer(string name)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        Name = name;
+        UpdateDetails(name);
     }
 
-    public void UpdateName(string name)
+    public void UpdateDetails(string name)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         Name = name;

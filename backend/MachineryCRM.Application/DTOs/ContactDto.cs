@@ -8,6 +8,7 @@ public class ContactDto
     public string Name { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string? Email { get; set; }
+    public string? Observations { get; set; }
 }
 
 public class CreateContactDto
@@ -17,6 +18,7 @@ public class CreateContactDto
     public string Name { get; set; } = string.Empty;
     public string? Phone { get; set; }
     public string? Email { get; set; }
+    public string? Observations { get; set; }
 }
 
 public class UpdateContactDto : CreateContactDto { }

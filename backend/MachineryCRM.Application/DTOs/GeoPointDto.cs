@@ -9,7 +9,7 @@ public class GeoPointDto
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public GeoLocationType LocationType { get; set; }
-    public int? Order { get; set; }
+    public int Order { get; set; }
 }
 
 public class CreateGeoPointDto
@@ -18,7 +18,7 @@ public class CreateGeoPointDto
     public double Latitude { get; set; }
     public double Longitude { get; set; }
     public GeoLocationType LocationType { get; set; }
-    public int? Order { get; set; }
+    public int Order { get; set; }
 }
 
 public class UpdateGeoPointDto : CreateGeoPointDto { }

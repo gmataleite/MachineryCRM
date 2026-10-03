@@ -5,24 +5,16 @@ public class Contact : Entity
     public Guid CustomerId { get; private set; }
     public Guid? SiteId { get; private set; }
     public Guid? FiscalEntityId { get; private set; }
-    public string Name { get; private set; }
+    public string Name { get; private set; } = null!;
     public string? Phone { get; private set; }
     public string? Email { get; private set; }
     public string? Observations { get; private set; }
-    public Site? Site { get; private set; }
-    public FiscalEntity? FiscalEntity { get; private set; }
 
-    public Contact(Guid customerId, string name, string? phone = null, string? email = null, string? observations = null)
+    public Contact(Guid customerId, string name, string? phone, string? email, string? observations)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-
         CustomerId = customerId;
-        Name = name;
-        
-        SetPhone(phone);
-        SetEmail(email);
-        
-        Observations = observations;
+
+        UpdateDetails(name, phone, email, observations);
     }
 
     public void UpdateDetails(string name, string? phone, string? email, string? observations)

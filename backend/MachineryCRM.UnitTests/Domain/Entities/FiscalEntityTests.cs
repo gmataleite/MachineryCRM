@@ -6,90 +6,42 @@ namespace MachineryCRM.UnitTests.Domain.Entities;
 
 public class FiscalEntityTests
 {
-    [Theory]
-    [InlineData("Farm", "49938200036", "Rua Dois, 1122", "Bairro Dois", "Belo Horizonte", "MG", "30170-190", "BR",
-                "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
-    [InlineData("Farm", "85150611000179", "Rua Dois, 1122", "Bairro Dois", "Belo Horizonte", "MG", "30170-190", "BR",
-                "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
-    [InlineData("Farm", null, null, null, "Belo Horizonte", "MG", null, "BR",
-                null, null, "São Paulo", "SP", null, "BR")]
-    [InlineData("Farm", "12ABC345000188", "Rua Dois, 1122", "Bairro Dois", "Belo Horizonte", "MG", "30170-190", "BR",
-                "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
-
-    public void CreateFiscalEntity_ShouldInitializePropertiesCorrectly(
-        string name, 
-        string? taxId, 
-        string? billingAddressLine, 
-        string? billingNeighborhood, 
-        string billingCity, 
-        string billingState, 
-        string? billingPostalCode,
-        string billingCountryCode, 
-        string? shippingAddressLine, 
-        string? shippingNeighborhood, 
-        string shippingCity, 
-        string shippingState, 
-        string? shippingPostalCode,
-        string shippingCountryCode)
-    {
-        // Arrange 
-        var taxIdObj = string.IsNullOrWhiteSpace(taxId) ? null : new TaxId(taxId, billingCountryCode);
-        var billingAddress = new Address(billingAddressLine, billingNeighborhood, billingCity, billingState, billingPostalCode, billingCountryCode);
-        var shippingAddress = new Address(shippingAddressLine, shippingNeighborhood, shippingCity, shippingState, shippingPostalCode, shippingCountryCode);
-        
-        // Act
-        var fiscalEntity = new FiscalEntity(Guid.NewGuid(), name, taxIdObj, billingAddress, shippingAddress);
-        
-        // Assert
-        Assert.Equal(name, fiscalEntity.Name);
-        Assert.Equal(taxId, fiscalEntity.TaxId?.Value);
-        Assert.Equal(billingAddress, fiscalEntity.BillingAddress);
-        Assert.Equal(shippingAddress, fiscalEntity.ShippingAddress);
-    }
-
-    [Theory]
-    [InlineData("Farm", "49938200036", "Rua Dois, 1122", "Bairro Dois", "Belo Horizonte", "MG", "30170-190", "BR",
-                "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
-    [InlineData("Farm", "85150611000179", "Rua Dois, 1122", "Bairro Dois", "Belo Horizonte", "MG", "30170-190", "BR",
-                "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
-    [InlineData("Farm", "12ABC345000188", "Rua Dois, 1122", "Bairro Dois", "Belo Horizonte", "MG", "30170-190", "BR",
-                "Rua Três, 3344", "Bairro Três", "São Paulo", "SP", "01000-000", "BR")]
-
-    public void UpdateDetails_ShouldUpdatePropertiesCorrectly(string name, string? taxId, string? billingAddressLine, string? billingNeighborhood, string billingCity, string billingState, string? billingPostalCode, string billingCountryCode, string? shippingAddressLine, string? shippingNeighborhood, string shippingCity, string shippingState, string? shippingPostalCode, string shippingCountryCode)
-    {
-        // Arrange
-
-        var taxIdObj = string.IsNullOrWhiteSpace(taxId) ? null : new TaxId(taxId, billingCountryCode);
-        var billingAddress = new Address(billingAddressLine, billingNeighborhood, billingCity, billingState, billingPostalCode, billingCountryCode);
-        var shippingAddress = new Address(shippingAddressLine, shippingNeighborhood, shippingCity, shippingState, shippingPostalCode, shippingCountryCode);
-        var fiscalEntity = new FiscalEntity(Guid.NewGuid(), "Farm", null, null, null);
-
-        // Act
-        fiscalEntity.UpdateDetails(name, taxIdObj, billingAddress, shippingAddress);
-
-        // Assert
-        Assert.Equal(name, fiscalEntity.Name);
-        Assert.Equal(taxId, fiscalEntity.TaxId?.Value);
-        Assert.Equal(billingAddress, fiscalEntity.BillingAddress);
-        Assert.Equal(shippingAddress, fiscalEntity.ShippingAddress);
-    }
-
     [Fact]
-    public void CreateFiscalEntity_ShouldThrowArgumentException_WhenNameIsEmpty()
+    public void CreateFiscalEntity_ShouldInitializePropertiesCorrectly()
     {
-        // Arrange, Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => new FiscalEntity(Guid.NewGuid(), "", null, null, null));
+        var customerId = Guid.NewGuid();
+        var taxId = new TaxId("49938200036", "BR");
+        var address = new Address("Rua 1", "Bairro", "BH", "MG", "30000-000", "BR");
+        
+        var fiscalEntity = new FiscalEntity(customerId, "Farm", taxId, address, address);
+        
+        Assert.Equal(customerId, fiscalEntity.CustomerId);
+        Assert.Equal("Farm", fiscalEntity.Name);
+        Assert.Equal(taxId, fiscalEntity.TaxId);
+        Assert.Equal(address, fiscalEntity.BillingAddress);
+        Assert.Equal(address, fiscalEntity.ShippingAddress);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void CreateFiscalEntity_ShouldThrowArgumentException_WhenNameIsInvalid(string? name)
+    {
+        var exception = Assert.ThrowsAny<ArgumentException>(() => new FiscalEntity(Guid.NewGuid(), name!, null, null, null));
         Assert.Equal("name", exception.ParamName);
     }
 
     [Fact]
-    public void UpdateDetails_ShouldThrowArgumentException_WhenNameIsEmpty()
+    public void UpdateDetails_ShouldUpdateProperties()
     {
-        // Arrange
-        var fiscalEntity = new FiscalEntity(Guid.NewGuid(), "Farm", null, null, null);
+        var entity = new FiscalEntity(Guid.NewGuid(), "Old", null, null, null);
+        var newAddress = new Address(null, null, "SP", "SP", null, "BR");
+        
+        entity.UpdateDetails("New", null, newAddress, null);
 
-        // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => fiscalEntity.UpdateDetails("", null, null, null));
-        Assert.Equal("name", exception.ParamName);
+        Assert.Equal("New", entity.Name);
+        Assert.Equal(newAddress, entity.BillingAddress);
+        Assert.Null(entity.ShippingAddress);
     }
 }

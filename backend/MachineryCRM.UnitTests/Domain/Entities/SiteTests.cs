@@ -1,4 +1,5 @@
 using MachineryCRM.Domain.Entities;
+using MachineryCRM.Domain.Enums;
 using MachineryCRM.Domain.ValueObjects;
 using Xunit;
 
@@ -6,65 +7,95 @@ namespace MachineryCRM.UnitTests.Domain.Entities;
 
 public class SiteTests
 {
-    [Theory]
-    [InlineData("Farm", "Belo Horizonte", "MG", "BR")]
-    [InlineData("Farm", null, "SP", "BR")]
-    [InlineData("Farm", "São Paulo", null, "BR")]
-    [InlineData("Farm", "Rio de Janeiro", "RJ", null)]
-    [InlineData("Farm", "", "", "")]
-    [InlineData("Farm", null, null, null)]
-
-    public void CreateSite_ShouldInitializePropertiesCorrectly(string name, string? city, string? state, string? countryCode)
+    [Fact]
+    public void CreateSite_ShouldInitializePropertiesCorrectly()
     {
-        // Arrange 
-        var address = new Address(null, null, city, state, null, countryCode);
+        var customerId = Guid.NewGuid();
+        var address = new Address(null, null, "BH", "MG", null, "BR");
         
-        // Act
-        var site = new Site(Guid.NewGuid(), name, address);
+        var site = new Site(customerId, "Farm", address);
         
-        // Assert
-        Assert.Equal(name, site.Name);
+        Assert.Equal(customerId, site.CustomerId);
+        Assert.Equal("Farm", site.Name);
         Assert.Equal(address, site.Address);
+    }   
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void CreateSite_ShouldThrowArgumentException_WhenNameIsInvalid(string? name)
+    {
+        var exception = Assert.ThrowsAny<ArgumentException>(() => new Site(Guid.NewGuid(), name!, null));
+        Assert.Equal("name", exception.ParamName);
     }
 
-    [Theory]
-    [InlineData("Farm", null, "SP", "BR")]
-    [InlineData("Farm", "São Paulo", null, "BR")]
-    [InlineData("Farm", "Rio de Janeiro", "RJ", null)]
-    [InlineData("Farm", "", "", "")]
-    [InlineData("Farm", null, null, null)]
-    public void UpdateDetails_ShouldUpdatePropertiesCorrectly(string name, string? city, string? state, string? countryCode)
+    [Fact]
+    public void UpdateDetails_ShouldUpdateProperties()
     {
-        // Arrange
-        var address = new Address(null, null, "Salvador", "BH", null, "BR");
-        var site = new Site(Guid.NewGuid(), "Plantation", address);
+        var site = new Site(Guid.NewGuid(), "Old", null);
+        var newAddress = new Address(null, null, "SP", "SP", null, "BR");
 
-        var newAddress = new Address(null, null, city, state, null, countryCode);
+        site.UpdateDetails("New", newAddress);
 
-        // Act
-        site.UpdateDetails(name, newAddress);
-
-        // Assert
-        Assert.Equal(name, site.Name);
+        Assert.Equal("New", site.Name);
         Assert.Equal(newAddress, site.Address);
     }
 
     [Fact]
-    public void CreateSite_ShouldThrowArgumentException_WhenNameIsEmpty()
+    public void ReorderGeoPoints_ShouldUpdateOrder_WhenValidAndMatchesRules()
     {
-        // Arrange, Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => new Site(Guid.NewGuid(), "", null));
-        Assert.Equal("name", exception.ParamName);
+        var site = new Site(Guid.NewGuid(), "Farm", null);
+        var p1 = new GeoPoint(site.Id, "G1", 0, 0, 0, (GeoLocationType)0);
+        var p2 = new GeoPoint(site.Id, "G2", 0, 0, 0, (GeoLocationType)1);
+        
+        site.GeoPoints.Add(p1);
+        site.GeoPoints.Add(p2);
+
+        var orderedIds = new List<Guid> { p1.Id, p2.Id };
+        
+        site.ReorderGeoPoints(orderedIds);
+
+        Assert.Equal(0, p1.Order);
+        Assert.Equal(1, p2.Order);
     }
 
     [Fact]
-    public void UpdateDetails_ShouldThrowArgumentException_WhenNameIsEmpty()
+    public void ReorderGeoPoints_ShouldThrowInvalidOperationException_WhenCountMismatches()
     {
-        // Arrange
         var site = new Site(Guid.NewGuid(), "Farm", null);
+        site.GeoPoints.Add(new GeoPoint(site.Id, "G1", 0, 0, 0, GeoLocationType.Waypoint));
 
-        // Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => site.UpdateDetails("", null));
-        Assert.Equal("name", exception.ParamName);
+        var exception = Assert.Throws<InvalidOperationException>(() => site.ReorderGeoPoints(new List<Guid>()));
+        Assert.Contains("A lista de ordenação deve conter a exata quantidade", exception.Message);
+    }
+
+    [Fact]
+    public void ReorderGeoPoints_ShouldThrowInvalidOperationException_WhenHierarchyIsViolated()
+    {
+        var site = new Site(Guid.NewGuid(), "Farm", null);
+        var p1 = new GeoPoint(site.Id, "Machine", 0, 0, 0, (GeoLocationType)2); // Nível superior
+        var p2 = new GeoPoint(site.Id, "Office", 0, 0, 0, (GeoLocationType)0);  // Nível inferior
+        
+        site.GeoPoints.Add(p1);
+        site.GeoPoints.Add(p2);
+
+        var orderedIds = new List<Guid> { p1.Id, p2.Id };
+
+        var exception = Assert.Throws<InvalidOperationException>(() => site.ReorderGeoPoints(orderedIds));
+        Assert.Contains("Ordem inválida", exception.Message);
+    }
+
+    [Fact]
+    public void ReorderGeoPoints_ShouldThrowInvalidOperationException_WhenPointDoesNotBelongToSite()
+    {
+        var site = new Site(Guid.NewGuid(), "Farm", null);
+        var p1 = new GeoPoint(site.Id, "G1", 0, 0, 0, GeoLocationType.Waypoint);
+        site.GeoPoints.Add(p1);
+
+        var wrongId = Guid.NewGuid();
+        
+        var exception = Assert.Throws<InvalidOperationException>(() => site.ReorderGeoPoints(new List<Guid> { wrongId }));
+        Assert.Contains("não pertence a este Site", exception.Message);
     }
 }

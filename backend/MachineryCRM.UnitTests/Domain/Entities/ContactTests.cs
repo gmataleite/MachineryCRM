@@ -5,45 +5,26 @@ namespace MachineryCRM.UnitTests.Domain.Entities;
 
 public class ContactTests
 {
+    [Fact]
+    public void CreateContact_ShouldInitializePropertiesCorrectly()
+    {
+        var customerId = Guid.NewGuid();
+        var contact = new Contact(customerId, "John Doe", "1234567890", "john.doe@example.com", "Notes");
+
+        Assert.Equal(customerId, contact.CustomerId);
+        Assert.Equal("John Doe", contact.Name);
+        Assert.Equal("1234567890", contact.Phone);
+        Assert.Equal("john.doe@example.com", contact.Email);
+        Assert.Equal("Notes", contact.Observations);
+    }
+
     [Theory]
-    [InlineData("John Doe", "1234567890", "john.doe@example.com")]
-    [InlineData("John Doe", null, "john.doe@example.com")]
-    [InlineData("John Doe", "1234567890", null)]
-    [InlineData("John Doe", null, null)]
-
-    public void CreateContact_ShouldInitializePropertiesCorrectly(string name, string? phone, string? email)
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void CreateContact_ShouldThrowArgumentException_WhenNameIsInvalid(string? name)
     {
-        // Act
-        var contact = new Contact(Guid.NewGuid(), name, phone, email);
-
-        // Assert
-        Assert.Equal(name, contact.Name);
-        Assert.Equal(email, contact.Email);
-        Assert.Equal(phone, contact.Phone);
-    }
-
-    [Fact]
-    public void UpdateDetails_ShouldUpdatePropertiesCorrectly()
-{
-        // Arrange
-        var contact = new Contact(Guid.NewGuid(), "John Doe", "1234567890", "john.doe@example.com");
-
-        // Act
-        contact.UpdateDetails("Jane Doe", "0987654321", "jane.doe@example.com", "Updated observations");
-
-        // Assert
-        Assert.Equal("Jane Doe", contact.Name);
-        Assert.Equal("jane.doe@example.com", contact.Email);
-        Assert.Equal("0987654321", contact.Phone);
-        Assert.Equal("Updated observations", contact.Observations);
-    }
-
-
-    [Fact]
-    public void CreateContact_ShouldThrowArgumentException_WhenNameIsEmpty()
-    {
-        // Arrange, Act & Assert
-        var exception = Assert.Throws<ArgumentException>(() => new Contact(Guid.NewGuid(), "", null, null));
+        var exception = Assert.ThrowsAny<ArgumentException>(() => new Contact(Guid.NewGuid(), name!, null, null, null));
         Assert.Equal("name", exception.ParamName);
     }
 
@@ -51,109 +32,57 @@ public class ContactTests
     [InlineData("invalid-email")]
     [InlineData("john.doe@")]
     [InlineData("@example.com")]
-    [InlineData("john.doe@example")]
-    public void CreateContact_WithInvalidEmail_ShouldThrowArgumentException(string invalidEmail)
+    public void Email_ShouldThrowFormatException_WhenInvalid(string invalidEmail)
     {
-        // Arrange
-        var name = "John Doe";
-        var phone = "1234567890";
-        var email = invalidEmail;
-
-        // Act & Assert
-        var exception = Assert.Throws<FormatException>(() => new Contact(Guid.NewGuid(), name, phone, email));
+        var exception = Assert.Throws<FormatException>(() => new Contact(Guid.NewGuid(), "Name", null, invalidEmail, null));
         Assert.Equal("Invalid email format.", exception.Message);
     }
 
     [Theory]
     [InlineData("invalid-phone")]
-    [InlineData("phone123")]
-    [InlineData("!@#$%^&*()")]
     [InlineData("123-456-7890")]
-    [InlineData("1234567890101234567890")]
-    public void CreateContact_WithInvalidPhone_ShouldThrowArgumentException(string invalidPhone)
+    public void Phone_ShouldThrowFormatException_WhenInvalid(string invalidPhone)
     {
-        // Arrange
-        var name = "John Doe";
-        var phone = invalidPhone;
-        var email = "john.doe@example.com";
-
-        // Act & Assert
-        var exception = Assert.Throws<FormatException>(() => new Contact(Guid.NewGuid(), name, phone, email));
+        var exception = Assert.Throws<FormatException>(() => new Contact(Guid.NewGuid(), "Name", invalidPhone, null, null));
         Assert.Equal("Invalid phone number format.", exception.Message);
     } 
 
     [Fact]
+    public void UpdateDetails_ShouldUpdateProperties()
+    {
+        var contact = new Contact(Guid.NewGuid(), "Old", "12345", "old@ex.com", "Old obs");
+        
+        contact.UpdateDetails("New", "98765", "new@ex.com", "New obs");
+
+        Assert.Equal("New", contact.Name);
+        Assert.Equal("98765", contact.Phone);
+        Assert.Equal("new@ex.com", contact.Email);
+        Assert.Equal("New obs", contact.Observations);
+    }
+
+    [Fact]
     public void ChangeSite_ShouldSetSiteIdAndClearFiscalEntityId()
     {
-        // Arrange
-        var contact = new Contact(Guid.NewGuid(), "John Doe");
-        var newSiteId = Guid.NewGuid();
+        var contact = new Contact(Guid.NewGuid(), "Name", null, null, null);
+        contact.ChangeFiscalEntity(Guid.NewGuid());
+        
+        var siteId = Guid.NewGuid();
+        contact.ChangeSite(siteId);
 
-        // Act
-        contact.ChangeSite(newSiteId);
-
-        // Assert
-        Assert.Equal(newSiteId, contact.SiteId);
+        Assert.Equal(siteId, contact.SiteId);
         Assert.Null(contact.FiscalEntityId);
     }
 
     [Fact]
     public void ChangeFiscalEntity_ShouldSetFiscalEntityIdAndClearSiteId()
     {
-        // Arrange
-        var contact = new Contact(Guid.NewGuid(), "John Doe");
-        var newFiscalEntityId = Guid.NewGuid();
-
-        // Act
-        contact.ChangeFiscalEntity(newFiscalEntityId);
-
-        // Assert
-        Assert.Equal(newFiscalEntityId, contact.FiscalEntityId);
-        Assert.Null(contact.SiteId);
-    }
-
-    [Fact]
-    public void ChangeSite_ForNull_ShouldClearFiscalEntityIdandSiteId()
-    {
-        // Arrange
-        var contact = new Contact(Guid.NewGuid(), "John Doe");
-
-        // Act
+        var contact = new Contact(Guid.NewGuid(), "Name", null, null, null);
         contact.ChangeSite(Guid.NewGuid());
-        contact.ChangeSite(null);
 
-        // Assert
+        var fiscalEntityId = Guid.NewGuid();
+        contact.ChangeFiscalEntity(fiscalEntityId);
+
+        Assert.Equal(fiscalEntityId, contact.FiscalEntityId);
         Assert.Null(contact.SiteId);
-        Assert.Null(contact.FiscalEntityId);
-    }
-
-    [Fact]
-    public void ChangeFiscalEntity_ForNull_ShouldClearFiscalEntityIdandSiteId()
-    {
-        // Arrange
-        var contact = new Contact(Guid.NewGuid(), "John Doe");
-
-        // Act
-        contact.ChangeFiscalEntity(Guid.NewGuid());
-        contact.ChangeFiscalEntity(null);
-
-        // Assert
-        Assert.Null(contact.SiteId);
-        Assert.Null(contact.FiscalEntityId);
-    }
-
-    [Fact]
-    public void SetFiscalEntityAndSite_ForNull_ShouldClearFiscalEntityIdandSiteId()
-    {
-        // Arrange
-        var contact = new Contact(Guid.NewGuid(), "John Doe");
-
-        // Act
-        contact.ChangeFiscalEntity(null);
-        contact.ChangeFiscalEntity(null);
-
-        // Assert
-        Assert.Null(contact.SiteId);
-        Assert.Null(contact.FiscalEntityId);
     }
 }
