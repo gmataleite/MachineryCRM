@@ -11,6 +11,8 @@ public class FiscalEntity : Entity
     public Address? ShippingAddress { get; private set; }
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
 
+    private FiscalEntity () { }
+    
     public FiscalEntity(Guid customerId, string name, TaxId? taxId, Address? billingAddress, Address? shippingAddress)
     {
         CustomerId = customerId;

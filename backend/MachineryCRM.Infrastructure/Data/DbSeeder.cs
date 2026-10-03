@@ -14,46 +14,47 @@ public static class DbSeeder
         if (context.Customers.Any())
             return;
 
-        var tech1 = new Technician("Roberto Almeida", "roberto.almeida@example.com", "CREA-10293");
-        var tech2 = new Technician("Carla Mendes", "carla.mendes@example.com", "CREA-94821");
+        var tech1 = new AppUser("Roberto Almeida", "roberto.almeida@example.com", "hash_temporario_123", "Technician");
+        var tech2 = new AppUser("Carla Mendes", "carla.mendes@example.com", "hash_temporario_456", "Technician");
         
-        context.Technicians.AddRange(tech1, tech2);
+        context.AppUsers.AddRange(tech1, tech2);
+        context.SaveChanges();
 
         var customer = new Customer("AgroTech Solutions");
         context.Customers.Add(customer);
         context.SaveChanges();
 
-        var site1 = new Site(customer.Id, "Sede Fazenda Bela Vista", null, null);
+        var site1 = new Site(customer.Id, "Sede Fazenda Bela Vista", null);
         context.Sites.Add(site1);
         context.SaveChanges();
 
-        Guid idMachine1 = Guid.NewGuid();
-        Guid idMachine2 = Guid.NewGuid();
-        Guid idMachine3 = Guid.NewGuid();
-
-        var machine1 = new Machine(site1.Id, "SN-77489-XYZ", "Colheitadeira AX-900", 2023);
-        var machine2 = new Machine(site1.Id, "SN-11200-ABC", "Trator de Esteira T-50", 2021);
-        var machine3 = new Machine(site1.Id, "SN-99882-QWE", "Pulverizador Autopropelido P-300", 2024);
+        var machine1 = new Machine(site1.Id, "SN-77489-XYZ", "Colheitadeira AX-900", "AgroMax", "Ativa", DateTime.UtcNow.AddYears(-2));
+        var machine2 = new Machine(site1.Id, "SN-11200-ABC", "Trator de Esteira T-50", "TerraTech", "Ativa", DateTime.UtcNow.AddYears(-3));
+        var machine3 = new Machine(site1.Id, "SN-99882-QWE", "Pulverizador Autopropelido P-300", "AgroMax", "Ativa", DateTime.UtcNow.AddYears(-1));
 
         context.Machines.AddRange(machine1, machine2, machine3);
         context.SaveChanges();
 
-        var order1 = new MaintenanceOrder(
+        var order1 = new Maintenance(
             machine1.Id, 
             tech1.Id, 
-            "Vazamento no sistema hidráulico primário.", 
-            DateTime.UtcNow.AddDays(2));
+            DateTime.UtcNow.AddDays(2),
+            "Corretiva: Vazamento no sistema hidráulico primário.", 
+            "O-rings e fluidos"
+        );
 
-        var order2 = new MaintenanceOrder(
+        var order2 = new Maintenance(
             machine2.Id, 
             tech2.Id, 
-            "Revisão preventiva de 1000 horas.", 
-            DateTime.UtcNow.AddDays(5));
+            DateTime.UtcNow.AddDays(5),
+            "Preventiva: Revisão de 1000 horas.", 
+            "Filtros de óleo"
+        );
 
         // Transição de estado encapsulada testando a regra de domínio
         order2.StartMaintenance(); 
 
-        context.MaintenanceOrders.AddRange(order1, order2);
+        context.Maintenances.AddRange(order1, order2);
         context.SaveChanges();
     }
 }

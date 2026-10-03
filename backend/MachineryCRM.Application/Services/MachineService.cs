@@ -24,12 +24,21 @@ public class MachineService : IMachineService
             throw new InvalidOperationException("A machine with this serial number already exists.");
         }
 
-        var machine = new Machine(dto.SiteId, dto.SerialNumber, dto.Model, dto.Year);
+        var machine = new Machine(dto.SiteId, dto.SerialNumber, dto.Model, dto.Brand, dto.Status, dto.AcquisitionDate);
         
         await _machineRepository.AddAsync(machine);
         await _unitOfWork.CommitAsync();
 
-        return new MachineDto(machine.Id, machine.SerialNumber, machine.Model, machine.Year, machine.SiteId);
+        return new MachineDto 
+        {
+            Id = machine.Id, 
+            SiteId = machine.SiteId,
+            SerialNumber = machine.SerialNumber, 
+            Model = machine.Model, 
+            Brand = machine.Brand,
+            Status = machine.Status,
+            AcquisitionDate = machine.AcquisitionDate
+        };
     }
 
     public async Task<MachineDto?> GetByIdAsync(Guid id)
@@ -37,12 +46,30 @@ public class MachineService : IMachineService
         var machine = await _machineRepository.GetByIdAsync(id);
         if (machine == null) return null;
         
-        return new MachineDto(machine.Id, machine.SerialNumber, machine.Model, machine.Year, machine.SiteId);
+        return new MachineDto 
+        {
+            Id = machine.Id, 
+            SiteId = machine.SiteId,
+            SerialNumber = machine.SerialNumber, 
+            Model = machine.Model, 
+            Brand = machine.Brand,
+            Status = machine.Status,
+            AcquisitionDate = machine.AcquisitionDate
+        };
     }
 
     public async Task<IEnumerable<MachineDto>> GetAllAsync()
     {
         var machines = await _machineRepository.GetAllAsync();
-        return machines.Select(m => new MachineDto(m.Id, m.SerialNumber, m.Model, m.Year, m.SiteId));
+        return machines.Select(machine => new MachineDto 
+        {
+            Id = machine.Id, 
+            SiteId = machine.SiteId,
+            SerialNumber = machine.SerialNumber, 
+            Model = machine.Model, 
+            Brand = machine.Brand,
+            Status = machine.Status,
+            AcquisitionDate = machine.AcquisitionDate
+        });
     }
 }

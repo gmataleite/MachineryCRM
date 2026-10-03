@@ -14,9 +14,6 @@ public interface ICustomerRepository : IRepository<Customer>
     
     // ADICIONADO: Método que implementamos para carregar o Site e sua coleção de GeoPoints
     Task<Site?> GetSiteByIdWithGeoPointsAsync(Guid id);
-    
-    // REMOVIDO: Task<List<GeoPoint>> GetGeoPointsBySiteIdAsync(Guid siteId);
-    // Motivo: O repositório não deve expor a busca de filhos isolados contornando o Aggregate Root (Site).
 
     void AddSite(Site site);
     void AddFiscalEntity(FiscalEntity fiscalEntity);

@@ -39,8 +39,8 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
 
     public async Task<GeoPoint?> GetGeoPointByIdAsync(Guid id) => await _context.Set<GeoPoint>().FirstOrDefaultAsync(x => x.Id == id);
 
-    public async Task<List<GeoPoint>> GetGeoPointsBySiteIdAsync(Guid siteId) => await _context.Set<GeoPoint>().Where(x => x.SiteId == siteId).ToListAsync();
-
+    public async Task<Site?> GetSiteByIdWithGeoPointsAsync(Guid id) => await _context.Set<Site>().Include(s => s.GeoPoints).FirstOrDefaultAsync(x => x.Id == id);
+    
     public void AddSite(Site site) => _context.Sites.Add(site);
 
     public void AddFiscalEntity(FiscalEntity fiscalEntity) => _context.FiscalEntities.Add(fiscalEntity);
@@ -58,5 +58,4 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
     public void AddGeoPoint(GeoPoint geoPoint) => _context.Set<GeoPoint>().Add(geoPoint);
     
     public void RemoveGeoPoint(GeoPoint geoPoint) => _context.Set<GeoPoint>().Remove(geoPoint);
-
 }

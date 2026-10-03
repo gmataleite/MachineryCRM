@@ -12,6 +12,8 @@ public class Site : Entity
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
     public ICollection<Machine> Machines { get; private set; } = new List<Machine>();
 
+    private Site () { }
+    
     public Site(Guid customerId, string name, Address? address)
     {
         CustomerId = customerId;

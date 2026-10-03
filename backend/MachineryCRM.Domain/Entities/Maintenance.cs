@@ -2,21 +2,24 @@ using MachineryCRM.Domain.Enums;
 
 namespace MachineryCRM.Domain.Entities;
 
-public class MaintenanceOrder : Entity
+public class Maintenance : Entity
 {
     public Guid MachineId { get; private set; }
-    public Guid TechnicianId { get; private set; }
+    public Guid AppUserId { get; private set; }
+    public DateTime MaintenanceDate { get; private set; }
+    public string MaintenanceType { get; private set; } = null!;
+    public string? PartsUsed { get; private set; }
     public MaintenanceStatus Status { get; private set; }
-    public string IssueDescription { get; private set; }
-    public DateTime ScheduledDate { get; private set; }
     public DateTime? CompletionDate { get; private set; }
 
-    public MaintenanceOrder(Guid machineId, Guid technicianId, string issueDescription, DateTime scheduledDate)
+
+    public Maintenance(Guid machineId, Guid appUserId, DateTime maintenanceDate, string maintenanceType, string? partsUsed)
     {
         MachineId = machineId;
-        TechnicianId = technicianId;
-        IssueDescription = issueDescription;
-        ScheduledDate = scheduledDate;
+        AppUserId = appUserId;
+        MaintenanceDate = maintenanceDate;
+        MaintenanceType = maintenanceType;
+        PartsUsed = partsUsed;
         Status = MaintenanceStatus.Pending;
     }
 
@@ -37,5 +40,5 @@ public class MaintenanceOrder : Entity
         Status = MaintenanceStatus.Completed;
         CompletionDate = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
-    }
+    }    
 }
