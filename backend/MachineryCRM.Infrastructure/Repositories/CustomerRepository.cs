@@ -44,8 +44,6 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
     public void AddSite(Site site) => _context.Sites.Add(site);
 
     public void AddFiscalEntity(FiscalEntity fiscalEntity) => _context.FiscalEntities.Add(fiscalEntity);
-
-    public void Remove(Customer customer) => _context.Customers.Remove(customer);
     
     public void RemoveSite(Site site) => _context.Sites.Remove(site);
 

@@ -15,7 +15,7 @@ public interface ICustomerService
     Task<ContactDto> AddContactAsync(Guid customerId, CreateContactDto dto);
 
     Task UpdateCustomerAsync(Guid id, UpdateCustomerDto dto);
-    Task DeleteCustomerAsync(Guid id);
+    Task ToggleCustomerStatusAsync(Guid id, bool activate);
 
     Task UpdateSiteAsync(Guid siteId, UpdateSiteDto dto);
     Task DeleteSiteAsync(Guid siteId);
