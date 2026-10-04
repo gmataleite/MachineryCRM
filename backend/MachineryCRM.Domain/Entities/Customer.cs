@@ -9,6 +9,8 @@ public class Customer : Entity
     public ICollection<Site> Sites { get; private set; } = new List<Site>();
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
 
+    private Customer() { }
+
     public Customer(string name)
     {
         UpdateDetails(name);

@@ -10,6 +10,8 @@ public class Contact : Entity
     public string? Email { get; private set; }
     public string? Observations { get; private set; }
 
+
+    private Contact() { }
     public Contact(Guid customerId, string name, string? phone, string? email, string? observations)
     {
         CustomerId = customerId;

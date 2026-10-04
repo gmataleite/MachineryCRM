@@ -11,6 +11,7 @@ public class GeoPoint : Entity
     public int Order { get; private set; }
     public GeoLocationType LocationType { get; private set; }
 
+    private GeoPoint() { } 
     public GeoPoint(Guid siteId, string description, double latitude, double longitude, int order, GeoLocationType locationType)
     {
         SiteId = siteId;

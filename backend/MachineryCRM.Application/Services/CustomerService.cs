@@ -22,7 +22,12 @@ public class CustomerService : ICustomerService
         await _customerRepository.AddAsync(customer);
         await _unitOfWork.CommitAsync();
 
-        return new CustomerDto { Id = customer.Id, Name = customer.Name };
+        return new CustomerDto 
+        { 
+            Id = customer.Id, 
+            Name = customer.Name, 
+            IsActive = customer.IsActive 
+        };
     }
 
     public async Task<IEnumerable<CustomerDto>> GetAllAsync()
@@ -33,9 +38,10 @@ public class CustomerService : ICustomerService
         { 
             Id = c.Id, 
             Name = c.Name,
-            Sites = c.Sites.Select(s => new SiteDto { Id = s.Id, Name = s.Name, Address = s.Address }).ToList(),
-            FiscalEntities = c.FiscalEntities.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, TaxId = f.TaxId, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList(),
-            Contacts = c.Contacts.Select(ct => new ContactDto { Id = ct.Id, Name = ct.Name, SiteId = ct.SiteId, FiscalEntityId = ct.FiscalEntityId, Phone = ct.Phone, Email = ct.Email }).ToList()
+            IsActive = c.IsActive,
+            Sites = c.Sites?.Select(s => new SiteDto { Id = s.Id, Name = s.Name, Address = s.Address }).ToList() ?? new List<SiteDto>(),
+            FiscalEntities = c.FiscalEntities?.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, TaxId = f.TaxId, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList() ?? new List<FiscalEntityDto>(),
+            Contacts = c.Contacts?.Select(ct => new ContactDto { Id = ct.Id, Name = ct.Name, SiteId = ct.SiteId, FiscalEntityId = ct.FiscalEntityId, Phone = ct.Phone, Email = ct.Email }).ToList() ?? new List<ContactDto>()
         });
     }
 
@@ -48,15 +54,16 @@ public class CustomerService : ICustomerService
         {
             Id = customer.Id,
             Name = customer.Name,
-            Sites = customer.Sites.Select(s => new SiteDto 
+            IsActive = customer.IsActive,
+            Sites = customer.Sites?.Select(s => new SiteDto 
             { 
                 Id = s.Id, 
                 Name = s.Name, 
                 Address = s.Address, 
-                GeoPoints = s.GeoPoints.OrderBy(g => g.Order).Select(g => new GeoPointDto { Id = g.Id, Description = g.Description, Latitude = g.Latitude, Longitude = g.Longitude, LocationType = g.LocationType, Order = g.Order }).ToList()
-            }).ToList(),
-            FiscalEntities = customer.FiscalEntities.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, TaxId = f.TaxId, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList(),
-            Contacts = customer.Contacts.Select(c => new ContactDto { Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Name = c.Name, Phone = c.Phone, Email = c.Email }).ToList()
+                GeoPoints = s.GeoPoints?.OrderBy(g => g.Order).Select(g => new GeoPointDto { Id = g.Id, Description = g.Description, Latitude = g.Latitude, Longitude = g.Longitude, LocationType = g.LocationType, Order = g.Order }).ToList() ?? new List<GeoPointDto>()
+            }).ToList() ?? new List<SiteDto>(),
+            FiscalEntities = customer.FiscalEntities?.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, TaxId = f.TaxId, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList() ?? new List<FiscalEntityDto>(),
+            Contacts = customer.Contacts?.Select(c => new ContactDto { Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Name = c.Name, Phone = c.Phone, Email = c.Email }).ToList() ?? new List<ContactDto>()
         };
     }
 
