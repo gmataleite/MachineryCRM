@@ -175,7 +175,7 @@ function ContactRow({
 
         <div>
           <div style={{ fontWeight: 700, fontSize: 13.5, color: "#23291F" }}>
-            {contact.description}
+            {contact.name}
           </div>
           {(contact.phone || contact.email) && (
             <div
@@ -415,11 +415,12 @@ export function CustomerDetail() {
 
       try {
         await updateContact(draggedContact.id, {
-          description: draggedContact.description,
-          phone: draggedContact.phone,
-          email: draggedContact.email,
           siteId: target.siteId,
           fiscalEntityId: target.fiscalEntityId,
+          name: draggedContact.name,
+          phone: draggedContact.phone,
+          email: draggedContact.email,
+          observations: draggedContact.observations,
         });
         setToast({ message: "Contato movido com sucesso.", type: "success" });
       } catch (err) {
