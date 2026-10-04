@@ -33,25 +33,22 @@ erDiagram
         int customer_id FK
         string sap_pn
         string name "Razão Social"
-        string cpf
-        string cnpj
+        string tax_id
         string ie
-        string country
+        string country_code
         string state
         string city
-        string fiscal_address
-        string postal_address
-        string observations
+        string billing_address
+        string shipping_address
     }
 
     SITE {
         int id PK
         int customer_id FK
         string name
-        string country
+        string country_code
         string state
         string city
-        string observations
     }
     
     GEO_POINT {
@@ -69,7 +66,7 @@ erDiagram
         int customer_id FK
         int site_id FK "Nullable"
         int fiscal_entity_id FK "Nullable"
-        string description
+        string name
         string phone
         string email
         string observations

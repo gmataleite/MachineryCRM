@@ -1,39 +1,32 @@
+using MachineryCRM.Domain.ValueObjects;
+
 namespace MachineryCRM.Domain.Entities;
 
 public class FiscalEntity : Entity
 {
     public Guid CustomerId { get; private set; }
-    public string? SapPn { get; private set; }
-    public string Name { get; private set; }
-    public string? Cpf { get; private set; }
-    public string? Cnpj { get; private set; }
-    public string? Ie { get; private set; }
-    public string Country { get; private set; }
-    public string State { get; private set; }
-    public string City { get; private set; }
-    public string? FiscalAddress { get; private set; }
-    public string? PostalAddress { get; private set; }
-    public string? Observations { get; private set; }
-    public Customer? Customer { get; private set; }
+    public string Name { get; private set; } = null!;
+    public TaxId? TaxId { get; private set; }
+    public Address? BillingAddress { get; private set; }
+    public Address? ShippingAddress { get; private set; }
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
 
-    public FiscalEntity(Guid customerId, string name, string country, string state, string city)
+    private FiscalEntity () { }
+    
+    public FiscalEntity(Guid customerId, string name, TaxId? taxId, Address? billingAddress, Address? shippingAddress)
     {
         CustomerId = customerId;
-        Name = name;
-        Country = country;
-        State = state;
-        City = city;
+
+        UpdateDetails(name, taxId, billingAddress, shippingAddress);
     }
 
-    public void UpdateDetails(string name, string? sapPn, string? cnpj, string? cpf, string country, string state, string city)
+    public void UpdateDetails(string name, TaxId? taxId, Address? billingAddress, Address? shippingAddress)
     {
-        Name = name;
-        SapPn = sapPn;
-        Cnpj = cnpj;
-        Cpf = cpf;
-        Country = country;
-        State = state;
-        City = city;
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        Name = name;    
+        TaxId = taxId;
+        BillingAddress = billingAddress;
+        ShippingAddress = shippingAddress;;
     }
 }

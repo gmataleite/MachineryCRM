@@ -86,9 +86,10 @@ export interface FiscalEntityDto extends CreateFiscalEntityDto {
 export interface CreateContactDto {
   siteId?: string;
   fiscalEntityId?: string;
-  description: string;
+  name: string;
   phone?: string;
   email?: string;
+  observations?: string;
 }
 
 export interface ContactDto extends CreateContactDto {
@@ -98,9 +99,10 @@ export interface ContactDto extends CreateContactDto {
 export interface UpdateContactDto {
   siteId?: string | null;
   fiscalEntityId?: string | null;
-  description: string;
+  name: string;
   phone?: string;
   email?: string;
+  observations?: string;
 }
 
 // ============================================================================
@@ -114,6 +116,7 @@ export interface CreateCustomerDto {
 export interface CustomerDto {
   id: string;
   name: string;
+  isActive: boolean;
   sites: SiteDto[];
   fiscalEntities: FiscalEntityDto[];
   contacts: ContactDto[];

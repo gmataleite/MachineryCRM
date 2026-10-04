@@ -7,12 +7,15 @@ public interface ICustomerService
     Task<CustomerDto> CreateAsync(CreateCustomerDto dto);
     Task<CustomerDto?> GetByIdWithDetailsAsync(Guid id);
     Task<IEnumerable<CustomerDto>> GetAllAsync();
+    
     Task<SiteDto> AddSiteAsync(Guid customerId, CreateSiteDto dto);
+    Task<SiteDto> GetSiteByIdWithGeoPointsAsync(Guid id);
+    
     Task<FiscalEntityDto> AddFiscalEntityAsync(Guid customerId, CreateFiscalEntityDto dto);
     Task<ContactDto> AddContactAsync(Guid customerId, CreateContactDto dto);
 
     Task UpdateCustomerAsync(Guid id, UpdateCustomerDto dto);
-    Task DeleteCustomerAsync(Guid id);
+    Task ToggleCustomerStatusAsync(Guid id, bool activate);
 
     Task UpdateSiteAsync(Guid siteId, UpdateSiteDto dto);
     Task DeleteSiteAsync(Guid siteId);
@@ -26,5 +29,7 @@ public interface ICustomerService
     Task<GeoPointDto> AddGeoPointAsync(Guid siteId, CreateGeoPointDto dto);
     Task UpdateGeoPointAsync(Guid geoPointId, UpdateGeoPointDto dto);
     Task DeleteGeoPointAsync(Guid geoPointId);
+    
+    // Adicionado: Assinatura para a reordenação
     Task ReorderGeoPointsAsync(Guid siteId, List<ReorderGeoPointDto> dtos);
 }
