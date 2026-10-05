@@ -13,11 +13,16 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   getCustomerById,
   updateContact,
+  deleteSite,
+  deleteFiscalEntity,
+  deleteContact,
   reorderGeoPoints,
   GeoLocationType,
   type CustomerDto,
   type ContactDto,
   type GeoPointDto,
+  type SiteDto,
+  type FiscalEntityDto,
 } from "../services/customerService";
 import {
   Building2,
@@ -227,7 +232,13 @@ function ContactRow({
   );
 }
 
-function StaticGeoPointRow({ geoPoint }: { geoPoint: GeoPointDto }) {
+function StaticGeoPointRow({
+  geoPoint,
+  onEdit,
+}: {
+  geoPoint: GeoPointDto;
+  onEdit: (geoPoint: GeoPointDto) => void;
+}) {
   return (
     <div
       style={{
@@ -245,9 +256,19 @@ function StaticGeoPointRow({ geoPoint }: { geoPoint: GeoPointDto }) {
         <GeoPointBadge type={geoPoint.locationType} />
         <span style={{ color: "#23291F", fontWeight: 500 }}>{geoPoint.description}</span>
       </div>
-      <span className="crm-mono-id" style={{ fontSize: 12.5, color: "#6E6C61" }}>
-        {geoPoint.latitude.toFixed(4)}, {geoPoint.longitude.toFixed(4)}
-      </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <span className="crm-mono-id" style={{ fontSize: 12.5, color: "#6E6C61" }}>
+          {geoPoint.latitude.toFixed(4)}, {geoPoint.longitude.toFixed(4)}
+        </span>
+        <button
+          type="button"
+          title="Editar ponto geográfico"
+          onClick={() => onEdit(geoPoint)}
+          className="crm-btn-icon"
+        >
+          <Pencil size={14} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -256,10 +277,12 @@ function WaypointSortableRow({
   siteId,
   geoPoint,
   sequenceIndex,
+  onEdit,
 }: {
   siteId: string;
   geoPoint: GeoPointDto;
   sequenceIndex: number;
+  onEdit: (geoPoint: GeoPointDto) => void;
 }) {
   const itemData: WaypointDragDropData = {
     kind: "waypoint",
@@ -349,9 +372,19 @@ function WaypointSortableRow({
         <span style={{ color: "#23291F", fontWeight: 500 }}>{geoPoint.description}</span>
       </div>
 
-      <span className="crm-mono-id" style={{ fontSize: 12.5, color: "#6E6C61" }}>
-        {geoPoint.latitude.toFixed(4)}, {geoPoint.longitude.toFixed(4)}
-      </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <span className="crm-mono-id" style={{ fontSize: 12.5, color: "#6E6C61" }}>
+          {geoPoint.latitude.toFixed(4)}, {geoPoint.longitude.toFixed(4)}
+        </span>
+        <button
+          type="button"
+          title="Editar ponto geográfico"
+          onClick={() => onEdit(geoPoint)}
+          className="crm-btn-icon"
+        >
+          <Pencil size={14} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -415,8 +448,8 @@ export function CustomerDetail() {
 
       try {
         await updateContact(draggedContact.id, {
-          siteId: target.siteId,
-          fiscalEntityId: target.fiscalEntityId,
+          siteId: target.siteId ?? undefined,
+          fiscalEntityId: target.fiscalEntityId ?? undefined,
           name: draggedContact.name,
           phone: draggedContact.phone,
           email: draggedContact.email,
@@ -479,9 +512,15 @@ export function CustomerDetail() {
       });
 
       try {
+        const allPoints = [...offices, ...machines, ...updatedWaypoints];
+        const reordePayLoad = allPoints.map((gp, index) => ({
+          id: gp.id,
+          order: index,
+        }));
+
         await reorderGeoPoints(
           site.id,
-          updatedWaypoints.map((wp) => ({ id: wp.id, order: wp.order! }))
+          reordePayLoad
         );
         setToast({
           message: "Ordem dos pontos de passagem atualizada.",
@@ -498,12 +537,28 @@ export function CustomerDetail() {
     }
   };
 
-  const [modalConfig, setModalConfig] = useState<{
-    isOpen: boolean;
-    type: "site" | "fiscal" | "contact" | "geopoint" | null;
-    siteId?: string;
-    fiscalEntityId?: string;
-  }>({ isOpen: false, type: null });
+  type ModalConfig =
+    | { isOpen: false; type: null }
+    | { isOpen: true; type: "site"; initialData?: SiteDto | null }
+    | { isOpen: true; type: "fiscal"; initialData?: FiscalEntityDto | null }
+    | {
+        isOpen: true;
+        type: "contact";
+        siteId?: string | null;
+        fiscalEntityId?: string | null;
+        initialData?: ContactDto | null;
+      }
+    | {
+        isOpen: true;
+        type: "geopoint";
+        siteId: string;
+        initialData?: GeoPointDto | null;
+      };
+
+  const [modalConfig, setModalConfig] = useState<ModalConfig>({
+    isOpen: false,
+    type: null,
+  });
 
   useEffect(() => {
     fetchCustomerData();
@@ -521,9 +576,9 @@ export function CustomerDetail() {
     }
   };
 
-  const handleModalSuccess = async (msg: string) => {
-    await fetchCustomerData();
+  const handleModalSuccess = (msg: string) => {
     setToast({ message: msg, type: "success" });
+    void fetchCustomerData();
   };
 
   const closeModal = () => setModalConfig({ isOpen: false, type: null });
@@ -533,6 +588,39 @@ export function CustomerDetail() {
 
   const generalContacts = customer.contacts.filter((c) => !c.siteId && !c.fiscalEntityId);
 
+  const handleDeleteSite = async (site: SiteDto) => {
+    if (!window.confirm(`Tem certeza que deseja remover o local produtivo "${site.name}"?`)) return;
+    try {
+      await deleteSite(site.id);
+      setToast({ message: "Local removido com sucesso.", type: "success" });
+      fetchCustomerData();
+    } catch {
+      setToast({ message: "Erro ao remover local.", type: "error" });
+    }
+  };
+
+  const handleDeleteFiscal = async (fiscal: FiscalEntityDto) => {
+    if (!window.confirm(`Tem certeza que deseja remover o ente fiscal "${fiscal.name}"?`)) return;
+    try {
+      await deleteFiscalEntity(fiscal.id);
+      setToast({ message: "Ente fiscal removido com sucesso.", type: "success" });
+      fetchCustomerData();
+    } catch {
+      setToast({ message: "Erro ao remover ente fiscal.", type: "error" });
+    }
+  };
+
+  const handleDeleteContact = async (contact: ContactDto) => {
+    if (!window.confirm(`Tem certeza que deseja remover o contato "${contact.name}"?`)) return;
+    try {
+      await deleteContact(contact.id);
+      setToast({ message: "Contato removido.", type: "success" });
+      fetchCustomerData();
+    } catch {
+      setToast({ message: "Erro ao remover contato.", type: "error" });
+    }
+  };
+
   return (
     <div>
       <Toast toast={toast} onClose={() => setToast(null)} />
@@ -540,6 +628,7 @@ export function CustomerDetail() {
       {modalConfig.isOpen && modalConfig.type === "site" && (
         <SiteFormModal
           customerId={customer.id}
+          initialData={modalConfig.initialData}
           onClose={closeModal}
           onSuccess={handleModalSuccess}
         />
@@ -548,6 +637,7 @@ export function CustomerDetail() {
       {modalConfig.isOpen && modalConfig.type === "fiscal" && (
         <FiscalFormModal
           customerId={customer.id}
+          initialData={modalConfig.initialData}
           onClose={closeModal}
           onSuccess={handleModalSuccess}
         />
@@ -558,6 +648,7 @@ export function CustomerDetail() {
           customerId={customer.id}
           siteId={modalConfig.siteId}
           fiscalEntityId={modalConfig.fiscalEntityId}
+          initialData={modalConfig.initialData}
           onClose={closeModal}
           onSuccess={handleModalSuccess}
         />
@@ -566,6 +657,7 @@ export function CustomerDetail() {
       {modalConfig.isOpen && modalConfig.type === "geopoint" && modalConfig.siteId && (
         <GeoPointMapModal
           siteId={modalConfig.siteId}
+          initialData={modalConfig.initialData}
           existingWaypointsCount={
             customer.sites
               .find((s) => s.id === modalConfig.siteId)
@@ -654,7 +746,16 @@ export function CustomerDetail() {
                   Nenhum contato cadastrado. Arraste um contato para cá, ou:
                 </div>
               ) : (
-                generalContacts.map((c) => <ContactRow key={c.id} contact={c} />)
+                generalContacts.map((c) => (
+                  <ContactRow
+                    key={c.id}
+                    contact={c}
+                    onEdit={(contact) =>
+                      setModalConfig({ isOpen: true, type: "contact", initialData: contact })
+                    }
+                    onDelete={handleDeleteContact}
+                  />
+                ))
               )}
             </ContactDropZone>
           </div>
@@ -715,10 +816,10 @@ export function CustomerDetail() {
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <button type="button" title="Excluir local" className="crm-btn-icon">
+                  <button type="button" onClick={() => handleDeleteSite(site)} title="Excluir local" className="crm-btn-icon">
                     <Trash2 size={15} />
                   </button>
-                  <button type="button" title="Editar local" className="crm-btn-icon">
+                  <button type="button" onClick={() => setModalConfig({ isOpen: true, type: "site", initialData: site })}title="Editar local" className="crm-btn-icon">
                     <Pencil size={15} />
                   </button>
                 </div>
@@ -753,7 +854,21 @@ export function CustomerDetail() {
                       Nenhum contato cadastrado. Arraste um contato para cá, ou:
                     </div>
                   ) : (
-                    siteContacts.map((c) => <ContactRow key={c.id} contact={c} />)
+                    siteContacts.map((c) => (
+                      <ContactRow
+                        key={c.id}
+                        contact={c}
+                        onEdit={(contact) =>
+                          setModalConfig({
+                            isOpen: true,
+                            type: "contact",
+                            siteId: site.id,
+                            initialData: contact,
+                          })
+                        }
+                        onDelete={handleDeleteContact}
+                      />
+                    ))
                   )}
                 </ContactDropZone>
               </div>
@@ -787,11 +902,33 @@ export function CustomerDetail() {
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {offices.map((gp) => (
-                      <StaticGeoPointRow key={gp.id} geoPoint={gp} />
+                      <StaticGeoPointRow
+                        key={gp.id}
+                        geoPoint={gp}
+                        onEdit={(geoPoint) =>
+                          setModalConfig({
+                            isOpen: true,
+                            type: "geopoint",
+                            siteId: site.id,
+                            initialData: geoPoint,
+                          })
+                        }
+                      />
                     ))}
 
                     {machines.map((gp) => (
-                      <StaticGeoPointRow key={gp.id} geoPoint={gp} />
+                      <StaticGeoPointRow
+                        key={gp.id}
+                        geoPoint={gp}
+                        onEdit={(geoPoint) =>
+                          setModalConfig({
+                            isOpen: true,
+                            type: "geopoint",
+                            siteId: site.id,
+                            initialData: geoPoint,
+                          })
+                        }
+                      />
                     ))}
 
                     {waypoints.map((gp, idx) => (
@@ -800,6 +937,14 @@ export function CustomerDetail() {
                         siteId={site.id}
                         geoPoint={gp}
                         sequenceIndex={idx + 1}
+                        onEdit={(geoPoint) =>
+                          setModalConfig({
+                            isOpen: true,
+                            type: "geopoint",
+                            siteId: site.id,
+                            initialData: geoPoint,
+                          })
+                        }
                       />
                     ))}
                   </div>
@@ -863,10 +1008,10 @@ export function CustomerDetail() {
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <button type="button" title="Excluir ente fiscal" className="crm-btn-icon">
+                  <button type="button" onClick={() => handleDeleteFiscal(fiscal)} title="Excluir ente fiscal" className="crm-btn-icon">
                     <Trash2 size={15} />
                   </button>
-                  <button type="button" title="Editar ente fiscal" className="crm-btn-icon">
+                  <button type="button" onClick={() => setModalConfig({ isOpen: true, type: "fiscal", initialData: fiscal })} title="Editar ente fiscal" className="crm-btn-icon">
                     <Pencil size={15} />
                   </button>
                 </div>
@@ -909,7 +1054,21 @@ export function CustomerDetail() {
                       Nenhum contato cadastrado. Arraste um contato para cá, ou:
                     </div>
                   ) : (
-                    fiscalContacts.map((c) => <ContactRow key={c.id} contact={c} />)
+                    fiscalContacts.map((c) => (
+                      <ContactRow
+                        key={c.id}
+                        contact={c}
+                        onEdit={(contact) =>
+                          setModalConfig({
+                            isOpen: true,
+                            type: "contact",
+                            fiscalEntityId: fiscal.id,
+                            initialData: contact,
+                          })
+                        }
+                        onDelete={handleDeleteContact}
+                      />
+                    ))
                   )}
                 </ContactDropZone>
               </div>

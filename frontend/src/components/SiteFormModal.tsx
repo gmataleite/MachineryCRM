@@ -1,19 +1,21 @@
 import React, { useState } from "react";
-import { addSiteToCustomer } from "../services/customerService";
+import { addSiteToCustomer, updateSite, type SiteDto } from "../services/customerService";
 import { X } from "lucide-react";
 
 interface SiteFormModalProps {
   customerId: string;
+  initialData?: SiteDto | null;
   onClose: () => void;
   onSuccess: (msg: string) => void;
 }
 
-export function SiteFormModal({ customerId, onClose, onSuccess }: SiteFormModalProps) {
+export function SiteFormModal({ customerId, initialData, onClose, onSuccess }: SiteFormModalProps) {
   const [form, setForm] = useState({
-    name: "",
-    country: "Brasil",
-    state: "",
-    city: "",
+    name: initialData?.name || "",
+    country: initialData?.country || "Brasil",
+    state: initialData?.state || "",
+    city: initialData?.city || "",
+    observations: initialData?.observations || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -29,15 +31,23 @@ export function SiteFormModal({ customerId, onClose, onSuccess }: SiteFormModalP
 
     setIsSubmitting(true);
     try {
-      await addSiteToCustomer(customerId, {
+      const payload = {
         ...form,
         name: form.name.trim(),
-      });
-      onSuccess("Local Produtivo adicionado com sucesso.");
-      onClose();
+      };
+
+      if (initialData) {
+        await updateSite(initialData.id, payload);
+        onClose();
+        onSuccess("Local Produtivo atualizado com sucesso.");
+      } else {
+        await addSiteToCustomer(customerId, payload);
+        onClose();
+        onSuccess("Local Produtivo adicionado com sucesso.");
+      }
     } catch (error) {
       console.error(error);
-      setErrorMsg("Erro ao adicionar local.");
+      setErrorMsg(initialData ? "Erro ao atualizar local." : "Erro ao adicionar local.");
     } finally {
       setIsSubmitting(false);
     }
@@ -47,7 +57,9 @@ export function SiteFormModal({ customerId, onClose, onSuccess }: SiteFormModalP
     <div className="crm-modal-overlay">
       <div className="crm-modal">
         <div className="crm-modal-header">
-          <h3 className="crm-modal-title">Novo Local Produtivo</h3>
+          <h3 className="crm-modal-title">
+            {initialData ? "Editar Local Produtivo" : "Novo Local Produtivo"}
+          </h3>
           <button type="button" onClick={onClose} className="crm-btn-icon">
             <X size={18} />
           </button>

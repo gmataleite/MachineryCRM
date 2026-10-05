@@ -1,21 +1,32 @@
 import React, { useState } from "react";
-import { addFiscalEntityToCustomer } from "../services/customerService";
+import {
+  addFiscalEntityToCustomer,
+  updateFiscalEntity,
+  type FiscalEntityDto,
+} from "../services/customerService";
 import { X } from "lucide-react";
 
 interface FiscalFormModalProps {
   customerId: string;
+  initialData?: FiscalEntityDto | null;
   onClose: () => void;
   onSuccess: (msg: string) => void;
 }
 
-export function FiscalFormModal({ customerId, onClose, onSuccess }: FiscalFormModalProps) {
+export function FiscalFormModal({
+  customerId,
+  initialData,
+  onClose,
+  onSuccess,
+}: FiscalFormModalProps) {
   const [form, setForm] = useState({
-    name: "",
-    cnpj: "",
-    cpf: "",
-    country: "Brasil",
-    state: "",
-    city: "",
+    sapPn: initialData?.sapPn || "",
+    name: initialData?.name || "",
+    cnpj: initialData?.cnpj || "",
+    cpf: initialData?.cpf || "",
+    country: initialData?.country || "Brasil",
+    state: initialData?.state || "",
+    city: initialData?.city || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -31,15 +42,25 @@ export function FiscalFormModal({ customerId, onClose, onSuccess }: FiscalFormMo
 
     setIsSubmitting(true);
     try {
-      await addFiscalEntityToCustomer(customerId, {
+      const payload = {
         ...form,
         name: form.name.trim(),
-      });
-      onSuccess("Ente Fiscal adicionado com sucesso.");
-      onClose();
+      };
+
+      if (initialData) {
+        await updateFiscalEntity(initialData.id, payload);
+        onClose();
+        onSuccess("Ente Fiscal atualizado com sucesso.");
+      } else {
+        await addFiscalEntityToCustomer(customerId, payload);
+        onClose();
+        onSuccess("Ente Fiscal adicionado com sucesso.");
+      }
     } catch (error) {
       console.error(error);
-      setErrorMsg("Erro ao adicionar ente fiscal.");
+      setErrorMsg(
+        initialData ? "Erro ao atualizar ente fiscal." : "Erro ao adicionar ente fiscal."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -49,7 +70,9 @@ export function FiscalFormModal({ customerId, onClose, onSuccess }: FiscalFormMo
     <div className="crm-modal-overlay">
       <div className="crm-modal">
         <div className="crm-modal-header">
-          <h3 className="crm-modal-title">Novo Ente Fiscal</h3>
+          <h3 className="crm-modal-title">
+            {initialData ? "Editar Ente Fiscal" : "Novo Ente Fiscal"}
+          </h3>
           <button type="button" onClick={onClose} className="crm-btn-icon">
             <X size={18} />
           </button>
