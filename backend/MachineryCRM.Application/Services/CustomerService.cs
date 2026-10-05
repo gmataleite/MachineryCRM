@@ -19,237 +19,231 @@ public class CustomerService : ICustomerService
     public async Task<CustomerDto> CreateAsync(CreateCustomerDto dto)
     {
         var customer = new Customer(dto.Name);
-        
         await _customerRepository.AddAsync(customer);
         await _unitOfWork.CommitAsync();
 
-        return new CustomerDto { Id = customer.Id, Name = customer.Name };
+        return new CustomerDto 
+        { 
+            Id = customer.Id, 
+            Name = customer.Name, 
+            IsActive = customer.IsActive 
+        };
     }
 
-public async Task<IEnumerable<CustomerDto>> GetAllAsync()
-{
-    var customers = await _customerRepository.GetAllWithDetailsAsync();
-    
-    return customers.Select(c => new CustomerDto 
-    { 
-        Id = c.Id, 
-        Name = c.Name,
-        // O mapeamento das listas é obrigatório para que o frontend consiga calcular o ".length"
-        Sites = c.Sites.Select(s => new SiteDto { Id = s.Id, Name = s.Name, Country = s.Country, State = s.State, City = s.City }).ToList(),
-        FiscalEntities = c.FiscalEntities.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, Country = f.Country, State = f.State, City = f.City }).ToList(),
-        Contacts = c.Contacts.Select(ct => new ContactDto { Id = ct.Id, Description = ct.Description }).ToList()
-    });
-}
-
-public async Task<CustomerDto?> GetByIdWithDetailsAsync(Guid id)
-{
-    var customer = await _customerRepository.GetCustomerWithDetailsAsync(id);
-    if (customer == null) return null;
-
-    var customerDto = new CustomerDto
+    public async Task<IEnumerable<CustomerDto>> GetAllAsync()
     {
-        Id = customer.Id,
-        Name = customer.Name,
-        Sites = customer.Sites.Select(s => new SiteDto 
+        var customers = await _customerRepository.GetAllWithDetailsAsync();
+        
+        return customers.Select(c => new CustomerDto 
         { 
-            Id = s.Id, Name = s.Name, Country = s.Country, State = s.State, City = s.City, Observations = s.Observations, GeoPoints = s.GeoPoints.OrderBy(g => g.Order).Select(g => new GeoPointDto
-            {
-                Id = g.Id,
-                Description = g.Description,
-                Latitude = g.Latitude,
-                Longitude = g.Longitude,
-                LocationType = g.LocationType,
-                Order = g.Order }).ToList()
-        }).ToList(),
-        FiscalEntities = customer.FiscalEntities.Select(f => new FiscalEntityDto 
-        { 
-            Id = f.Id, Name = f.Name, SapPn = f.SapPn, Cnpj = f.Cnpj, Cpf = f.Cpf, Country = f.Country, State = f.State, City = f.City 
-        }).ToList(),
-        Contacts = customer.Contacts.Select(c => new ContactDto 
-        { 
-            Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Description = c.Description, Phone = c.Phone, Email = c.Email 
-        }).ToList()
-    };
-
-    return customerDto;
-}
-
-public async Task<SiteDto> AddSiteAsync(Guid customerId, CreateSiteDto dto)
-{
-    // Busca leve: carrega apenas o cliente, sem as listas pesadas
-    var customer = await _customerRepository.GetByIdAsync(customerId);
-    if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
-
-    var site = new Site(customerId, dto.Name, dto.Country, dto.State, dto.City);
-    
-    // Inserção direta sem modificar a entidade Customer
-    _customerRepository.AddSite(site);
-    await _unitOfWork.CommitAsync();
-
-    return new SiteDto 
-    { 
-        Id = site.Id, Name = site.Name, Country = site.Country, State = site.State, City = site.City 
-    };
-}
-
-public async Task<FiscalEntityDto> AddFiscalEntityAsync(Guid customerId, CreateFiscalEntityDto dto)
-{
-    var customer = await _customerRepository.GetByIdAsync(customerId);
-    if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
-
-    var fiscal = new FiscalEntity(customerId, dto.Name, dto.Country, dto.State, dto.City);
-    
-    // Inserção direta sem modificar a entidade Customer
-    _customerRepository.AddFiscalEntity(fiscal);
-    await _unitOfWork.CommitAsync();
-
-    return new FiscalEntityDto 
-    { 
-        Id = fiscal.Id, Name = fiscal.Name, Country = fiscal.Country, State = fiscal.State, City = fiscal.City 
-    };
-}
-
-public async Task<ContactDto> AddContactAsync(Guid customerId, CreateContactDto dto)
-{
-    var customer = await _customerRepository.GetByIdAsync(customerId);
-    if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
-
-    var contact = new Contact(customerId, dto.Description, dto.Phone, dto.Email);
-    
-    // Se a entidade utilizar métodos para atribuir chaves estrangeiras opcionais:
-    if (dto.SiteId.HasValue) contact.ChangeSite(dto.SiteId.Value);
-    if (dto.FiscalEntityId.HasValue) contact.ChangeFiscalEntity(dto.FiscalEntityId.Value);
-    
-    _customerRepository.AddContact(contact);
-    await _unitOfWork.CommitAsync();
-
-    return new ContactDto 
-    { 
-        Id = contact.Id, 
-        SiteId = contact.SiteId, 
-        FiscalEntityId = contact.FiscalEntityId, 
-        Description = contact.Description, 
-        Phone = contact.Phone, 
-        Email = contact.Email 
-    };
-}
-
-// --- CUSTOMER ---
-public async Task UpdateCustomerAsync(Guid id, UpdateCustomerDto dto)
-{
-    var customer = await _customerRepository.GetByIdAsync(id);
-    if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
-    customer.UpdateName(dto.Name);
-    _customerRepository.Update(customer);
-    await _unitOfWork.CommitAsync();
-}
-
-public async Task DeleteCustomerAsync(Guid id)
-{
-    var customer = await _customerRepository.GetByIdAsync(id);
-    if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
-    _customerRepository.Remove(customer); // A exclusão em cascata deve cuidar dos filhos se configurada no EF
-    await _unitOfWork.CommitAsync();
-}
-
-// --- SITE ---
-public async Task UpdateSiteAsync(Guid siteId, UpdateSiteDto dto)
-{
-    var site = await _customerRepository.GetSiteByIdAsync(siteId);
-    if (site == null) throw new KeyNotFoundException("Local não encontrado.");
-    site.UpdateDetails(dto.Name, dto.Country, dto.State, dto.City);
-    await _unitOfWork.CommitAsync(); // O EF rastreia a mudança da entidade carregada
-}
-
-public async Task DeleteSiteAsync(Guid siteId)
-{
-    var site = await _customerRepository.GetSiteByIdAsync(siteId);
-    if (site == null) throw new KeyNotFoundException("Local não encontrado.");
-    _customerRepository.RemoveSite(site);
-    await _unitOfWork.CommitAsync();
-}
-
-// --- FISCAL ENTITY ---
-public async Task UpdateFiscalEntityAsync(Guid fiscalId, UpdateFiscalEntityDto dto)
-{
-    var fiscal = await _customerRepository.GetFiscalEntityByIdAsync(fiscalId);
-    if (fiscal == null) throw new KeyNotFoundException("Ente fiscal não encontrado.");
-    fiscal.UpdateDetails(dto.Name, dto.SapPn, dto.Cnpj, dto.Cpf, dto.Country, dto.State, dto.City);
-    await _unitOfWork.CommitAsync();
-}
-
-public async Task DeleteFiscalEntityAsync(Guid fiscalId)
-{
-    var fiscal = await _customerRepository.GetFiscalEntityByIdAsync(fiscalId);
-    if (fiscal == null) throw new KeyNotFoundException("Ente fiscal não encontrado.");
-    _customerRepository.RemoveFiscalEntity(fiscal);
-    await _unitOfWork.CommitAsync();
-}
-
-// --- CONTACT ---
-public async Task UpdateContactAsync(Guid contactId, UpdateContactDto dto)
-{
-    var contact = await _customerRepository.GetContactByIdAsync(contactId);
-    if (contact == null) throw new KeyNotFoundException("Contato não encontrado.");
-    
-    contact.UpdateDetails(dto.Description, dto.Phone, dto.Email, null);
-    
-    // Lógica para permitir arrastar/mover contatos entre cards no frontend
-    if (contact.SiteId != dto.SiteId) contact.ChangeSite(dto.SiteId);
-    if (contact.FiscalEntityId != dto.FiscalEntityId) contact.ChangeFiscalEntity(dto.FiscalEntityId);
-
-    await _unitOfWork.CommitAsync();
-}
-
-public async Task DeleteContactAsync(Guid contactId)
-{
-    var contact = await _customerRepository.GetContactByIdAsync(contactId);
-    if (contact == null) throw new KeyNotFoundException("Contato não encontrado.");
-    _customerRepository.RemoveContact(contact);
-    await _unitOfWork.CommitAsync();
-}
-
-// --- GEO POINT ---
-public async Task<GeoPointDto> AddGeoPointAsync(Guid siteId, CreateGeoPointDto dto)
-{
-    var site = await _customerRepository.GetSiteByIdAsync(siteId);
-    if (site == null) throw new KeyNotFoundException("Local produtivo não encontrado.");
-
-    var geoPoint = new GeoPoint(siteId, dto.Description, dto.Latitude, dto.Longitude, dto.LocationType, dto.Order);
-    _customerRepository.AddGeoPoint(geoPoint);
-    await _unitOfWork.CommitAsync();
-
-    return new GeoPointDto { Id = geoPoint.Id, Description = geoPoint.Description, Latitude = geoPoint.Latitude, Longitude = geoPoint.Longitude, Order = geoPoint.Order };
-}
-
-public async Task UpdateGeoPointAsync(Guid geoPointId, UpdateGeoPointDto dto)
-{
-    var geoPoint = await _customerRepository.GetGeoPointByIdAsync(geoPointId);
-    if (geoPoint == null) throw new KeyNotFoundException("Ponto geográfico não encontrado.");
-
-    geoPoint.UpdateDetails(dto.Description, dto.Latitude, dto.Longitude);
-    await _unitOfWork.CommitAsync();
-}
-
-public async Task DeleteGeoPointAsync(Guid geoPointId)
-{
-    var geoPoint = await _customerRepository.GetGeoPointByIdAsync(geoPointId);
-    if (geoPoint == null) throw new KeyNotFoundException("Ponto geográfico não encontrado.");
-
-    _customerRepository.RemoveGeoPoint(geoPoint);
-    await _unitOfWork.CommitAsync();
-}
-
-public async Task ReorderGeoPointsAsync(Guid siteId, List<ReorderGeoPointDto> dtos)
-{
-    var geoPoints = await _customerRepository.GetGeoPointsBySiteIdAsync(siteId);
-    
-    foreach (var dto in dtos)
-    {
-        var point = geoPoints.FirstOrDefault(g => g.Id == dto.Id);
-        if (point != null) point.SetOrder(dto.Order);
+            Id = c.Id, 
+            Name = c.Name,
+            IsActive = c.IsActive,
+            Sites = c.Sites?.Select(s => new SiteDto { Id = s.Id, Name = s.Name, Address = s.Address }).ToList() ?? new List<SiteDto>(),
+            FiscalEntities = c.FiscalEntities?.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, TaxId = f.TaxId, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList() ?? new List<FiscalEntityDto>(),
+            Contacts = c.Contacts?.Select(ct => new ContactDto { Id = ct.Id, Name = ct.Name, SiteId = ct.SiteId, FiscalEntityId = ct.FiscalEntityId, Phone = ct.Phone, Email = ct.Email }).ToList() ?? new List<ContactDto>()
+        });
     }
 
-    await _unitOfWork.CommitAsync();
-}
+    public async Task<CustomerDto?> GetByIdWithDetailsAsync(Guid id)
+    {
+        var customer = await _customerRepository.GetCustomerWithDetailsAsync(id);
+        if (customer == null) return null;
+
+        return new CustomerDto
+        {
+            Id = customer.Id,
+            Name = customer.Name,
+            IsActive = customer.IsActive,
+            Sites = customer.Sites?.Select(s => new SiteDto 
+            { 
+                Id = s.Id, 
+                Name = s.Name, 
+                Address = s.Address, 
+                GeoPoints = s.GeoPoints?.OrderBy(g => g.Order).Select(g => new GeoPointDto { Id = g.Id, Description = g.Description, Latitude = g.Latitude, Longitude = g.Longitude, LocationType = g.LocationType, Order = g.Order }).ToList() ?? new List<GeoPointDto>()
+            }).ToList() ?? new List<SiteDto>(),
+            FiscalEntities = customer.FiscalEntities?.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, TaxId = f.TaxId, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList() ?? new List<FiscalEntityDto>(),
+            Contacts = customer.Contacts?.Select(c => new ContactDto { Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Name = c.Name, Phone = c.Phone, Email = c.Email }).ToList() ?? new List<ContactDto>()
+        };
+    }
+
+    public async Task<SiteDto> AddSiteAsync(Guid customerId, CreateSiteDto dto)
+    {
+        var customer = await _customerRepository.GetByIdAsync(customerId);
+        if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
+
+        var site = new Site(customerId, dto.Name, dto.Address);
+        _customerRepository.AddSite(site);
+        await _unitOfWork.CommitAsync();
+
+        return new SiteDto { Id = site.Id, Name = site.Name, Address = site.Address };
+    }
+
+    public async Task<FiscalEntityDto> AddFiscalEntityAsync(Guid customerId, CreateFiscalEntityDto dto)
+    {
+        var customer = await _customerRepository.GetByIdAsync(customerId);
+        if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
+
+        var fiscal = new FiscalEntity(customerId, dto.Name, dto.TaxId, dto.BillingAddress, dto.ShippingAddress);
+        _customerRepository.AddFiscalEntity(fiscal);
+        await _unitOfWork.CommitAsync();
+
+        return new FiscalEntityDto { Id = fiscal.Id, Name = fiscal.Name, TaxId = fiscal.TaxId, BillingAddress = fiscal.BillingAddress, ShippingAddress = fiscal.ShippingAddress };
+    }
+
+    public async Task<ContactDto> AddContactAsync(Guid customerId, CreateContactDto dto)
+    {
+        var customer = await _customerRepository.GetByIdAsync(customerId);
+        if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
+
+        var contact = new Contact(customerId, dto.Name, dto.Phone, dto.Email, dto.Observations);
+        
+        if (dto.SiteId.HasValue) contact.ChangeSite(dto.SiteId.Value);
+        else if (dto.FiscalEntityId.HasValue) contact.ChangeFiscalEntity(dto.FiscalEntityId.Value);
+        
+        _customerRepository.AddContact(contact);
+        await _unitOfWork.CommitAsync();
+
+        return new ContactDto { Id = contact.Id, SiteId = contact.SiteId, FiscalEntityId = contact.FiscalEntityId, Name = contact.Name, Phone = contact.Phone, Email = contact.Email };
+    }
+
+    public async Task UpdateCustomerAsync(Guid id, UpdateCustomerDto dto)
+    {
+        var customer = await _customerRepository.GetByIdAsync(id);
+        if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
+        
+        customer.UpdateDetails(dto.Name);
+
+        _customerRepository.Update(customer);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task ToggleCustomerStatusAsync(Guid id, bool activate)
+    {
+        var customer = await _customerRepository.GetByIdAsync(id);
+        if (customer == null) throw new KeyNotFoundException("Cliente não encontrado.");
+        
+        if (activate)
+            customer.Activate();
+        else
+            customer.Deactivate();
+
+        _customerRepository.Update(customer);   
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task UpdateSiteAsync(Guid siteId, UpdateSiteDto dto)
+    {
+        var site = await _customerRepository.GetSiteByIdAsync(siteId);
+        if (site == null) throw new KeyNotFoundException("Local não encontrado.");
+        
+        site.UpdateDetails(dto.Name, dto.Address);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task DeleteSiteAsync(Guid siteId)
+    {
+        var site = await _customerRepository.GetSiteByIdAsync(siteId);
+        if (site == null) throw new KeyNotFoundException("Local não encontrado.");
+        
+        _customerRepository.RemoveSite(site);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task UpdateFiscalEntityAsync(Guid fiscalId, UpdateFiscalEntityDto dto)
+    {
+        var fiscal = await _customerRepository.GetFiscalEntityByIdAsync(fiscalId);
+        if (fiscal == null) throw new KeyNotFoundException("Ente fiscal não encontrado.");
+        
+        fiscal.UpdateDetails(dto.Name, dto.TaxId, dto.BillingAddress, dto.ShippingAddress);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task DeleteFiscalEntityAsync(Guid fiscalId)
+    {
+        var fiscal = await _customerRepository.GetFiscalEntityByIdAsync(fiscalId);
+        if (fiscal == null) throw new KeyNotFoundException("Ente fiscal não encontrado.");
+        
+        _customerRepository.RemoveFiscalEntity(fiscal);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task UpdateContactAsync(Guid contactId, UpdateContactDto dto)
+    {
+        var contact = await _customerRepository.GetContactByIdAsync(contactId);
+        if (contact == null) throw new KeyNotFoundException("Contato não encontrado.");
+        
+        // Correção aplicada: dto.Observations mapeado ao invés de null estático
+        contact.UpdateDetails(dto.Name, dto.Phone, dto.Email, dto.Observations);
+        
+        // Regras de transferência de agregado
+        if (contact.SiteId != dto.SiteId) contact.ChangeSite(dto.SiteId);
+        if (contact.FiscalEntityId != dto.FiscalEntityId) contact.ChangeFiscalEntity(dto.FiscalEntityId);
+
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task DeleteContactAsync(Guid contactId)
+    {
+        var contact = await _customerRepository.GetContactByIdAsync(contactId);
+        if (contact == null) throw new KeyNotFoundException("Contato não encontrado.");
+        
+        _customerRepository.RemoveContact(contact);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task<GeoPointDto> AddGeoPointAsync(Guid siteId, CreateGeoPointDto dto)
+    {
+        var site = await _customerRepository.GetSiteByIdAsync(siteId);
+        if (site == null) throw new KeyNotFoundException("Local produtivo não encontrado.");
+
+        var geoPoint = new GeoPoint(siteId, dto.Description, dto.Latitude, dto.Longitude, dto.Order, dto.LocationType);
+        _customerRepository.AddGeoPoint(geoPoint);
+        await _unitOfWork.CommitAsync();
+
+        return new GeoPointDto { Id = geoPoint.Id, Description = geoPoint.Description, Latitude = geoPoint.Latitude, Longitude = geoPoint.Longitude, Order = geoPoint.Order };
+    }
+
+    public async Task UpdateGeoPointAsync(Guid geoPointId, UpdateGeoPointDto dto)
+    {
+        var geoPoint = await _customerRepository.GetGeoPointByIdAsync(geoPointId);
+        if (geoPoint == null) throw new KeyNotFoundException("Ponto geográfico não encontrado.");
+
+        geoPoint.UpdateDetails(dto.Description, dto.Latitude, dto.Longitude, dto.Order);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task DeleteGeoPointAsync(Guid geoPointId)
+    {
+        var geoPoint = await _customerRepository.GetGeoPointByIdAsync(geoPointId);
+        if (geoPoint == null) throw new KeyNotFoundException("Ponto geográfico não encontrado.");
+
+        _customerRepository.RemoveGeoPoint(geoPoint);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task ReorderGeoPointsAsync(Guid siteId, List<ReorderGeoPointDto> dtos)
+    {
+        var site = await _customerRepository.GetSiteByIdWithGeoPointsAsync(siteId);
+        if (site == null) throw new KeyNotFoundException("Site não encontrado.");
+
+        var orderedIds = dtos.OrderBy(dto => dto.Order).Select(dto => dto.Id).ToList();
+        
+        site.ReorderGeoPoints(orderedIds);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task<SiteDto> GetSiteByIdWithGeoPointsAsync(Guid id)
+    {
+        var site = await _customerRepository.GetSiteByIdWithGeoPointsAsync(id);
+        if (site == null) throw new KeyNotFoundException("Site não encontrado.");
+
+        return new SiteDto
+        {
+            Id = site.Id,
+            Name = site.Name,
+            Address = site.Address,
+            GeoPoints = site.GeoPoints.OrderBy(g => g.Order).Select(g => new GeoPointDto { Id = g.Id, Description = g.Description, Latitude = g.Latitude, Longitude = g.Longitude, LocationType = g.LocationType, Order = g.Order }).ToList()
+        };
+    }
 }

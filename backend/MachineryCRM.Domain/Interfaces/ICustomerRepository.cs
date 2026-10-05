@@ -11,11 +11,11 @@ public interface ICustomerRepository : IRepository<Customer>
     Task<FiscalEntity?> GetFiscalEntityByIdAsync(Guid id);
     Task<Contact?> GetContactByIdAsync(Guid id);
     Task<GeoPoint?> GetGeoPointByIdAsync(Guid id);
-    Task<List<GeoPoint>> GetGeoPointsBySiteIdAsync(Guid siteId);
+    Task<Site?> GetSiteByIdWithGeoPointsAsync(Guid id);
+
     void AddSite(Site site);
     void AddFiscalEntity(FiscalEntity fiscalEntity);
     void AddContact(Contact contact);
-    void Remove(Customer customer); 
     void RemoveSite(Site site);
     void RemoveFiscalEntity(FiscalEntity fiscalEntity);
     void RemoveContact(Contact contact);

@@ -5,28 +5,29 @@ public class Contact : Entity
     public Guid CustomerId { get; private set; }
     public Guid? SiteId { get; private set; }
     public Guid? FiscalEntityId { get; private set; }
-    public string Description { get; private set; }
+    public string Name { get; private set; } = null!;
     public string? Phone { get; private set; }
     public string? Email { get; private set; }
     public string? Observations { get; private set; }
 
-    public Customer? Customer { get; private set; }
-    public Site? Site { get; private set; }
-    public FiscalEntity? FiscalEntity { get; private set; }
 
-    public Contact(Guid customerId, string description, string? phone = null, string? email = null)
+    private Contact() { }
+    public Contact(Guid customerId, string name, string? phone, string? email, string? observations)
     {
         CustomerId = customerId;
-        Description = description;
-        Phone = phone;
-        Email = email;
+
+        UpdateDetails(name, phone, email, observations);
     }
 
-    public void UpdateDetails(string description, string? phone, string? email, string? observations)
+    public void UpdateDetails(string name, string? phone, string? email, string? observations)
     {
-        Description = description;
-        Phone = phone;
-        Email = email;
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        Name = name;
+
+        SetPhone(phone);
+        SetEmail(email);
+
         Observations = observations;
     }
 
@@ -43,4 +44,37 @@ public class Contact : Entity
         if (fiscalEntityId.HasValue) 
             SiteId = null;
     }
+
+    private void SetEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            Email = null;
+            return;
+        }
+
+        if (!System.Net.Mail.MailAddress.TryCreate(email, out var addr) || addr.Address != email || !addr.Host.Contains("."))
+        {
+            throw new FormatException("Invalid email format.");
+        }
+
+        Email = email;
+    }
+
+    private void SetPhone(string? phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone))
+        {
+            Phone = null;
+            return;
+        }
+
+        if (!System.Text.RegularExpressions.Regex.IsMatch(phone, @"^\+?[0-9]\d{1,14}$"))
+        {
+            throw new FormatException("Invalid phone number format.");
+        }
+
+        Phone = phone;
+    }
+
 }

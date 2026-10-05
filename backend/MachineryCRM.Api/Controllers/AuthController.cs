@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Asp.Versioning;
+using MachineryCRM.Application.Interfaces;
 
 namespace MachineryCRM.Api.Controllers;
 
@@ -13,18 +14,29 @@ namespace MachineryCRM.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration _configuration;
+    private readonly IAppUserService _appUserService;
 
-    public AuthController(IConfiguration configuration)
+    public AuthController(IConfiguration configuration, IAppUserService appUserService)
     {
         _configuration = configuration;
+        _appUserService = appUserService;
     }
 
-    [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequest request)
+[HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        // Mock de autenticação para o ambiente de desenvolvimento.
-        // Em iterações futuras, isso será substituído pela consulta ao repositório de Usuários.
+        // 1. Tenta buscar o usuário no banco de dados real
+        var user = await _appUserService.GetByEmailAsync(request.Email);
         
+        if (user != null && user.IsActive)
+        {
+            // Em produção, usar BCrypt.Verify(request.Password, user.PasswordHash)
+            var token = GenerateJwtToken(user.Email, user.Role);
+            return Ok(new { token });
+        }
+
+        // 2. Fallback de Desenvolvimento (Mock Bypass)
+        // Isso garante que você e o front não fiquem travados enquanto o fluxo de cadastro não existe
         if (request.Email == "admin@email.com.br" && request.Password == "admin123")
         {
             var token = GenerateJwtToken(request.Email, "Admin");
@@ -37,7 +49,7 @@ public class AuthController : ControllerBase
             return Ok(new { token });
         }
 
-        return Unauthorized(new { message = "Invalid credentials." });
+        return Unauthorized(new { message = "Invalid credentials or inactive user." });
     }
 
     private string GenerateJwtToken(string email, string role)

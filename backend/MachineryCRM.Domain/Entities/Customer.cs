@@ -2,19 +2,26 @@ namespace MachineryCRM.Domain.Entities;
 
 public class Customer : Entity
 {
-    public string Name { get; private set; }
+    public string Name { get; private set; } = null!;
+    public bool IsActive { get; private set; } = true;
 
     public ICollection<FiscalEntity> FiscalEntities { get; private set; } = new List<FiscalEntity>();
     public ICollection<Site> Sites { get; private set; } = new List<Site>();
     public ICollection<Contact> Contacts { get; private set; } = new List<Contact>();
 
+    private Customer() { }
+
     public Customer(string name)
     {
-        Name = name;
+        UpdateDetails(name);
     }
 
-    public void UpdateName(string name)
+    public void UpdateDetails(string name)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
         Name = name;
     }   
+
+    public void Deactivate() => IsActive = false;
+    public void Activate() => IsActive = true;
 }

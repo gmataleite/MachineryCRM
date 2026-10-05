@@ -17,7 +17,7 @@ export function ContactFormModal({
   onClose,
   onSuccess,
 }: ContactFormModalProps) {
-  const [form, setForm] = useState({ description: "", phone: "", email: "" });
+  const [form, setForm] = useState({ name: "", phone: "", email: "" , observations: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -25,17 +25,18 @@ export function ContactFormModal({
     e.preventDefault();
     setErrorMsg("");
 
-    if (!form.description.trim()) {
-      setErrorMsg("A descrição/nome do contato é obrigatória.");
+    if (!form.name.trim()) {
+      setErrorMsg("O nome do contato é obrigatório.");
       return;
     }
 
     setIsSubmitting(true);
     try {
       await addContactToCustomer(customerId, {
-        description: form.description.trim(),
+        name: form.name.trim(),
         phone: form.phone.trim() || undefined,
         email: form.email.trim() || undefined,
+        observations: form.observations.trim() || undefined,
         siteId,
         fiscalEntityId,
       });
@@ -67,8 +68,8 @@ export function ContactFormModal({
               type="text"
               className="crm-input"
               placeholder="Ex: João, Gerente"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
             />
           </div>
@@ -92,6 +93,17 @@ export function ContactFormModal({
               placeholder="Ex: contato@empresa.com.br"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="crm-label">Observações</label>
+            <input
+              type="text"
+              className="crm-input"
+              placeholder="Ex: Gerente de vendas, responsável por compras"
+              value={form.observations}
+              onChange={(e) => setForm({ ...form, observations: e.target.value })}
             />
           </div>
 

@@ -92,21 +92,32 @@ public class CustomersController : ControllerBase
     }
     // ---- CUSTOMERS CRUD ----
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> UpdateCustomer(Guid id, [FromBody] UpdateCustomerDto dto)
     {
         await _customerService.UpdateCustomerAsync(id, dto);
         return NoContent();
     }
 
-    [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> DeleteCustomer(Guid id)
+    [HttpPatch("{id:guid}/deactivate")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<IActionResult> DeactivateCustomer(Guid id)
     {
-        await _customerService.DeleteCustomerAsync(id);
+        await _customerService.ToggleCustomerStatusAsync(id, false);
         return NoContent();
-    } 
+    }
+
+    [HttpPatch("{id:guid}/activate")]
+    [Authorize(Roles = "Manager,Admin")]
+    public async Task<IActionResult> ActivateCustomer(Guid id)
+    {
+        await _customerService.ToggleCustomerStatusAsync(id, true);
+        return NoContent();
+    }
 
     // ---- SITES CRUD ----
     [HttpPut("sites/{siteId:guid}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> UpdateSite(Guid siteId, [FromBody] UpdateSiteDto dto)
     {
         await _customerService.UpdateSiteAsync(siteId, dto);
@@ -114,6 +125,7 @@ public class CustomersController : ControllerBase
     }
 
     [HttpDelete("sites/{siteId:guid}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> DeleteSite(Guid siteId)
     {
         await _customerService.DeleteSiteAsync(siteId);
@@ -122,6 +134,7 @@ public class CustomersController : ControllerBase
 
     // ---- FISCAL ENTITIES CRUD ----
     [HttpPut("fiscal-entities/{fiscalId:guid}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> UpdateFiscalEntity(Guid fiscalId, [FromBody] UpdateFiscalEntityDto dto)
     {
         await _customerService.UpdateFiscalEntityAsync(fiscalId, dto);
@@ -129,6 +142,7 @@ public class CustomersController : ControllerBase
     }
 
     [HttpDelete("fiscal-entities/{fiscalId:guid}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> DeleteFiscalEntity(Guid fiscalId)
     {
         await _customerService.DeleteFiscalEntityAsync(fiscalId);
@@ -137,6 +151,7 @@ public class CustomersController : ControllerBase
 
     // ---- CONTACTS CRUD ----
     [HttpPut("contacts/{contactId:guid}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> UpdateContact(Guid contactId, [FromBody] UpdateContactDto dto)
     {
         await _customerService.UpdateContactAsync(contactId, dto);
@@ -144,6 +159,7 @@ public class CustomersController : ControllerBase
     }
 
     [HttpDelete("contacts/{contactId:guid}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> DeleteContact(Guid contactId)
     {
         await _customerService.DeleteContactAsync(contactId);
@@ -152,6 +168,7 @@ public class CustomersController : ControllerBase
 
     // ---- GEOPOINTS CRUD ----
     [HttpPost("sites/{siteId:guid}/geopoints")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> AddGeoPoint(Guid siteId, [FromBody] CreateGeoPointDto dto)
     {
         var result = await _customerService.AddGeoPointAsync(siteId, dto);
@@ -159,6 +176,7 @@ public class CustomersController : ControllerBase
     }
 
     [HttpPut("geopoints/{geoPointId:guid}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> UpdateGeoPoint(Guid geoPointId, [FromBody] UpdateGeoPointDto dto)
     {
         await _customerService.UpdateGeoPointAsync(geoPointId, dto);
@@ -166,6 +184,7 @@ public class CustomersController : ControllerBase
     }
 
     [HttpDelete("geopoints/{geoPointId:guid}")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> DeleteGeoPoint(Guid geoPointId)
     {
         await _customerService.DeleteGeoPointAsync(geoPointId);
@@ -173,6 +192,7 @@ public class CustomersController : ControllerBase
     }
 
     [HttpPut("sites/{siteId:guid}/geopoints/reorder")]
+    [Authorize(Roles = "Manager,Admin")]
     public async Task<IActionResult> ReorderGeoPoints(Guid siteId, [FromBody] List<ReorderGeoPointDto> dtos)
     {
         await _customerService.ReorderGeoPointsAsync(siteId, dtos);

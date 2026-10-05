@@ -24,6 +24,96 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("MachineryCRM.Domain.Entities.AppUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("AppUsers", (string)null);
+                });
+
+            modelBuilder.Entity("MachineryCRM.Domain.Entities.Communication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("ContactId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("InteractionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("MachineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("MachineId");
+
+                    b.ToTable("Communications", (string)null);
+                });
+
             modelBuilder.Entity("MachineryCRM.Domain.Entities.Contact", b =>
                 {
                     b.Property<Guid>("Id")
@@ -36,21 +126,25 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Email")
-                        .HasColumnType("text");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<Guid?>("FiscalEntityId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
                     b.Property<string>("Observations")
-                        .HasColumnType("text");
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid?>("SiteId")
                         .HasColumnType("uuid");
@@ -66,7 +160,7 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
 
                     b.HasIndex("SiteId");
 
-                    b.ToTable("Contacts");
+                    b.ToTable("Contacts", (string)null);
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.Customer", b =>
@@ -78,6 +172,11 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -88,7 +187,7 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers");
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.FiscalEntity", b =>
@@ -97,52 +196,21 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Cnpj")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Cpf")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("FiscalAddress")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Ie")
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<string>("Observations")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PostalAddress")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SapPn")
-                        .HasColumnType("text");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.Property<string>("TaxId")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("TaxId");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -151,7 +219,7 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("FiscalEntities");
+                    b.ToTable("FiscalEntities", (string)null);
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.GeoPoint", b =>
@@ -165,18 +233,23 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.Property<double>("Latitude")
+                        .HasPrecision(10, 7)
                         .HasColumnType("double precision");
 
-                    b.Property<int>("LocationType")
-                        .HasColumnType("integer");
+                    b.Property<string>("LocationType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<double>("Longitude")
+                        .HasPrecision(10, 7)
                         .HasColumnType("double precision");
 
-                    b.Property<int?>("Order")
+                    b.Property<int>("Order")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("SiteId")
@@ -189,7 +262,7 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
 
                     b.HasIndex("SiteId");
 
-                    b.ToTable("GeoPoints");
+                    b.ToTable("GeoPoints", (string)null);
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.Machine", b =>
@@ -198,13 +271,20 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("AcquisitionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Brand")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Model")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("SerialNumber")
                         .IsRequired()
@@ -214,11 +294,12 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.Property<Guid>("SiteId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -227,13 +308,16 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
 
                     b.HasIndex("SiteId");
 
-                    b.ToTable("Machines");
+                    b.ToTable("Machines", (string)null);
                 });
 
-            modelBuilder.Entity("MachineryCRM.Domain.Entities.MaintenanceOrder", b =>
+            modelBuilder.Entity("MachineryCRM.Domain.Entities.Maintenance", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AppUserId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("CompletionDate")
@@ -242,28 +326,35 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("IssueDescription")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<Guid>("MachineId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("ScheduledDate")
+                    b.Property<DateTime>("MaintenanceDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("MaintenanceType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<Guid>("TechnicianId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("PartsUsed")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.ToTable("MaintenanceOrders");
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("MachineId");
+
+                    b.ToTable("Maintenances", (string)null);
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.Site", b =>
@@ -271,16 +362,6 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -293,14 +374,6 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<string>("Observations")
-                        .HasColumnType("text");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -308,10 +381,10 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Sites");
+                    b.ToTable("Sites", (string)null);
                 });
 
-            modelBuilder.Entity("MachineryCRM.Domain.Entities.Technician", b =>
+            modelBuilder.Entity("MachineryCRM.Domain.Entities.TransferHistory", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -320,93 +393,287 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("DestinationSiteId")
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("LoggedBy")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
-                    b.Property<string>("RegistrationNumber")
+                    b.Property<Guid>("MachineId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OriginSiteId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reason")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("TransferDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Technicians");
+                    b.HasIndex("DestinationSiteId");
+
+                    b.HasIndex("MachineId");
+
+                    b.HasIndex("OriginSiteId");
+
+                    b.ToTable("TransferHistories", (string)null);
+                });
+
+            modelBuilder.Entity("MachineryCRM.Domain.Entities.Communication", b =>
+                {
+                    b.HasOne("MachineryCRM.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MachineryCRM.Domain.Entities.Contact", null)
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MachineryCRM.Domain.Entities.Machine", null)
+                        .WithMany("Communications")
+                        .HasForeignKey("MachineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.Contact", b =>
                 {
-                    b.HasOne("MachineryCRM.Domain.Entities.Customer", "Customer")
+                    b.HasOne("MachineryCRM.Domain.Entities.Customer", null)
                         .WithMany("Contacts")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MachineryCRM.Domain.Entities.FiscalEntity", "FiscalEntity")
+                    b.HasOne("MachineryCRM.Domain.Entities.FiscalEntity", null)
                         .WithMany("Contacts")
                         .HasForeignKey("FiscalEntityId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("MachineryCRM.Domain.Entities.Site", "Site")
+                    b.HasOne("MachineryCRM.Domain.Entities.Site", null)
                         .WithMany("Contacts")
                         .HasForeignKey("SiteId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("FiscalEntity");
-
-                    b.Navigation("Site");
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.FiscalEntity", b =>
                 {
-                    b.HasOne("MachineryCRM.Domain.Entities.Customer", "Customer")
+                    b.HasOne("MachineryCRM.Domain.Entities.Customer", null)
                         .WithMany("FiscalEntities")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.OwnsOne("MachineryCRM.Domain.ValueObjects.Address", "BillingAddress", b1 =>
+                        {
+                            b1.Property<Guid>("FiscalEntityId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("AddressLine")
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("BillingAddressLine");
+
+                            b1.Property<string>("City")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("BillingCity");
+
+                            b1.Property<string>("CountryCode")
+                                .HasMaxLength(10)
+                                .HasColumnType("character varying(10)")
+                                .HasColumnName("BillingCountryCode");
+
+                            b1.Property<string>("Neighborhood")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("BillingNeighborhood");
+
+                            b1.Property<string>("PostalCode")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("BillingPostalCode");
+
+                            b1.Property<string>("State")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("BillingState");
+
+                            b1.HasKey("FiscalEntityId");
+
+                            b1.ToTable("FiscalEntities");
+
+                            b1.WithOwner()
+                                .HasForeignKey("FiscalEntityId");
+                        });
+
+                    b.OwnsOne("MachineryCRM.Domain.ValueObjects.Address", "ShippingAddress", b1 =>
+                        {
+                            b1.Property<Guid>("FiscalEntityId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("AddressLine")
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("ShippingAddressLine");
+
+                            b1.Property<string>("City")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("ShippingCity");
+
+                            b1.Property<string>("CountryCode")
+                                .HasMaxLength(10)
+                                .HasColumnType("character varying(10)")
+                                .HasColumnName("ShippingCountryCode");
+
+                            b1.Property<string>("Neighborhood")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("ShippingNeighborhood");
+
+                            b1.Property<string>("PostalCode")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("ShippingPostalCode");
+
+                            b1.Property<string>("State")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("ShippingState");
+
+                            b1.HasKey("FiscalEntityId");
+
+                            b1.ToTable("FiscalEntities");
+
+                            b1.WithOwner()
+                                .HasForeignKey("FiscalEntityId");
+                        });
+
+                    b.Navigation("BillingAddress");
+
+                    b.Navigation("ShippingAddress");
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.GeoPoint", b =>
                 {
-                    b.HasOne("MachineryCRM.Domain.Entities.Site", "Site")
+                    b.HasOne("MachineryCRM.Domain.Entities.Site", null)
                         .WithMany("GeoPoints")
                         .HasForeignKey("SiteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Site");
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.Machine", b =>
                 {
-                    b.HasOne("MachineryCRM.Domain.Entities.Site", "Site")
+                    b.HasOne("MachineryCRM.Domain.Entities.Site", null)
                         .WithMany("Machines")
                         .HasForeignKey("SiteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MachineryCRM.Domain.Entities.Maintenance", b =>
+                {
+                    b.HasOne("MachineryCRM.Domain.Entities.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Site");
+                    b.HasOne("MachineryCRM.Domain.Entities.Machine", null)
+                        .WithMany("Maintenances")
+                        .HasForeignKey("MachineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.Site", b =>
                 {
-                    b.HasOne("MachineryCRM.Domain.Entities.Customer", "Customer")
+                    b.HasOne("MachineryCRM.Domain.Entities.Customer", null)
                         .WithMany("Sites")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.OwnsOne("MachineryCRM.Domain.ValueObjects.Address", "Address", b1 =>
+                        {
+                            b1.Property<Guid>("SiteId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("AddressLine")
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("AddressLine");
+
+                            b1.Property<string>("City")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("City");
+
+                            b1.Property<string>("CountryCode")
+                                .HasMaxLength(10)
+                                .HasColumnType("character varying(10)")
+                                .HasColumnName("CountryCode");
+
+                            b1.Property<string>("Neighborhood")
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("Neighborhood");
+
+                            b1.Property<string>("PostalCode")
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("PostalCode");
+
+                            b1.Property<string>("State")
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("State");
+
+                            b1.HasKey("SiteId");
+
+                            b1.ToTable("Sites");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SiteId");
+                        });
+
+                    b.Navigation("Address");
+                });
+
+            modelBuilder.Entity("MachineryCRM.Domain.Entities.TransferHistory", b =>
+                {
+                    b.HasOne("MachineryCRM.Domain.Entities.Site", null)
+                        .WithMany()
+                        .HasForeignKey("DestinationSiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MachineryCRM.Domain.Entities.Machine", null)
+                        .WithMany("TransferHistories")
+                        .HasForeignKey("MachineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MachineryCRM.Domain.Entities.Site", null)
+                        .WithMany()
+                        .HasForeignKey("OriginSiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.Customer", b =>
@@ -421,6 +688,15 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
             modelBuilder.Entity("MachineryCRM.Domain.Entities.FiscalEntity", b =>
                 {
                     b.Navigation("Contacts");
+                });
+
+            modelBuilder.Entity("MachineryCRM.Domain.Entities.Machine", b =>
+                {
+                    b.Navigation("Communications");
+
+                    b.Navigation("Maintenances");
+
+                    b.Navigation("TransferHistories");
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.Site", b =>

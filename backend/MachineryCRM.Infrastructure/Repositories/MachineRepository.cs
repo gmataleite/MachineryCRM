@@ -13,4 +13,18 @@ public class MachineRepository : Repository<Machine>, IMachineRepository
     {
         return await _context.Machines.FirstOrDefaultAsync(m => m.SerialNumber == serialNumber);
     }
+
+    public async Task<Machine?> GetMachineWithDetailsAsync(Guid id)
+    {
+        return await _context.Machines
+            .AsSplitQuery()
+            .Include(m => m.TransferHistories)
+            .Include(m => m.Maintenances)
+            .Include(m => m.Communications)
+            .FirstOrDefaultAsync(m => m.Id == id);
+    }
+    
+    public void AddMaintenance(Maintenance maintenance) => _context.Set<Maintenance>().Add(maintenance);
+    public void AddTransferHistory(TransferHistory transfer) => _context.Set<TransferHistory>().Add(transfer);
+    public void AddCommunication(Communication communication) => _context.Set<Communication>().Add(communication);
 }

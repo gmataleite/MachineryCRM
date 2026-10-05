@@ -27,9 +27,18 @@ public class MachineServiceTests
     public async Task CreateAsync_ShouldThrowException_WhenSerialNumberExists()
     {
         // Arrange
-        Guid fakeSiteId = Guid.NewGuid();
-        var dto = new CreateMachineDto(fakeSiteId, "SN-12345", "Trator T-50", 2024);
-        var existingMachine = new Machine(dto.SiteId, dto.SerialNumber, dto.Model, dto.Year);
+        var fakeSiteId = Guid.NewGuid();
+        var dto = new CreateMachineDto
+        {
+            SiteId = fakeSiteId,
+            SerialNumber = "SN-12345",
+            Model = "Trator T-50",
+            Brand = "AgroTech",
+            Status = "Ativo",
+            AcquisitionDate = DateTime.UtcNow.Date
+        };
+        
+        var existingMachine = new Machine(dto.SiteId, dto.SerialNumber, dto.Model, dto.Brand, dto.Status, dto.AcquisitionDate);
         
         _machineRepositoryMock.Setup(repo => repo.GetBySerialNumberAsync(dto.SerialNumber))
             .ReturnsAsync(existingMachine);
@@ -48,8 +57,16 @@ public class MachineServiceTests
     public async Task CreateAsync_ShouldReturnMachineDto_WhenSuccessful()
     {
         // Arrange
-        Guid fakeSiteId = Guid.NewGuid();
-        var dto = new CreateMachineDto(fakeSiteId, "SN-99999", "Colheitadeira AX-900", 2024);
+        var fakeSiteId = Guid.NewGuid();
+        var dto = new CreateMachineDto
+        {
+            SiteId = fakeSiteId,
+            SerialNumber = "SN-99999",
+            Model = "Colheitadeira AX-900",
+            Brand = "AgroMax",
+            Status = "Novo",
+            AcquisitionDate = DateTime.UtcNow.Date
+        };
         
         _machineRepositoryMock.Setup(repo => repo.GetBySerialNumberAsync(dto.SerialNumber))
             .ReturnsAsync((Machine?)null);
@@ -61,6 +78,9 @@ public class MachineServiceTests
         Assert.NotNull(result);
         Assert.Equal(dto.SerialNumber, result.SerialNumber);
         Assert.Equal(dto.SiteId, result.SiteId);
+        Assert.Equal(dto.Brand, result.Brand);
+        Assert.Equal(dto.Status, result.Status);
+        Assert.Equal(dto.AcquisitionDate, result.AcquisitionDate);
         
         _machineRepositoryMock.Verify(repo => repo.AddAsync(It.IsAny<Machine>()), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CommitAsync(), Times.Once);
