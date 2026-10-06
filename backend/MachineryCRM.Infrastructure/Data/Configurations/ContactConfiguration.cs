@@ -16,6 +16,16 @@ public class ContactConfiguration : IEntityTypeConfiguration<Contact>
         builder.Property(c => c.Email).HasMaxLength(150);
         builder.Property(c => c.Observations).HasMaxLength(1000);
 
+        builder.HasOne<Site>()
+               .WithMany(s => s.Contacts)
+               .HasForeignKey(c => c.SiteId)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne<FiscalEntity>()
+               .WithMany(f => f.Contacts)
+               .HasForeignKey(c => c.FiscalEntityId)
+               .OnDelete(DeleteBehavior.Cascade);
+
         // Comunicações associadas ao Contato
         builder.HasMany<Communication>()
                .WithOne()
