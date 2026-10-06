@@ -850,8 +850,13 @@ export function CustomerDetail() {
         {customer.sites.map((site) => {
           const siteContacts = customer.contacts.filter((c) => c.siteId === site.id);
           
-          // <--- Formatação Cidade - Estado - País
-          const locationLine = [site.address].filter(Boolean).join(" - ");
+          const locationLine = [
+            site.address?.city,
+            site.address?.state,
+            site.address?.countryCode,
+          ]
+            .filter(Boolean)
+            .join(" - ");
           
           const { offices, machines, waypoints } = sortSiteGeoPoints(site.geoPoints);
           const hasGeoPoints =
