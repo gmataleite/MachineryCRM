@@ -120,4 +120,41 @@ public class CustomerServiceTests
         _customerRepositoryMock.Verify(repo => repo.AddContact(It.Is<Contact>(c => c.SiteId == siteId)), Times.Once);
         _unitOfWorkMock.Verify(uow => uow.CommitAsync(), Times.Once);
     }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldMapContactObservations()
+    {
+        var customer = new Customer("Test Customer");
+        var contact = new Contact(customer.Id, "John", "12345", "john@example.com", "Main contact");
+        customer.Contacts.Add(contact);
+
+        _customerRepositoryMock
+            .Setup(repo => repo.GetAllWithDetailsAsync())
+            .ReturnsAsync(new List<Customer> { customer });
+
+        var result = (await _customerService.GetAllAsync()).ToList();
+
+        Assert.Single(result);
+        Assert.Single(result[0].Contacts);
+        Assert.Equal("Main contact", result[0].Contacts[0].Observations);
+    }
+
+    [Fact]
+    public async Task GetByIdWithDetailsAsync_ShouldMapContactObservations()
+    {
+        var customer = new Customer("Test Customer");
+        var customerId = customer.Id;
+        var contact = new Contact(customerId, "John", "12345", "john@example.com", "Important notes");
+        customer.Contacts.Add(contact);
+
+        _customerRepositoryMock
+            .Setup(repo => repo.GetCustomerWithDetailsAsync(customerId))
+            .ReturnsAsync(customer);
+
+        var result = await _customerService.GetByIdWithDetailsAsync(customerId);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Contacts);
+        Assert.Equal("Important notes", result.Contacts[0].Observations);
+    }
 }
