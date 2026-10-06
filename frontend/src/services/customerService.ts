@@ -51,9 +51,7 @@ export interface ReorderGeoPointDto {
 
 export interface CreateSiteDto {
   name: string;
-  country: string;
-  state: string;
-  city: string;
+  address?: AddressDto | null;
   observations?: string;
 }
 
@@ -68,14 +66,24 @@ export interface UpdateSiteDto extends CreateSiteDto { }
 // FISCAL ENTITY DTOs
 // ============================================================================
 
+export interface AddressDto {
+  addressLine?: string | null;
+  neighborhood?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  countryCode?: string | null;
+}
+
+export interface TaxIdDto {
+  value: string;
+}
+
 export interface CreateFiscalEntityDto {
-  sapPn?: string;
   name: string;
-  cnpj?: string;
-  cpf?: string;
-  country: string;
-  state: string;
-  city: string;
+  taxId?: TaxIdDto | null;
+  billingAddress?: AddressDto | null;
+  shippingAddress?: AddressDto | null;
 }
 
 export interface FiscalEntityDto extends CreateFiscalEntityDto {

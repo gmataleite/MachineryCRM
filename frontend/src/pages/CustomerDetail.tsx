@@ -16,6 +16,7 @@ import {
   deleteSite,
   deleteFiscalEntity,
   deleteContact,
+  deleteGeoPoint, // <--- Nova importação
   reorderGeoPoints,
   GeoLocationType,
   type CustomerDto,
@@ -23,6 +24,7 @@ import {
   type GeoPointDto,
   type SiteDto,
   type FiscalEntityDto,
+  type AddressDto, // <--- Nova importação
 } from "../services/customerService";
 import {
   Building2,
@@ -235,9 +237,11 @@ function ContactRow({
 function StaticGeoPointRow({
   geoPoint,
   onEdit,
+  onDelete, // <--- Adicionado
 }: {
   geoPoint: GeoPointDto;
   onEdit: (geoPoint: GeoPointDto) => void;
+  onDelete: (geoPoint: GeoPointDto) => void; // <--- Adicionado
 }) {
   return (
     <div
@@ -268,6 +272,15 @@ function StaticGeoPointRow({
         >
           <Pencil size={14} />
         </button>
+        {/* Botão Excluir */}
+        <button
+          type="button"
+          title="Excluir ponto geográfico"
+          onClick={() => onDelete(geoPoint)}
+          className="crm-btn-icon"
+        >
+          <Trash2 size={14} />
+        </button>
       </div>
     </div>
   );
@@ -278,11 +291,13 @@ function WaypointSortableRow({
   geoPoint,
   sequenceIndex,
   onEdit,
+  onDelete, // <--- Adicionado
 }: {
   siteId: string;
   geoPoint: GeoPointDto;
   sequenceIndex: number;
   onEdit: (geoPoint: GeoPointDto) => void;
+  onDelete: (geoPoint: GeoPointDto) => void; // <--- Adicionado
 }) {
   const itemData: WaypointDragDropData = {
     kind: "waypoint",
@@ -384,6 +399,15 @@ function WaypointSortableRow({
         >
           <Pencil size={14} />
         </button>
+        {/* Botão Excluir */}
+        <button
+          type="button"
+          title="Excluir ponto geográfico"
+          onClick={() => onDelete(geoPoint)}
+          className="crm-btn-icon"
+        >
+          <Trash2 size={14} />
+        </button>
       </div>
     </div>
   );
@@ -398,6 +422,20 @@ function sortSiteGeoPoints(geoPoints: GeoPointDto[] = []) {
 
   return { offices, machines, waypoints };
 }
+
+// Helper para formatar DTO de endereço em uma linha só, separada por vírgula
+const formatAddress = (addr?: AddressDto | null) => {
+  if (!addr) return "Não informado";
+  const parts = [
+    addr.addressLine,
+    addr.neighborhood,
+    addr.city,
+    addr.state,
+    addr.postalCode,
+    addr.countryCode,
+  ].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : "Não informado";
+};
 
 export function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -590,35 +628,68 @@ export function CustomerDetail() {
 
   const handleDeleteSite = async (site: SiteDto) => {
     if (!window.confirm(`Tem certeza que deseja remover o local produtivo "${site.name}"?`)) return;
-    try {
-      await deleteSite(site.id);
+
+    setCustomer((prev) => prev ? { ...prev, sites: prev.sites.filter(s => s.id !== site.id) } : prev);
+
+    deleteSite(site.id)
+    .then(() => {
       setToast({ message: "Local removido com sucesso.", type: "success" });
-      fetchCustomerData();
-    } catch {
+    }).catch(() => {
       setToast({ message: "Erro ao remover local.", type: "error" });
-    }
+      fetchCustomerData();
+    })
   };
 
   const handleDeleteFiscal = async (fiscal: FiscalEntityDto) => {
     if (!window.confirm(`Tem certeza que deseja remover o ente fiscal "${fiscal.name}"?`)) return;
-    try {
-      await deleteFiscalEntity(fiscal.id);
+
+    setCustomer((prev) => prev ? { ...prev, fiscalEntities: prev.fiscalEntities.filter(f => f.id !== fiscal.id) } : prev);
+
+    deleteFiscalEntity(fiscal.id)
+    .then(() => {
       setToast({ message: "Ente fiscal removido com sucesso.", type: "success" });
-      fetchCustomerData();
-    } catch {
+    }).catch(() => {
       setToast({ message: "Erro ao remover ente fiscal.", type: "error" });
-    }
+      fetchCustomerData();
+    })
   };
 
   const handleDeleteContact = async (contact: ContactDto) => {
     if (!window.confirm(`Tem certeza que deseja remover o contato "${contact.name}"?`)) return;
-    try {
-      await deleteContact(contact.id);
+    
+    setCustomer((prev) => prev ? { ...prev, contacts: prev.contacts.filter(c => c.id !== contact.id) } : prev);
+
+    deleteContact(contact.id)
+    .then(() => {
       setToast({ message: "Contato removido.", type: "success" });
-      fetchCustomerData();
-    } catch {
+    }).catch(() => {
       setToast({ message: "Erro ao remover contato.", type: "error" });
-    }
+      fetchCustomerData();
+    })
+  };
+
+  // <--- Lógica adicionada para remover pontos
+  const handleDeleteGeoPoint = async (geoPoint: GeoPointDto) => {
+    if (!window.confirm(`Tem certeza que deseja remover o ponto geográfico "${geoPoint.description}"?`)) return;
+
+    setCustomer((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        sites: prev.sites.map((s) => ({
+          ...s,
+          geoPoints: s.geoPoints?.filter((gp) => gp.id !== geoPoint.id),
+        })),
+      };
+    });
+
+    deleteGeoPoint(geoPoint.id)
+    .then(() => {
+      setToast({ message: "Ponto geográfico removido com sucesso.", type: "success" });
+    }).catch(() => {
+      setToast({ message: "Erro ao remover ponto geográfico.", type: "error" });
+      fetchCustomerData();
+    });
   };
 
   return (
@@ -778,7 +849,10 @@ export function CustomerDetail() {
 
         {customer.sites.map((site) => {
           const siteContacts = customer.contacts.filter((c) => c.siteId === site.id);
-          const locationLine = [site.city, site.state, site.country].filter(Boolean).join(" — ");
+          
+          // <--- Formatação Cidade - Estado - País
+          const locationLine = [site.address].filter(Boolean).join(" - ");
+          
           const { offices, machines, waypoints } = sortSiteGeoPoints(site.geoPoints);
           const hasGeoPoints =
             offices.length > 0 || machines.length > 0 || waypoints.length > 0;
@@ -913,6 +987,7 @@ export function CustomerDetail() {
                             initialData: geoPoint,
                           })
                         }
+                        onDelete={handleDeleteGeoPoint} // <--- Passando o Handler
                       />
                     ))}
 
@@ -928,6 +1003,7 @@ export function CustomerDetail() {
                             initialData: geoPoint,
                           })
                         }
+                        onDelete={handleDeleteGeoPoint} // <--- Passando o Handler
                       />
                     ))}
 
@@ -945,6 +1021,7 @@ export function CustomerDetail() {
                             initialData: geoPoint,
                           })
                         }
+                        onDelete={handleDeleteGeoPoint} // <--- Passando o Handler
                       />
                     ))}
                   </div>
@@ -971,16 +1048,10 @@ export function CustomerDetail() {
 
         {customer.fiscalEntities.map((fiscal) => {
           const fiscalContacts = customer.contacts.filter((c) => c.fiscalEntityId === fiscal.id);
-          const docText = fiscal.cnpj
-            ? `CNPJ ${fiscal.cnpj}`
-            : fiscal.cpf
-            ? `CPF ${fiscal.cpf}`
-            : "";
-          const sapText = fiscal.sapPn ? `PN SAP ${fiscal.sapPn}` : "";
-          const docAndSapLine = [docText, sapText].filter(Boolean).join(" · ");
-          const locationLine = [fiscal.city, fiscal.state, fiscal.country]
-            .filter(Boolean)
-            .join(" — ");
+          
+          // Compatibilidade atualizada com a nova prop taxId
+          const docText = fiscal.taxId?.value ? `Documento: ${fiscal.taxId.value}` : "";
+          const docLine = [docText].filter(Boolean).join(" · ");
 
           return (
             <div key={fiscal.id} className="crm-card">
@@ -995,16 +1066,19 @@ export function CustomerDetail() {
                   <div style={{ fontWeight: 700, fontSize: 16, color: "#23291F" }}>
                     {fiscal.name}
                   </div>
-                  {docAndSapLine && (
+                  {docLine && (
                     <div style={{ fontSize: 13.5, color: "#6E6C61", marginTop: 3 }}>
-                      {docAndSapLine}
+                      {docLine}
                     </div>
                   )}
-                  {locationLine && (
-                    <div style={{ fontSize: 13.5, color: "#6E6C61", marginTop: 2 }}>
-                      {locationLine}
-                    </div>
-                  )}
+                  
+                  {/* Endereço de Faturamento e Entrega mapeados do novo Helper */}
+                  <div style={{ fontSize: 13, color: "#6E6C61", marginTop: 8 }}>
+                    <span style={{ fontWeight: 600 }}>Endereço de faturamento:</span> {formatAddress(fiscal.billingAddress)}
+                  </div>
+                  <div style={{ fontSize: 13, color: "#6E6C61", marginTop: 2 }}>
+                    <span style={{ fontWeight: 600 }}>Endereço de entrega:</span> {formatAddress(fiscal.shippingAddress)}
+                  </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
