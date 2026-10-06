@@ -243,10 +243,16 @@ export function FiscalFormModal({
     try {
       // Regra: se o usuário desmarcou a flag, espelha o billingAddress no shippingAddress
       const finalShippingAddress = isShippingDifferent ? shippingAddress : billingAddress;
+      const normalizedTaxId = taxId.trim();
 
       const payload = {
         name: name.trim(),
-        taxId: taxId ? { value: taxId } : null,
+        taxId: normalizedTaxId
+          ? {
+              value: normalizedTaxId,
+              countryCode: (billingAddress.countryCode || "BR").trim().toUpperCase(),
+            }
+          : null,
         billingAddress,
         shippingAddress: finalShippingAddress,
       };
