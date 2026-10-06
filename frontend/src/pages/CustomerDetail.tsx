@@ -626,50 +626,53 @@ export function CustomerDetail() {
 
   const generalContacts = customer.contacts.filter((c) => !c.siteId && !c.fiscalEntityId);
 
-  const handleDeleteSite = async (site: SiteDto) => {
+  const handleDeleteSite = (site: SiteDto) => {
     if (!window.confirm(`Tem certeza que deseja remover o local produtivo "${site.name}"?`)) return;
 
     setCustomer((prev) => prev ? { ...prev, sites: prev.sites.filter(s => s.id !== site.id) } : prev);
 
-    deleteSite(site.id)
-    .then(() => {
-      setToast({ message: "Local removido com sucesso.", type: "success" });
-    }).catch(() => {
-      setToast({ message: "Erro ao remover local.", type: "error" });
-      fetchCustomerData();
-    })
+    void deleteSite(site.id)
+      .then(() => {
+        setToast({ message: "Local removido com sucesso.", type: "success" });
+      })
+      .catch(() => {
+        setToast({ message: "Erro ao remover local.", type: "error" });
+        void fetchCustomerData();
+      });
   };
 
-  const handleDeleteFiscal = async (fiscal: FiscalEntityDto) => {
+  const handleDeleteFiscal = (fiscal: FiscalEntityDto) => {
     if (!window.confirm(`Tem certeza que deseja remover o ente fiscal "${fiscal.name}"?`)) return;
 
     setCustomer((prev) => prev ? { ...prev, fiscalEntities: prev.fiscalEntities.filter(f => f.id !== fiscal.id) } : prev);
 
-    deleteFiscalEntity(fiscal.id)
-    .then(() => {
-      setToast({ message: "Ente fiscal removido com sucesso.", type: "success" });
-    }).catch(() => {
-      setToast({ message: "Erro ao remover ente fiscal.", type: "error" });
-      fetchCustomerData();
-    })
+    void deleteFiscalEntity(fiscal.id)
+      .then(() => {
+        setToast({ message: "Ente fiscal removido com sucesso.", type: "success" });
+      })
+      .catch(() => {
+        setToast({ message: "Erro ao remover ente fiscal.", type: "error" });
+        void fetchCustomerData();
+      });
   };
 
-  const handleDeleteContact = async (contact: ContactDto) => {
+  const handleDeleteContact = (contact: ContactDto) => {
     if (!window.confirm(`Tem certeza que deseja remover o contato "${contact.name}"?`)) return;
     
     setCustomer((prev) => prev ? { ...prev, contacts: prev.contacts.filter(c => c.id !== contact.id) } : prev);
 
-    deleteContact(contact.id)
-    .then(() => {
-      setToast({ message: "Contato removido.", type: "success" });
-    }).catch(() => {
-      setToast({ message: "Erro ao remover contato.", type: "error" });
-      fetchCustomerData();
-    })
+    void deleteContact(contact.id)
+      .then(() => {
+        setToast({ message: "Contato removido.", type: "success" });
+      })
+      .catch(() => {
+        setToast({ message: "Erro ao remover contato.", type: "error" });
+        void fetchCustomerData();
+      });
   };
 
   // <--- Lógica adicionada para remover pontos
-  const handleDeleteGeoPoint = async (geoPoint: GeoPointDto) => {
+  const handleDeleteGeoPoint = (geoPoint: GeoPointDto) => {
     if (!window.confirm(`Tem certeza que deseja remover o ponto geográfico "${geoPoint.description}"?`)) return;
 
     setCustomer((prev) => {
@@ -683,13 +686,14 @@ export function CustomerDetail() {
       };
     });
 
-    deleteGeoPoint(geoPoint.id)
-    .then(() => {
-      setToast({ message: "Ponto geográfico removido com sucesso.", type: "success" });
-    }).catch(() => {
-      setToast({ message: "Erro ao remover ponto geográfico.", type: "error" });
-      fetchCustomerData();
-    });
+    void deleteGeoPoint(geoPoint.id)
+      .then(() => {
+        setToast({ message: "Ponto geográfico removido com sucesso.", type: "success" });
+      })
+      .catch(() => {
+        setToast({ message: "Erro ao remover ponto geográfico.", type: "error" });
+        void fetchCustomerData();
+      });
   };
 
   return (
