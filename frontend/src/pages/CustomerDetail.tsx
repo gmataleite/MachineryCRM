@@ -12,6 +12,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   getCustomerById,
+  updateCustomer,
   updateContact,
   deleteSite,
   deleteFiscalEntity,
@@ -441,6 +442,9 @@ export function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<CustomerDto | null>(null);
+  const [isEditingCustomerName, setIsEditingCustomerName] = useState(false);
+  const [customerNameDraft, setCustomerNameDraft] = useState("");
+  const [isSavingCustomerName, setIsSavingCustomerName] = useState(false);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<ToastData | null>(null);
 
@@ -692,6 +696,45 @@ export function CustomerDetail() {
     });
   };
 
+  const handleStartEditCustomerName = () => {
+    setCustomerNameDraft(customer?.name ?? "");
+    setIsEditingCustomerName(true);
+  };
+
+  const handleCancelEditCustomerName = () => {
+    setCustomerNameDraft(customer?.name ?? "");
+    setIsEditingCustomerName(false);
+  };
+
+  const handleSaveCustomerName = async () => {
+    if (!customer) return;
+    const updatedName = customerNameDraft.trim();
+
+    if (!updatedName) {
+      setToast({ message: "Informe um nome para o cliente.", type: "error" });
+      return;
+    }
+
+    if (updatedName === customer.name) {
+      setIsEditingCustomerName(false);
+      return;
+    }
+
+    setIsSavingCustomerName(true);
+    try {
+      await updateCustomer(customer.id, { name: updatedName });
+      setCustomer((prev) => (prev ? { ...prev, name: updatedName } : prev));
+      setCustomerNameDraft(updatedName);
+      setIsEditingCustomerName(false);
+      setToast({ message: "Nome do cliente atualizado com sucesso.", type: "success" });
+    } catch (err) {
+      console.error("Erro ao atualizar nome do cliente:", err);
+      setToast({ message: "Erro ao atualizar nome do cliente.", type: "error" });
+    } finally {
+      setIsSavingCustomerName(false);
+    }
+  };
+
   return (
     <div>
       <Toast toast={toast} onClose={() => setToast(null)} />
@@ -779,13 +822,63 @@ export function CustomerDetail() {
                 background: "#FFFFFF",
               }}
             >
-              <span style={{ fontSize: 15, fontWeight: 500, color: "#23291F" }}>
-                {customer.name}
-              </span>
+              {isEditingCustomerName ? (
+                <input
+                  type="text"
+                  value={customerNameDraft}
+                  onChange={(event) => setCustomerNameDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      void handleSaveCustomerName();
+                    }
+                    if (event.key === "Escape") {
+                      event.preventDefault();
+                      handleCancelEditCustomerName();
+                    }
+                  }}
+                  className="crm-input"
+                  style={{ marginRight: 8, paddingTop: 6, paddingBottom: 6 }}
+                  disabled={isSavingCustomerName}
+                  autoFocus
+                />
+              ) : (
+                <span style={{ fontSize: 15, fontWeight: 500, color: "#23291F" }}>
+                  {customer.name}
+                </span>
+              )}
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <button type="button" title="Editar cliente" className="crm-btn-icon">
-                  <Pencil size={14} />
-                </button>
+                {isEditingCustomerName ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleCancelEditCustomerName}
+                      className="crm-btn-outline"
+                      style={{ padding: "5px 8px" }}
+                      disabled={isSavingCustomerName}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleSaveCustomerName()}
+                      className="crm-btn-primary"
+                      style={{ padding: "5px 8px", fontSize: 12.5 }}
+                      disabled={isSavingCustomerName}
+                    >
+                      Salvar
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    title="Editar cliente"
+                    className="crm-btn-icon"
+                    onClick={handleStartEditCustomerName}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                )}
               </div>
             </div>
           </div>
