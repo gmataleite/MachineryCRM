@@ -77,6 +77,7 @@ export interface AddressDto {
 
 export interface TaxIdDto {
   value: string;
+  countryCode: string;
 }
 
 export interface CreateFiscalEntityDto {
