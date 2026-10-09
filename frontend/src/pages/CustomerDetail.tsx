@@ -41,6 +41,7 @@ import {
   Briefcase,
   Signpost,
   Warehouse,
+  FileText,
 } from "lucide-react";
 import { SiteFormModal } from "../components/SiteFormModal";
 import { FiscalFormModal } from "../components/FiscalFormModal";
@@ -208,6 +209,22 @@ function ContactRow({
               )}
             </div>
           )}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                color: "#6E6C61",
+                fontSize: 12.5,
+                marginTop: 3,
+              }}
+            >
+              {contact.observations && (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <FileText size={12} color="#6E6C61" /> {contact.observations}
+                </span>
+              )}
+            </div>
         </div>
       </div>
 

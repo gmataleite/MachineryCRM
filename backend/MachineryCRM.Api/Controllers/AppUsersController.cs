@@ -1,8 +1,8 @@
+using Asp.Versioning;
 using MachineryCRM.Application.DTOs;
 using MachineryCRM.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
 
 namespace MachineryCRM.Api.Controllers;
 
@@ -30,6 +30,20 @@ public class AppUsersController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return Conflict(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("{email}/reset-password")]
+    public async Task<IActionResult> ResetPassword(string email)
+    {
+        try
+        {
+            var result = await _appUserService.ResetPasswordAsync(email);
+            return Ok(new { result.User, result.TemporaryPassword });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "User not found." });
         }
     }
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Building2 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../services/api";
@@ -8,6 +8,7 @@ export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [remember, setRemember] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -19,8 +20,8 @@ export function Login() {
       const response = await api.post("/auth/login", { email, password });
 
       if (response.data && response.data.token) {
-        login(response.data.token);
-        navigate("/");
+        login(response.data.token, remember);
+        navigate(response.data.mustChangePassword ? "/change-password" : "/");
       }
     } catch (err) {
       setError("Credenciais inválidas ou falha de comunicação com o servidor.");
@@ -145,6 +146,35 @@ export function Login() {
             }}
             required
           />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, color: "#6E6C61", cursor: "pointer" }}>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={remember}
+              onClick={() => setRemember(!remember)}
+              style={{
+                width: 38,
+                height: 21,
+                padding: 2,
+                border: "none",
+                borderRadius: 20,
+                background: remember ? "#1F3B2C" : "#B8B6AB",
+                cursor: "pointer",
+                display: "flex",
+                justifyContent: remember ? "flex-end" : "flex-start",
+                alignItems: "center",
+              }}
+            >
+              <span style={{ width: 17, height: 17, borderRadius: "50%", background: "#FFFFFF" }} />
+            </button>
+            Salvar senha
+          </label>
+          <Link to="/forgot-password" style={{ color: "#1F3B2C", fontSize: 12, textDecoration: "none", fontWeight: 600 }}>
+            Esqueci a senha
+          </Link>
         </div>
 
         <button
