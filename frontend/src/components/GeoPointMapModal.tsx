@@ -7,12 +7,18 @@ import {
   useMapsLibrary,
   useMap,
 } from "@vis.gl/react-google-maps";
-import { addGeoPointToSite, GeoLocationType } from "../services/customerService";
+import {
+  addGeoPointToSite,
+  updateGeoPoint,
+  GeoLocationType,
+  type GeoPointDto,
+} from "../services/customerService";
 import { X, MapPin } from "lucide-react";
 
 interface GeoPointMapModalProps {
   siteId: string;
   existingWaypointsCount: number;
+  initialData?: GeoPointDto | null;
   onClose: () => void;
   onSuccess: (msg: string) => void;
 }
@@ -84,14 +90,17 @@ function PlaceAutocompleteInput({
 export function GeoPointMapModal({
   siteId,
   existingWaypointsCount,
+  initialData,
   onClose,
   onSuccess,
 }: GeoPointMapModalProps) {
-  const [description, setDescription] = useState("");
-  const [locationType, setLocationType] = useState<GeoLocationType>(GeoLocationType.Office);
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [locationType, setLocationType] = useState<GeoLocationType>(
+    initialData?.locationType ?? GeoLocationType.Office
+  );
   const [position, setPosition] = useState<{ lat: number; lng: number }>({
-    lat: -22.3145,
-    lng: -49.0587,
+    lat: initialData?.latitude ?? -22.3145,
+    lng: initialData?.longitude ?? -49.0587,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -108,19 +117,31 @@ export function GeoPointMapModal({
 
     setIsSubmitting(true);
     try {
-      await addGeoPointToSite(siteId, {
+      const payload = {
         description: description.trim(),
         latitude: Number(position.lat.toFixed(6)),
         longitude: Number(position.lng.toFixed(6)),
         locationType,
         order:
           locationType === GeoLocationType.Waypoint ? existingWaypointsCount + 1 : undefined,
-      });
-      onSuccess("Ponto geográfico adicionado com sucesso.");
-      onClose();
+      };
+
+      if (initialData) {
+        await updateGeoPoint(initialData.id, payload);
+        onClose();
+        onSuccess("Ponto geográfico atualizado com sucesso.");
+      } else {
+        await addGeoPointToSite(siteId, payload);
+        onClose();
+        onSuccess("Ponto geográfico adicionado com sucesso.");
+      }
     } catch (error) {
       console.error(error);
-      setErrorMsg("Falha ao salvar o ponto geográfico no servidor.");
+      setErrorMsg(
+        initialData
+          ? "Falha ao atualizar o ponto geográfico no servidor."
+          : "Falha ao salvar o ponto geográfico no servidor."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -130,7 +151,9 @@ export function GeoPointMapModal({
     <div className="crm-modal-overlay">
       <div className="crm-modal crm-modal-lg">
         <div className="crm-modal-header">
-          <h3 className="crm-modal-title">Novo Ponto Geográfico</h3>
+          <h3 className="crm-modal-title">
+            {initialData ? "Editar Ponto Geográfico" : "Novo Ponto Geográfico"}
+          </h3>
           <button type="button" onClick={onClose} className="crm-btn-icon">
             <X size={18} />
           </button>
@@ -160,7 +183,7 @@ export function GeoPointMapModal({
                   className="crm-input"
                 >
                   <option value={GeoLocationType.Office}>Escritório</option>
-                  <option value={GeoLocationType.Waypoint}>Ponto de Rota (Entrada)</option>
+                  <option value={GeoLocationType.Waypoint}>Ponto de Rota</option>
                   <option value={GeoLocationType.MachineLocation}>Local de Máquinas</option>
                 </select>
               </div>
@@ -240,7 +263,11 @@ export function GeoPointMapModal({
               className="crm-btn-primary"
               style={{ marginTop: 4 }}
             >
-              {isSubmitting ? "A gravar..." : "Confirmar e Salvar Ponto"}
+              {isSubmitting
+                ? "A gravar..."
+                : initialData
+                ? "Atualizar Ponto"
+                : "Confirmar e Salvar Ponto"}
             </button>
           </form>
         </APIProvider>
