@@ -11,7 +11,7 @@ export const api = axios.create({
 // Request Interceptor: Injects the JWT token into every outgoing request
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('jwt_token');
+    const token = localStorage.getItem("jwt_token") ?? sessionStorage.getItem("jwt_token");
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,7 +30,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Clears invalid token and forces redirection to the authentication route
-      localStorage.removeItem('jwt_token');
+      localStorage.removeItem("jwt_token");
+      sessionStorage.removeItem("jwt_token");
       window.location.href = '/login'; 
     }
     return Promise.reject(error);

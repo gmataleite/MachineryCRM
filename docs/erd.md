@@ -5,7 +5,7 @@ erDiagram
     CUSTOMER ||--o{ CONTACT : has
     SITE ||--o{ GEO_POINT : contains
     SITE ||--o{ CONTACT : houses
-    FISCAL_ENTITY ||--o{ CONTACT : registers
+    FISCAL_ENTITY ||--o{ CONTACT : houses
     SITE ||--o{ MACHINE : houses
     MACHINE ||--o{ TRANSFER_HISTORY : logs
     MACHINE ||--o{ MAINTENANCE : receives
@@ -19,7 +19,7 @@ erDiagram
         string full_name
         string email
         string password_hash
-        string role "Enum: Manager, Sales, Technician"
+        string role "Enum: Admin, Manager, Sales, Technician"
         boolean is_active
     }
 

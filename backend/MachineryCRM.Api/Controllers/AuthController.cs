@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Asp.Versioning;
+using MachineryCRM.Application.DTOs;
 using MachineryCRM.Application.Interfaces;
 
 namespace MachineryCRM.Api.Controllers;
@@ -25,31 +27,33 @@ public class AuthController : ControllerBase
 [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        // 1. Tenta buscar o usuário no banco de dados real
-        var user = await _appUserService.GetByEmailAsync(request.Email);
-        
-        if (user != null && user.IsActive)
+        var user = await _appUserService.AuthenticateAsync(request.Email, request.Password);
+        if (user != null)
         {
-            // Em produção, usar BCrypt.Verify(request.Password, user.PasswordHash)
-            var token = GenerateJwtToken(user.Email, user.Role);
-            return Ok(new { token });
-        }
-
-        // 2. Fallback de Desenvolvimento (Mock Bypass)
-        // Isso garante que você e o front não fiquem travados enquanto o fluxo de cadastro não existe
-        if (request.Email == "admin@email.com.br" && request.Password == "admin123")
-        {
-            var token = GenerateJwtToken(request.Email, "Admin");
-            return Ok(new { token });
-        }
-        
-        if (request.Email == "tecnico@email.com.br" && request.Password == "tecnico123")
-        {
-            var token = GenerateJwtToken(request.Email, "Technician");
-            return Ok(new { token });
+            var token = GenerateJwtToken(user.Email, user.Role.ToString());
+            return Ok(new { token, mustChangePassword = user.MustChangePassword });
         }
 
         return Unauthorized(new { message = "Invalid credentials or inactive user." });
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        var email = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        if (email == null) return Unauthorized();
+
+        try
+        {
+            await _appUserService.ChangePasswordAsync(email, dto.CurrentPassword, dto.NewPassword);
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new { message = "Invalid credentials." });
+        }
     }
 
     private string GenerateJwtToken(string email, string role)
