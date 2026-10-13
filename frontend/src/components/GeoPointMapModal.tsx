@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   APIProvider,
   Map,
   AdvancedMarker,
   Pin,
   useMapsLibrary,
-  useMap,
-} from "@vis.gl/react-google-maps";
+  useMap
+} from '@vis.gl/react-google-maps';
 import {
   addGeoPointToSite,
   updateGeoPoint,
   GeoLocationType,
-  type GeoPointDto,
-} from "../services/customerService";
-import { X, MapPin } from "lucide-react";
+  type GeoPointDto
+} from '../services/customerService';
+import { X, MapPin } from 'lucide-react';
 
 interface GeoPointMapModalProps {
   siteId: string;
@@ -23,30 +23,33 @@ interface GeoPointMapModalProps {
   onSuccess: (msg: string) => void;
 }
 
-const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
-const MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || "DEMO_MAP_ID";
+const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+const MAP_ID = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID';
 
 function PlaceAutocompleteInput({
-  onPlaceSelect,
+  onPlaceSelect
 }: {
   onPlaceSelect: (lat: number, lng: number) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const placesLib = useMapsLibrary("places");
+  const placesLib = useMapsLibrary('places');
   const map = useMap();
 
   const onPlaceSelectRef = useRef(onPlaceSelect);
-  onPlaceSelectRef.current = onPlaceSelect;
+
+  useEffect(() => {
+    onPlaceSelectRef.current = onPlaceSelect;
+  }, [onPlaceSelect]);
 
   useEffect(() => {
     if (!placesLib || !inputRef.current) return;
 
     const autocomplete = new placesLib.Autocomplete(inputRef.current, {
-      fields: ["geometry", "name", "formatted_address"],
-      componentRestrictions: { country: "br" },
+      fields: ['geometry', 'name', 'formatted_address'],
+      componentRestrictions: { country: 'br' }
     });
 
-    const listener = autocomplete.addListener("place_changed", () => {
+    const listener = autocomplete.addListener('place_changed', () => {
       const place = autocomplete.getPlace();
       if (place.geometry?.location) {
         const lat = place.geometry.location.lat();
@@ -67,11 +70,11 @@ function PlaceAutocompleteInput({
   }, [placesLib, map]);
 
   return (
-    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
       <MapPin
         size={15}
         color="#6E6C61"
-        style={{ position: "absolute", left: 10, pointerEvents: "none" }}
+        style={{ position: 'absolute', left: 10, pointerEvents: 'none' }}
       />
       <input
         ref={inputRef}
@@ -79,7 +82,7 @@ function PlaceAutocompleteInput({
         className="crm-input"
         placeholder="Digite um endereço, rodovia ou cidade (Autocomplete)..."
         onKeyDown={(e) => {
-          if (e.key === "Enter") e.preventDefault();
+          if (e.key === 'Enter') e.preventDefault();
         }}
         style={{ paddingLeft: 32, fontSize: 13 }}
       />
@@ -92,26 +95,26 @@ export function GeoPointMapModal({
   existingWaypointsCount,
   initialData,
   onClose,
-  onSuccess,
+  onSuccess
 }: GeoPointMapModalProps) {
-  const [description, setDescription] = useState(initialData?.description || "");
+  const [description, setDescription] = useState(initialData?.description || '');
   const [locationType, setLocationType] = useState<GeoLocationType>(
     initialData?.locationType ?? GeoLocationType.Office
   );
   const [position, setPosition] = useState<{ lat: number; lng: number }>({
     lat: initialData?.latitude ?? -22.3145,
-    lng: initialData?.longitude ?? -49.0587,
+    lng: initialData?.longitude ?? -49.0587
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg("");
+    setErrorMsg('');
 
     if (!description.trim()) {
-      setErrorMsg("A descrição do ponto é obrigatória.");
+      setErrorMsg('A descrição do ponto é obrigatória.');
       return;
     }
 
@@ -122,25 +125,24 @@ export function GeoPointMapModal({
         latitude: Number(position.lat.toFixed(6)),
         longitude: Number(position.lng.toFixed(6)),
         locationType,
-        order:
-          locationType === GeoLocationType.Waypoint ? existingWaypointsCount + 1 : undefined,
+        order: locationType === GeoLocationType.Waypoint ? existingWaypointsCount + 1 : undefined
       };
 
       if (initialData) {
         await updateGeoPoint(initialData.id, payload);
         onClose();
-        onSuccess("Ponto geográfico atualizado com sucesso.");
+        onSuccess('Ponto geográfico atualizado com sucesso.');
       } else {
         await addGeoPointToSite(siteId, payload);
         onClose();
-        onSuccess("Ponto geográfico adicionado com sucesso.");
+        onSuccess('Ponto geográfico adicionado com sucesso.');
       }
     } catch (error) {
       console.error(error);
       setErrorMsg(
         initialData
-          ? "Falha ao atualizar o ponto geográfico no servidor."
-          : "Falha ao salvar o ponto geográfico no servidor."
+          ? 'Falha ao atualizar o ponto geográfico no servidor.'
+          : 'Falha ao salvar o ponto geográfico no servidor.'
       );
     } finally {
       setIsSubmitting(false);
@@ -152,7 +154,7 @@ export function GeoPointMapModal({
       <div className="crm-modal crm-modal-lg">
         <div className="crm-modal-header">
           <h3 className="crm-modal-title">
-            {initialData ? "Editar Ponto Geográfico" : "Novo Ponto Geográfico"}
+            {initialData ? 'Editar Ponto Geográfico' : 'Novo Ponto Geográfico'}
           </h3>
           <button type="button" onClick={onClose} className="crm-btn-icon">
             <X size={18} />
@@ -161,7 +163,7 @@ export function GeoPointMapModal({
 
         <APIProvider apiKey={API_KEY}>
           <form onSubmit={handleSubmit} className="crm-form">
-            <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ display: 'flex', gap: 10 }}>
               <div style={{ flex: 1 }}>
                 <label className="crm-label">Descrição</label>
                 <input
@@ -201,17 +203,17 @@ export function GeoPointMapModal({
             <div
               style={{
                 height: 300,
-                width: "100%",
+                width: '100%',
                 borderRadius: 4,
-                overflow: "hidden",
-                border: "1px solid #DEDCD0",
+                overflow: 'hidden',
+                border: '1px solid #DEDCD0'
               }}
             >
               <Map
                 mapId={MAP_ID}
                 defaultCenter={position}
                 defaultZoom={15}
-                gestureHandling={"greedy"}
+                gestureHandling={'greedy'}
                 onClick={(e) => {
                   if (e.detail.latLng) {
                     setPosition({ lat: e.detail.latLng.lat, lng: e.detail.latLng.lng });
@@ -227,26 +229,22 @@ export function GeoPointMapModal({
                     }
                   }}
                 >
-                  <Pin
-                    background={"#1F3B2C"}
-                    glyphColor={"#CDE06E"}
-                    borderColor={"#1F3B2C"}
-                  />
+                  <Pin background={'#1F3B2C'} glyphColor={'#CDE06E'} borderColor={'#1F3B2C'} />
                 </AdvancedMarker>
               </Map>
             </div>
 
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
+                display: 'flex',
+                justifyContent: 'space-between',
                 fontSize: 12,
-                color: "#6E6C61",
-                fontFamily: "monospace",
-                background: "#F8F7F2",
-                padding: "8px 12px",
+                color: '#6E6C61',
+                fontFamily: 'monospace',
+                background: '#F8F7F2',
+                padding: '8px 12px',
                 borderRadius: 4,
-                border: "1px solid #EAE8DD",
+                border: '1px solid #EAE8DD'
               }}
             >
               <span>Arraste o pino ou clique no mapa para ajustar</span>
@@ -264,10 +262,10 @@ export function GeoPointMapModal({
               style={{ marginTop: 4 }}
             >
               {isSubmitting
-                ? "A gravar..."
+                ? 'A gravar...'
                 : initialData
-                ? "Atualizar Ponto"
-                : "Confirmar e Salvar Ponto"}
+                  ? 'Atualizar Ponto'
+                  : 'Confirmar e Salvar Ponto'}
             </button>
           </form>
         </APIProvider>

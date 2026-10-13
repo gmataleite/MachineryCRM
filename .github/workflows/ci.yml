@@ -32,7 +32,7 @@ jobs:
         run: dotnet test MachineryCRM.UnitTests/MachineryCRM.UnitTests.csproj --no-build --configuration Release --verbosity normal
 
   frontend:
-    name: React Frontend Build
+    name: React Frontend Build & Test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -50,6 +50,12 @@ jobs:
           
       - name: Install dependencies
         run: npm ci
+        
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
         
       - name: Build (TypeScript & Vite)
         run: npm run build

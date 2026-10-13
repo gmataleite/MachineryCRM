@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { addContactToCustomer, updateContact, type ContactDto } from "../services/customerService";
-import { X } from "lucide-react";
+import React, { useState } from 'react';
+import { addContactToCustomer, updateContact, type ContactDto } from '../services/customerService';
+import { X } from 'lucide-react';
 
 interface ContactFormModalProps {
   customerId: string;
@@ -17,24 +17,24 @@ export function ContactFormModal({
   fiscalEntityId,
   initialData,
   onClose,
-  onSuccess,
+  onSuccess
 }: ContactFormModalProps) {
   const [form, setForm] = useState({
-    name: initialData?.name || "",
-    phone: initialData?.phone || "",
-    email: initialData?.email || "",
-    observations: initialData?.observations || "",
+    name: initialData?.name || '',
+    phone: initialData?.phone || '',
+    email: initialData?.email || '',
+    observations: initialData?.observations || ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg("");
+    setErrorMsg('');
 
     if (!form.name.trim()) {
-      setErrorMsg("O nome do contato é obrigatório.");
+      setErrorMsg('O nome do contato é obrigatório.');
       return;
     }
 
@@ -46,23 +46,21 @@ export function ContactFormModal({
         email: form.email.trim() || undefined,
         observations: form.observations.trim() || undefined,
         siteId: siteId || null,
-        fiscalEntityId: fiscalEntityId || null,
+        fiscalEntityId: fiscalEntityId || null
       };
 
       if (initialData) {
         await updateContact(initialData.id, payload);
         onClose();
-        onSuccess("Contato atualizado com sucesso.");
+        onSuccess('Contato atualizado com sucesso.');
       } else {
         await addContactToCustomer(customerId, payload);
         onClose();
-        onSuccess("Contato adicionado com sucesso.");
+        onSuccess('Contato adicionado com sucesso.');
       }
     } catch (error) {
       console.error(error);
-      setErrorMsg(
-        initialData ? "Erro ao atualizar contato." : "Erro ao adicionar contato."
-      );
+      setErrorMsg(initialData ? 'Erro ao atualizar contato.' : 'Erro ao adicionar contato.');
     } finally {
       setIsSubmitting(false);
     }
@@ -72,9 +70,7 @@ export function ContactFormModal({
     <div className="crm-modal-overlay">
       <div className="crm-modal">
         <div className="crm-modal-header">
-          <h3 className="crm-modal-title">
-            {initialData ? "Editar Contato" : "Novo Contato"}
-          </h3>
+          <h3 className="crm-modal-title">{initialData ? 'Editar Contato' : 'Novo Contato'}</h3>
           <button type="button" onClick={onClose} className="crm-btn-icon">
             <X size={18} />
           </button>
@@ -135,7 +131,7 @@ export function ContactFormModal({
             className="crm-btn-primary"
             style={{ marginTop: 6 }}
           >
-            {isSubmitting ? "A gravar..." : "Salvar Contato"}
+            {isSubmitting ? 'A gravar...' : 'Salvar Contato'}
           </button>
         </form>
       </div>
