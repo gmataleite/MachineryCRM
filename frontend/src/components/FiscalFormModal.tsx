@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { APIProvider, useMapsLibrary } from '@vis.gl/react-google-maps';
-import {
-  addFiscalEntityToCustomer,
-  updateFiscalEntity,
-  type FiscalEntityDto,
-  type AddressDto
-} from '../services/customerService';
-import { normalizeTaxId, validateTaxId } from '../utils/taxId';
+import { addFiscalEntityToCustomer, updateFiscalEntity, type FiscalEntityDto, type AddressDto } from '../services/customerService';
+import { normalizeTaxId, validateTaxId, formatTaxId } from '../utils/taxId';
 import { X } from 'lucide-react';
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
@@ -329,8 +324,8 @@ export function FiscalFormModal({
                   type="text"
                   className="crm-input"
                   placeholder="CNPJ ou CPF"
-                  value={taxId}
-                  onChange={(e) => setTaxId(e.target.value)}
+                  value={formatTaxId(taxId, billingAddress.countryCode || 'BR')}
+                  onChange={(e) => setTaxId(normalizeTaxId(e.target.value))}
                 />
               </div>
             </div>

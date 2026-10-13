@@ -48,6 +48,7 @@ import { FiscalFormModal } from '../components/FiscalFormModal';
 import { ContactFormModal } from '../components/ContactFormModal';
 import { Toast, type ToastData } from '../components/Toast';
 import { GeoPointMapModal } from '../components/GeoPointMapModal';
+import { formatTaxId } from '../utils/taxId';
 
 function GeoPointBadge({ type }: { type: GeoLocationType }) {
   const base: React.CSSProperties = {
@@ -1191,10 +1192,6 @@ export function CustomerDetail() {
         {customer.fiscalEntities.map((fiscal) => {
           const fiscalContacts = customer.contacts.filter((c) => c.fiscalEntityId === fiscal.id);
 
-          // Compatibilidade atualizada com a nova prop taxId
-          const docText = fiscal.taxId?.value ? `Documento: ${fiscal.taxId.value}` : '';
-          const docLine = [docText].filter(Boolean).join(' · ');
-
           return (
             <div key={fiscal.id} className="crm-card">
               <div
@@ -1208,8 +1205,13 @@ export function CustomerDetail() {
                   <div style={{ fontWeight: 700, fontSize: 16, color: '#23291F' }}>
                     {fiscal.name}
                   </div>
-                  {docLine && (
-                    <div style={{ fontSize: 13.5, color: '#6E6C61', marginTop: 3 }}>{docLine}</div>
+                  
+                  {/* Renderização da Máscara do Documento e "Documento:" em Negrito */}
+                  {fiscal.taxId?.value && (
+                    <div style={{ fontSize: 13, color: '#6E6C61', marginTop: 8 }}>
+                      <span style={{ fontWeight: 600 }}>Documento:</span>{' '}
+                      {formatTaxId(fiscal.taxId.value, fiscal.taxId.countryCode)}
+                    </div>
                   )}
 
                   {/* Endereço de Faturamento e Entrega mapeados do novo Helper */}

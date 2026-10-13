@@ -107,3 +107,30 @@ export function validateTaxId(countryCode: string, value: string): boolean {
 
   return validator.validate(value);
 }
+
+// NOVA FUNÇÃO: Máscara dinâmica para CPF e CNPJ (incluindo alfanumérico)
+export function formatTaxId(value: string | null | undefined, countryCode: string = 'BR'): string {
+  if (!value) return '';
+  
+  // Só aplicamos a máscara brasileira se o país for BR
+  if (countryCode.toUpperCase() !== 'BR') return value;
+
+  let clean = value.replace(/[./-]/g, '').toUpperCase();
+
+  // Se contém apenas dígitos e tem 11 ou menos caracteres, aplica máscara de CPF
+  if (clean.length <= 11 && /^\d+$/.test(clean)) {
+    clean = clean.replace(/(\d{3})(\d)/, '$1.$2');
+    clean = clean.replace(/(\d{3})(\d)/, '$1.$2');
+    clean = clean.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    return clean;
+  } 
+  // Caso contrário, aplica máscara de CNPJ (limite 14 caracteres)
+  else {
+    clean = clean.substring(0, 14);
+    clean = clean.replace(/^([A-Z0-9]{2})([A-Z0-9])/, '$1.$2');
+    clean = clean.replace(/^([A-Z0-9]{2}\.[A-Z0-9]{3})([A-Z0-9])/, '$1.$2');
+    clean = clean.replace(/^([A-Z0-9]{2}\.[A-Z0-9]{3}\.[A-Z0-9]{3})([A-Z0-9])/, '$1/$2');
+    clean = clean.replace(/^([A-Z0-9]{2}\.[A-Z0-9]{3}\.[A-Z0-9]{3}\/[A-Z0-9]{4})([A-Z0-9])/, '$1-$2');
+    return clean;
+  }
+}
