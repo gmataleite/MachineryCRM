@@ -7,7 +7,7 @@ import { Machines } from './pages/Machines';
 import { Login } from './pages/Login';
 import { Customers } from './pages/Customers';
 import { CustomerDetail } from './pages/CustomerDetail';
-import { CreateUser } from './pages/CreateUser';
+import { Users } from './pages/Users';
 import { ChangePassword } from './pages/ChangePassword';
 import { ForgotPassword } from './pages/ForgotPassword';
 
@@ -27,7 +27,7 @@ export default function App() {
               <Route path="customers/:id" element={<CustomerDetail />} />
               <Route path="change-password" element={<ChangePassword />} />
               <Route element={<ProtectedRoute roles={['Admin', 'Manager']} />}>
-                <Route path="users/new" element={<CreateUser />} />
+                <Route path="users" element={<Users />} />
               </Route>
             </Route>
           </Route>

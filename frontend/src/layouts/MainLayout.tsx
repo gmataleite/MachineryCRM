@@ -45,7 +45,7 @@ export function MainLayout() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', width: '100%', position: 'relative' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100%', position: 'relative', overflow: 'hidden' }}>
       
       {/* Overlay escuro para quando o menu está aberto em ecrãs móveis */}
       {isMobile && isOpen && (
@@ -69,7 +69,8 @@ export function MainLayout() {
           backgroundColor: '#1F3B2C',
           color: '#FFFFFF',
           transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          overflow: 'hidden', 
+          overflowX: 'hidden',
+          overflowY: 'auto', // Permite rolar o menu se houver muitos itens
           zIndex: 50,
           boxShadow: isOpen && isMobile ? '4px 0 16px rgba(0,0,0,0.2)' : 'none'
         }}
@@ -121,7 +122,7 @@ export function MainLayout() {
             {[
               ...navItems,
               ...(canManageUsers
-                ? [{ to: '/users/new', label: 'Novo usuário', icon: UserPlus, end: false }]
+                ? [{ to: '/users', label: 'Usuários', icon: UserPlus, end: false }]
                 : [])
             ].map(({ to, label, icon: Icon, end }) => (
               <NavLink
@@ -201,13 +202,14 @@ export function MainLayout() {
           minWidth: 0,
           background: '#F2F0E9',
           color: '#23291F',
-          minHeight: '100vh',
+          height: '100vh',
+          overflowY: 'auto', // Permite que apenas a área principal role
           display: 'flex',
           flexDirection: 'column',
           textAlign: 'left'
         }}
       >
-        {/* Barra Superior (Header) com o menu Hamburger à ESQUERDA */}
+        {/* Barra Superior (Header) */}
         <header 
           style={{ 
             height: 64, 
@@ -237,7 +239,6 @@ export function MainLayout() {
             <Menu size={26} />
           </button>
 
-          {/* Logotipo como link para a Home (Dashboard) */}
           <Link 
             to="/"
             style={{ 
@@ -246,7 +247,7 @@ export function MainLayout() {
               color: '#1F3B2C', 
               opacity: isOpen ? 0 : 1, 
               transition: 'opacity 0.2s',
-              textDecoration: 'none' // Remove o sublinhado do link
+              textDecoration: 'none'
             }}
           >
             {!isOpen && "MachineryCRM"}

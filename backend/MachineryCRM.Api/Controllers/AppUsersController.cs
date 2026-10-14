@@ -19,6 +19,24 @@ public class AppUsersController : ControllerBase
         _appUserService = appUserService;
     }
 
+    // --- CRUD ---
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var users = await _appUserService.GetAllAsync();
+        return Ok(users);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var user = await _appUserService.GetByIdAsync(id);
+        if (user == null) return NotFound(new { message = "User not found." });
+
+        return Ok(user);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateAppUserDto dto)
     {
@@ -33,13 +51,31 @@ public class AppUsersController : ControllerBase
         }
     }
 
-    [HttpPost("{email}/reset-password")]
-    public async Task<IActionResult> ResetPassword(string email)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAppUserDto dto)
     {
         try
         {
-            var result = await _appUserService.ResetPasswordAsync(email);
-            return Ok(new { result.User, result.TemporaryPassword });
+            await _appUserService.UpdateAsync(id, dto);
+            return NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
+    [HttpPatch("{id:guid}/deactivate")]
+    public async Task<IActionResult> DeactivateUser(Guid id)
+    {
+        try
+        {
+            await _appUserService.DeactivateAsync(id);
+            return NoContent(); 
         }
         catch (KeyNotFoundException)
         {
@@ -47,12 +83,37 @@ public class AppUsersController : ControllerBase
         }
     }
 
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id)
-    {
-        var user = await _appUserService.GetByIdAsync(id);
-        if (user == null) return NotFound(new { message = "User not found." });
+    // --- AUTENTICAÇÃO / ACESSO ---
 
-        return Ok(user);
+    [HttpPost("{id:guid}/reset-password")]
+    public async Task<IActionResult> ResetPassword(Guid id)
+    {
+        try
+        {
+            var result = await _appUserService.ResetPasswordByIdAsync(id);
+            return Ok(new { temporaryPassword = result.TemporaryPassword }); 
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+    }
+
+    [HttpPatch("{id:guid}/reactivate")]
+    public async Task<IActionResult> ReactivateUser(Guid id)
+    {
+        try
+        {
+            var result = await _appUserService.ReactivateAndResetPasswordAsync(id);
+            return Ok(new { temporaryPassword = result.TemporaryPassword }); 
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "User not found." });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

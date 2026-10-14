@@ -1,3 +1,5 @@
+using MachineryCRM.Domain.Enums;
+
 namespace MachineryCRM.Domain.Entities;
 
 public class AppUser : Entity
@@ -17,6 +19,12 @@ public class AppUser : Entity
         Role = role;
         IsActive = isActive;
         MustChangePassword = true;
+    }
+
+    public void UpdateDetails(string fullName, string email)
+    {
+        FullName = fullName;
+        Email = email;
     }
 
     public void UpdatePassword(string newPasswordHash)
@@ -41,4 +49,8 @@ public class AppUser : Entity
         IsActive = false;
     }
 
+    public void Activate()
+    {
+        IsActive = true;
+    }
 }
