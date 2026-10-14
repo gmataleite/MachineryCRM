@@ -115,11 +115,13 @@ void ConfigureApi(IServiceCollection services)
         options.SubstituteApiVersionInUrl = true;
     });
 
-    services.AddCors(options =>
+    builder.Services.AddCors(options =>
     {
-        options.AddPolicy("AllowFrontend", policy =>
+        options.AddPolicy("ProductionCors", policy =>
         {
-            policy.WithOrigins("http://localhost:5173") 
+            policy.WithOrigins(
+                builder.Configuration["FrontendUrl"] ?? "https://machinerycrm.vercel.app"
+            ) 
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -173,7 +175,7 @@ void ConfigurePipeline(WebApplication app)
 
     app.UseHttpsRedirection();
     app.UseRouting();
-    app.UseCors("AllowFrontend"); 
+    app.UseCors("ProductionCors"); 
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
@@ -194,3 +196,4 @@ void ExecuteDbSeeder(WebApplication app)
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
+
