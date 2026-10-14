@@ -7,6 +7,26 @@ on:
     branches: [ "main" ]
 
 jobs:
+  security:
+      name: Security & Secret Scanning
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+
+        - name: Check for sensitive files
+          run: |
+            # Searches for sensitive files ignoring .env.example or .template
+            SENSITIVE_FILES=$(git ls-files | grep -iE '(\.env$|\.env\.|secrets\.json|\.pem$|\.pfx$|\.key$|\.sqlite$|\.db$)' | grep -v -iE '(\.example$|\.template$)' || true)
+            
+            if [ -n "$SENSITIVE_FILES" ]; then
+              echo "::error::Sensitive files detected in the repository!"
+              echo "$SENSITIVE_FILES"
+              echo "Remove these files from version control and add them to .gitignore."
+              exit 1
+            fi
+            echo "No sensitive files detected."
+
   backend:
     name: .NET Backend Build & Test
     runs-on: ubuntu-latest
