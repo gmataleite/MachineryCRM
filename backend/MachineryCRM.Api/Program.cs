@@ -169,9 +169,11 @@ void ConfigurePipeline(WebApplication app)
             }
             c.RoutePrefix = string.Empty; 
         });
-
-        ExecuteDbSeeder(app);
     }
+
+    // Execute the database seeder
+    ExecuteDbSeeder(app);
+
 
     app.UseHttpsRedirection();
     app.UseRouting();
