@@ -113,7 +113,7 @@ export function MainLayout() {
                 whiteSpace: 'nowrap'
               }}
             >
-              MachineryCRM
+            {import.meta.env.VITE_APP_SHORT_NAME || 'MachineryCRM'}
             </div>
             <button
               type="button"
@@ -268,7 +268,7 @@ export function MainLayout() {
               textDecoration: 'none'
             }}
           >
-            {!isOpen && 'MachineryCRM'}
+            {!isOpen && (import.meta.env.VITE_APP_NAME || 'MachineryCRM')}
           </Link>
         </header>
 
