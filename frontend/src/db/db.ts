@@ -14,7 +14,7 @@ export interface SyncOperation {
   id?: number; // Auto-incrementado localmente
   entity: string; // ex: 'customer'
   action: 'POST' | 'PUT' | 'DELETE';
-  payload: any; // Os dados a enviar para a API
+  payload: unknown; // Os dados a enviar para a API
   createdAt: number;
 }
 
@@ -24,7 +24,7 @@ export class MachineryDatabase extends Dexie {
 
   constructor() {
     super('MachineryDB');
-    
+
     // Define o esquema das tabelas (apenas a chave primária e campos indexados precisam ser declarados aqui)
     this.version(1).stores({
       customers: 'id, name, isSynced',

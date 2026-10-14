@@ -16,7 +16,7 @@ export function useBackgroundSync() {
         try {
           if (op.action === 'POST' && op.entity === 'customer') {
             await api.post('/customers', op.payload);
-            
+
             // Marca o cliente local como sincronizado
             await db.customers.update(op.payload.id, { isSynced: true });
           }
@@ -25,7 +25,10 @@ export function useBackgroundSync() {
           // Se a requisição deu sucesso (HTTP 200/201), remove da fila local
           await db.syncQueue.delete(op.id!);
         } catch (error) {
-          console.error('Erro ao sincronizar operação, ficará na fila para a próxima tentativa.', error);
+          console.error(
+            'Erro ao sincronizar operação, ficará na fila para a próxima tentativa.',
+            error
+          );
           break; // Para a fila para respeitar a ordem cronológica em caso de erro na API
         }
       }
@@ -33,7 +36,7 @@ export function useBackgroundSync() {
 
     // Escuta ativamente quando a rede do dispositivo volta a ficar online
     window.addEventListener('online', processQueue);
-    
+
     // Tenta processar assim que o app é aberto
     void processQueue();
 

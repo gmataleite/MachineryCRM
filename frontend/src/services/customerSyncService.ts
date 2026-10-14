@@ -1,6 +1,6 @@
 import { api } from './api';
 import { db, type LocalCustomer } from '../db/db';
-import { v4 as uuidv4 } from 'uuid'; 
+import { v4 as uuidv4 } from 'uuid';
 
 export const saveCustomer = async (customerData: Omit<LocalCustomer, 'id' | 'isSynced'>) => {
   const newId = uuidv4(); // Geramos o ID no frontend para garantir que o BD local tenha a chave
@@ -10,7 +10,7 @@ export const saveCustomer = async (customerData: Omit<LocalCustomer, 'id' | 'isS
     try {
       // 1. Tenta salvar na API .NET
       await api.post('/customers', payload);
-      
+
       // 2. Se deu certo, salva no banco local como sincronizado
       await db.customers.put({ ...payload, isSynced: true });
       return;
@@ -23,7 +23,7 @@ export const saveCustomer = async (customerData: Omit<LocalCustomer, 'id' | 'isS
   // 3. FLUXO OFFLINE: Salva no BD local como pendente
   await db.transaction('rw', db.customers, db.syncQueue, async () => {
     await db.customers.put({ ...payload, isSynced: false });
-    
+
     // Adiciona a operação à fila para ser processada mais tarde
     await db.syncQueue.add({
       entity: 'customer',

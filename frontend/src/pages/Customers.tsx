@@ -1,12 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Building2, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-// Importa apenas a leitura e a tipagem da API direta
-import { getCustomers, type CustomerDto } from '../services/customerService';
-// Importa as operações de escrita do nosso novo motor offline
-import { saveCustomer, getLocalCustomers } from '../services/customerSyncService';
-
+import { getCustomers, createCustomer, type CustomerDto } from '../services/customerService';
 import { Toast, type ToastData } from '../components/Toast';
 
 type SortKey = 'id' | 'name' | 'sites' | 'fiscalEntities';
@@ -28,34 +23,8 @@ export function Customers() {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      let apiCustomers: CustomerDto[] = [];
-      
-      // 1. Tenta buscar da API se houver ligação
-      if (navigator.onLine) {
-        try {
-          apiCustomers = await getCustomers();
-        } catch (apiErr) {
-          console.warn('Erro na API, caindo para modo offline...', apiErr);
-        }
-      }
-
-      // 2. Busca os clientes locais pendentes de sincronização no Dexie (IndexedDB)
-      const localData = await getLocalCustomers();
-      const pendingCustomers = localData.filter(c => !c.isSynced);
-      
-      // 3. Converte os pendentes locais para o formato visual da tabela
-      const mappedPending: CustomerDto[] = pendingCustomers.map(c => ({
-        id: c.id,
-        name: `${c.name} ⏳ (Pendente)`, // Indicador visual para o técnico saber que ainda não subiu
-        isActive: true,
-        sites: [],
-        fiscalEntities: [],
-        contacts: []
-      }));
-
-      // 4. Junta os dados (pendentes primeiro, depois os da API)
-      setCustomers([...mappedPending, ...apiCustomers]);
-
+      const data = await getCustomers();
+      setCustomers(data);
     } catch (error) {
       console.error('Falha ao carregar clientes', error);
     } finally {
@@ -64,7 +33,8 @@ export function Customers() {
   };
 
   useEffect(() => {
-    void fetchCustomers();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchCustomers();
   }, []);
 
   const showSuccess = (msg: string) => {
@@ -76,8 +46,7 @@ export function Customers() {
     const trimmedName = newCustomerName.trim();
     if (!trimmedName) return;
 
-    // Evita duplicados ignorando a tag "⏳ (Pendente)"
-    if (customers.some((c) => c.name.replace(' ⏳ (Pendente)', '').toLowerCase() === trimmedName.toLowerCase())) {
+    if (customers.some((c) => c.name.toLowerCase() === trimmedName.toLowerCase())) {
       if (
         !window.confirm(
           'Já existe um grupo econômico com este nome. Deseja criar um novo registro mesmo assim?'
@@ -87,20 +56,13 @@ export function Customers() {
     }
 
     try {
-      // Usamos o serviço de sincronização em vez da API direta
-      await saveCustomer({ name: trimmedName });
+      await createCustomer({ name: trimmedName });
       setNewCustomerName('');
-      
-      if (navigator.onLine) {
-        showSuccess('Grupo Econômico registrado com sucesso.');
-      } else {
-        showSuccess('Sem conexão. Cliente guardado localmente e será sincronizado depois.');
-      }
-      
+      showSuccess('Grupo Econômico registrado com sucesso.');
       await fetchCustomers();
     } catch (error) {
       console.error('Falha', error);
-      alert('Erro inesperado ao guardar o cliente.');
+      alert('Erro ao comunicar com o servidor.');
     }
   };
 
@@ -156,7 +118,7 @@ export function Customers() {
     userSelect: 'none'
   };
 
-  if (loading) return <div className="crm-status">A carregar dados...</div>;
+  if (loading) return <div className="crm-status">A carregar dados do servidor...</div>;
 
   return (
     <div>
@@ -187,7 +149,6 @@ export function Customers() {
             placeholder="Ex: Luis Pereira de Barros e Ricardo Barros"
             value={newCustomerName}
             onChange={(e) => setNewCustomerName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSaveCustomer()}
             style={{ flex: 1 }}
           />
           <button
@@ -256,20 +217,15 @@ export function Customers() {
               </tr>
             ) : (
               sortedCustomers.map((cliente) => (
-                <tr key={cliente.id} style={{ opacity: cliente.name.includes('⏳') ? 0.7 : 1 }}>
+                <tr key={cliente.id}>
                   <td className="crm-mono-id">{cliente.id.split('-')[0].toUpperCase()}</td>
                   <td style={{ fontWeight: 600 }}>
-                    {/* Clientes pendentes offline ainda não têm detalhes no backend, logo removemos o link provisoriamente */}
-                    {cliente.name.includes('⏳') ? (
-                      <span style={{ color: '#1F3B2C' }}>{cliente.name}</span>
-                    ) : (
-                      <Link
-                        to={`/customers/${cliente.id}`}
-                        style={{ color: '#1F3B2C', textDecoration: 'none' }}
-                      >
-                        {cliente.name}
-                      </Link>
-                    )}
+                    <Link
+                      to={`/customers/${cliente.id}`}
+                      style={{ color: '#1F3B2C', textDecoration: 'none' }}
+                    >
+                      {cliente.name}
+                    </Link>
                   </td>
                   <td style={{ textAlign: 'center' }}>{cliente.sites?.length || 0}</td>
                   <td style={{ textAlign: 'center' }}>{cliente.fiscalEntities?.length || 0}</td>

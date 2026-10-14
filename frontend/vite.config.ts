@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
-      react(), 
+      react(),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
@@ -43,5 +43,5 @@ export default defineConfig(({ mode }) => {
       restoreMocks: true,
       reporters: ['dot']
     }
-};
+  };
 });

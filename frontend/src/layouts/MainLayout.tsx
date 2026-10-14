@@ -113,7 +113,7 @@ export function MainLayout() {
                 whiteSpace: 'nowrap'
               }}
             >
-            {import.meta.env.VITE_APP_SHORT_NAME || 'MachineryCRM'}
+              {import.meta.env.VITE_APP_SHORT_NAME || 'MachineryCRM'}
             </div>
             <button
               type="button"
