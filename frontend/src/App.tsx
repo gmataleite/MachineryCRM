@@ -10,8 +10,11 @@ import { CustomerDetail } from './pages/CustomerDetail';
 import { Users } from './pages/Users';
 import { ChangePassword } from './pages/ChangePassword';
 import { ForgotPassword } from './pages/ForgotPassword';
+import { useBackgroundSync } from './hooks/useBackgroundSync';
 
 export default function App() {
+  useBackgroundSync();
+
   return (
     <AuthProvider>
       <BrowserRouter>
