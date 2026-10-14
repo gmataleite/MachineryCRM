@@ -9,14 +9,31 @@ export interface LocalCustomer {
   isSynced: boolean; // Flag para sabermos se veio da API ou se foi criado offline
 }
 
-// Interface da Fila de Sincronização (Outbox)
-export interface SyncOperation {
-  id?: number; // Auto-incrementado localmente
-  entity: string; // ex: 'customer'
-  action: 'POST' | 'PUT' | 'DELETE';
-  payload: unknown; // Os dados a enviar para a API
-  createdAt: number;
+export interface CustomerSyncPayload {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
 }
+
+type BaseSyncOperation<TEntity extends string, TPayload> =
+  | {
+      id?: number; // Auto-incrementado localmente
+      entity: TEntity;
+      action: 'POST' | 'PUT';
+      payload: TPayload;
+      createdAt: number;
+    }
+  | {
+      id?: number;
+      entity: TEntity;
+      action: 'DELETE';
+      payload: { id: string };
+      createdAt: number;
+    };
+
+// Interface da Fila de Sincronização (Outbox)
+export type SyncOperation = BaseSyncOperation<'customer', CustomerSyncPayload>;
 
 export class MachineryDatabase extends Dexie {
   customers!: Table<LocalCustomer, string>;

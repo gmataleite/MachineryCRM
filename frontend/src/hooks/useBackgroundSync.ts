@@ -14,11 +14,13 @@ export function useBackgroundSync() {
 
       for (const op of pendingOperations) {
         try {
-          if (op.action === 'POST' && op.entity === 'customer') {
-            await api.post('/customers', op.payload);
+          if (op.entity === 'customer' && op.action === 'POST') {
+            const customer = op.payload;
+
+            await api.post('/customers', customer);
 
             // Marca o cliente local como sincronizado
-            await db.customers.update(op.payload.id, { isSynced: true });
+            await db.customers.update(customer.id, { isSynced: true });
           }
           // (Aqui você adicionaria os ifs para PUT e DELETE)
 
