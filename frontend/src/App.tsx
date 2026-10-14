@@ -1,19 +1,26 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import { MainLayout } from "./layouts/MainLayout";
-import { Dashboard } from "./pages/Dashboard";
-import { Machines } from "./pages/Machines";
-import { Login } from "./pages/Login";
-import { Customers } from "./pages/Customers";
-import { CustomerDetail } from "./pages/CustomerDetail";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { MainLayout } from './layouts/MainLayout';
+import { Dashboard } from './pages/Dashboard';
+import { Machines } from './pages/Machines';
+import { Login } from './pages/Login';
+import { Customers } from './pages/Customers';
+import { CustomerDetail } from './pages/CustomerDetail';
+import { Users } from './pages/Users';
+import { ChangePassword } from './pages/ChangePassword';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { useBackgroundSync } from './hooks/useBackgroundSync';
 
 export default function App() {
+  useBackgroundSync();
+
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<MainLayout />}>
@@ -21,6 +28,10 @@ export default function App() {
               <Route path="machines" element={<Machines />} />
               <Route path="customers" element={<Customers />} />
               <Route path="customers/:id" element={<CustomerDetail />} />
+              <Route path="change-password" element={<ChangePassword />} />
+              <Route element={<ProtectedRoute roles={['Admin', 'Manager']} />}>
+                <Route path="users" element={<Users />} />
+              </Route>
             </Route>
           </Route>
         </Routes>

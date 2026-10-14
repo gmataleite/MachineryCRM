@@ -31,11 +31,11 @@ public class SiteConfiguration : IEntityTypeConfiguration<Site>
         builder.HasMany(s => s.Contacts)
             .WithOne()
             .HasForeignKey(c => c.SiteId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Cascade);
             
         builder.HasMany(s => s.Machines)
             .WithOne()
             .HasForeignKey(m => m.SiteId)
-            .OnDelete(DeleteBehavior.Restrict); 
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

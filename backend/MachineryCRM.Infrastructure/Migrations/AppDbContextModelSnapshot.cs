@@ -3,20 +3,17 @@ using System;
 using MachineryCRM.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MachineryCRM.Infrastructure.Data.Migrations
+namespace MachineryCRM.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261003190322_UpdateDomainModel")]
-    partial class UpdateDomainModel
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,6 +44,11 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("MustChangePassword")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
@@ -174,6 +176,11 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -459,12 +466,12 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.HasOne("MachineryCRM.Domain.Entities.FiscalEntity", null)
                         .WithMany("Contacts")
                         .HasForeignKey("FiscalEntityId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("MachineryCRM.Domain.Entities.Site", null)
                         .WithMany("Contacts")
                         .HasForeignKey("SiteId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.FiscalEntity", b =>
@@ -580,7 +587,7 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.HasOne("MachineryCRM.Domain.Entities.Site", null)
                         .WithMany("Machines")
                         .HasForeignKey("SiteId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
                 });
 

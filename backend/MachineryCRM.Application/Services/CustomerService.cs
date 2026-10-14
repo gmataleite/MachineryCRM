@@ -41,7 +41,7 @@ public class CustomerService : ICustomerService
             IsActive = c.IsActive,
             Sites = c.Sites?.Select(s => new SiteDto { Id = s.Id, Name = s.Name, Address = s.Address }).ToList() ?? new List<SiteDto>(),
             FiscalEntities = c.FiscalEntities?.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, TaxId = f.TaxId, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList() ?? new List<FiscalEntityDto>(),
-            Contacts = c.Contacts?.Select(ct => new ContactDto { Id = ct.Id, Name = ct.Name, SiteId = ct.SiteId, FiscalEntityId = ct.FiscalEntityId, Phone = ct.Phone, Email = ct.Email }).ToList() ?? new List<ContactDto>()
+            Contacts = c.Contacts?.Select(ct => new ContactDto { Id = ct.Id, Name = ct.Name, SiteId = ct.SiteId, FiscalEntityId = ct.FiscalEntityId, Phone = ct.Phone, Email = ct.Email, Observations = ct.Observations }).ToList() ?? new List<ContactDto>()
         });
     }
 
@@ -63,7 +63,7 @@ public class CustomerService : ICustomerService
                 GeoPoints = s.GeoPoints?.OrderBy(g => g.Order).Select(g => new GeoPointDto { Id = g.Id, Description = g.Description, Latitude = g.Latitude, Longitude = g.Longitude, LocationType = g.LocationType, Order = g.Order }).ToList() ?? new List<GeoPointDto>()
             }).ToList() ?? new List<SiteDto>(),
             FiscalEntities = customer.FiscalEntities?.Select(f => new FiscalEntityDto { Id = f.Id, Name = f.Name, TaxId = f.TaxId, BillingAddress = f.BillingAddress, ShippingAddress = f.ShippingAddress }).ToList() ?? new List<FiscalEntityDto>(),
-            Contacts = customer.Contacts?.Select(c => new ContactDto { Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Name = c.Name, Phone = c.Phone, Email = c.Email }).ToList() ?? new List<ContactDto>()
+            Contacts = customer.Contacts?.Select(c => new ContactDto { Id = c.Id, SiteId = c.SiteId, FiscalEntityId = c.FiscalEntityId, Name = c.Name, Phone = c.Phone, Email = c.Email, Observations = c.Observations }).ToList() ?? new List<ContactDto>()
         };
     }
 

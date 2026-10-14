@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { api } from './api';
 
 // ============================================================================
 // ENUMS & CONSTANTS
@@ -7,7 +7,7 @@ import { api } from "./api";
 export const GeoLocationType = {
   Office: 0,
   MachineLocation: 1,
-  Waypoint: 2,
+  Waypoint: 2
 } as const;
 
 export type GeoLocationType = (typeof GeoLocationType)[keyof typeof GeoLocationType];
@@ -37,6 +37,7 @@ export interface UpdateGeoPointDto {
   description: string;
   latitude: number;
   longitude: number;
+  order?: number;
 }
 
 export interface ReorderGeoPointDto {
@@ -50,9 +51,7 @@ export interface ReorderGeoPointDto {
 
 export interface CreateSiteDto {
   name: string;
-  country: string;
-  state: string;
-  city: string;
+  address?: AddressDto | null;
   observations?: string;
 }
 
@@ -61,49 +60,57 @@ export interface SiteDto extends CreateSiteDto {
   geoPoints?: GeoPointDto[];
 }
 
+export type UpdateSiteDto = CreateSiteDto;
+
 // ============================================================================
 // FISCAL ENTITY DTOs
 // ============================================================================
 
+export interface AddressDto {
+  addressLine?: string | null;
+  neighborhood?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  countryCode?: string | null;
+}
+
+export interface TaxIdDto {
+  value: string;
+  countryCode: string;
+}
+
 export interface CreateFiscalEntityDto {
-  sapPn?: string;
   name: string;
-  cnpj?: string;
-  cpf?: string;
-  country: string;
-  state: string;
-  city: string;
+  taxId?: TaxIdDto | null;
+  billingAddress?: AddressDto | null;
+  shippingAddress?: AddressDto | null;
 }
 
 export interface FiscalEntityDto extends CreateFiscalEntityDto {
   id: string;
 }
 
+export type UpdateFiscalEntityDto = CreateFiscalEntityDto;
+
 // ============================================================================
 // CONTACT DTOs
 // ============================================================================
 
 export interface CreateContactDto {
-  siteId?: string;
-  fiscalEntityId?: string;
   name: string;
   phone?: string;
   email?: string;
   observations?: string;
+  siteId?: string | null;
+  fiscalEntityId?: string | null;
 }
 
 export interface ContactDto extends CreateContactDto {
   id: string;
 }
 
-export interface UpdateContactDto {
-  siteId?: string | null;
-  fiscalEntityId?: string | null;
-  name: string;
-  phone?: string;
-  email?: string;
-  observations?: string;
-}
+export type UpdateContactDto = CreateContactDto;
 
 // ============================================================================
 // CUSTOMER DTOs
@@ -122,12 +129,14 @@ export interface CustomerDto {
   contacts: ContactDto[];
 }
 
+export type UpdateCustomerDto = CreateCustomerDto;
+
 // ============================================================================
 // API SERVICES — CUSTOMERS
 // ============================================================================
 
 export const getCustomers = async (): Promise<CustomerDto[]> => {
-  const response = await api.get<CustomerDto[]>("/customers");
+  const response = await api.get<CustomerDto[]>('/customers');
   return response.data;
 };
 
@@ -137,12 +146,20 @@ export const getCustomerById = async (id: string): Promise<CustomerDto> => {
 };
 
 export const createCustomer = async (data: CreateCustomerDto): Promise<CustomerDto> => {
-  const response = await api.post<CustomerDto>("/customers", data);
+  const response = await api.post<CustomerDto>('/customers', data);
   return response.data;
 };
 
+export const updateCustomer = async (id: string, data: UpdateCustomerDto): Promise<void> => {
+  await api.put(`/customers/${id}`, data);
+};
+
+export const deactivateCustomer = async (id: string): Promise<void> => {
+  await api.patch(`/customers/${id}/deactivate`);
+};
+
 // ============================================================================
-// API SERVICES — SITES & FISCAL ENTITIES
+// API SERVICES — SITES
 // ============================================================================
 
 export const addSiteToCustomer = async (
@@ -153,6 +170,18 @@ export const addSiteToCustomer = async (
   return response.data;
 };
 
+export const updateSite = async (siteId: string, data: UpdateSiteDto): Promise<void> => {
+  await api.put(`/customers/sites/${siteId}`, data);
+};
+
+export const deleteSite = async (siteId: string): Promise<void> => {
+  await api.delete(`/customers/sites/${siteId}`);
+};
+
+// ============================================================================
+// API SERVICES — FISCAL ENTITIES
+// ============================================================================
+
 export const addFiscalEntityToCustomer = async (
   customerId: string,
   data: CreateFiscalEntityDto
@@ -162,6 +191,17 @@ export const addFiscalEntityToCustomer = async (
     data
   );
   return response.data;
+};
+
+export const updateFiscalEntity = async (
+  fiscalId: string,
+  data: UpdateFiscalEntityDto
+): Promise<void> => {
+  await api.put(`/customers/fiscal-entities/${fiscalId}`, data);
+};
+
+export const deleteFiscalEntity = async (fiscalId: string): Promise<void> => {
+  await api.delete(`/customers/fiscal-entities/${fiscalId}`);
 };
 
 // ============================================================================
@@ -176,11 +216,12 @@ export const addContactToCustomer = async (
   return response.data;
 };
 
-export const updateContact = async (
-  contactId: string,
-  data: UpdateContactDto
-): Promise<void> => {
+export const updateContact = async (contactId: string, data: UpdateContactDto): Promise<void> => {
   await api.put(`/customers/contacts/${contactId}`, data);
+};
+
+export const deleteContact = async (contactId: string): Promise<void> => {
+  await api.delete(`/customers/contacts/${contactId}`);
 };
 
 // ============================================================================
@@ -191,10 +232,7 @@ export const addGeoPointToSite = async (
   siteId: string,
   data: CreateGeoPointDto
 ): Promise<GeoPointDto> => {
-  const response = await api.post<GeoPointDto>(
-    `/customers/sites/${siteId}/geopoints`,
-    data
-  );
+  const response = await api.post<GeoPointDto>(`/customers/sites/${siteId}/geopoints`, data);
   return response.data;
 };
 

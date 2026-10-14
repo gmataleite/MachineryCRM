@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MachineryCRM.Infrastructure.Data.Migrations
+namespace MachineryCRM.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261003205732_AddCustomerStatus")]
-    partial class AddCustomerStatus
+    [Migration("20261014181617_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,6 +47,11 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("MustChangePassword")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
@@ -464,12 +469,12 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.HasOne("MachineryCRM.Domain.Entities.FiscalEntity", null)
                         .WithMany("Contacts")
                         .HasForeignKey("FiscalEntityId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("MachineryCRM.Domain.Entities.Site", null)
                         .WithMany("Contacts")
                         .HasForeignKey("SiteId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("MachineryCRM.Domain.Entities.FiscalEntity", b =>
@@ -585,7 +590,7 @@ namespace MachineryCRM.Infrastructure.Data.Migrations
                     b.HasOne("MachineryCRM.Domain.Entities.Site", null)
                         .WithMany("Machines")
                         .HasForeignKey("SiteId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
                 });
 

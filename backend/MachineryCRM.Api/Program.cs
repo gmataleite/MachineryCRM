@@ -4,11 +4,13 @@ using MachineryCRM.Application.Services;
 using MachineryCRM.Domain.Interfaces;
 using MachineryCRM.Infrastructure.Data;
 using MachineryCRM.Infrastructure.Repositories;
+using MachineryCRM.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +64,9 @@ void ConfigureDependencies(IServiceCollection services)
     services.AddScoped<IMaintenanceService, MaintenanceService>();
     services.AddScoped<ITransferHistoryService, TransferHistoryService>();
     services.AddScoped<ICommunicationService, CommunicationService>();
+
+    // Security
+    services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 }
 
 void ConfigureAuthentication(WebApplicationBuilder builder)
@@ -93,7 +98,9 @@ void ConfigureAuthentication(WebApplicationBuilder builder)
 
 void ConfigureApi(IServiceCollection services)
 {
-    services.AddControllers();
+    services.AddControllers()
+        .AddJsonOptions(options =>
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     services.AddEndpointsApiExplorer();
 
     services.AddApiVersioning(options =>
@@ -108,11 +115,13 @@ void ConfigureApi(IServiceCollection services)
         options.SubstituteApiVersionInUrl = true;
     });
 
-    services.AddCors(options =>
+    builder.Services.AddCors(options =>
     {
-        options.AddPolicy("AllowFrontend", policy =>
+        options.AddPolicy("ProductionCors", policy =>
         {
-            policy.WithOrigins("http://localhost:5173") 
+            policy.WithOrigins(
+                builder.Configuration["FrontendUrl"] ?? "https://machinerycrm.vercel.app"
+            ) 
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -166,7 +175,7 @@ void ConfigurePipeline(WebApplication app)
 
     app.UseHttpsRedirection();
     app.UseRouting();
-    app.UseCors("AllowFrontend"); 
+    app.UseCors("ProductionCors"); 
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
@@ -179,7 +188,7 @@ void ExecuteDbSeeder(WebApplication app)
     
     try
     {
-        DbSeeder.Seed(dbContext);
+        DbSeeder.Seed(dbContext, app.Configuration);
     }
     catch (Exception ex)
     {
@@ -187,3 +196,4 @@ void ExecuteDbSeeder(WebApplication app)
         logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
+

@@ -7,6 +7,26 @@ on:
     branches: [ "main" ]
 
 jobs:
+  security:
+      name: Security & Secret Scanning
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+
+        - name: Check for sensitive files
+          run: |
+            # Searches for sensitive files ignoring .env.example or .template
+            SENSITIVE_FILES=$(git ls-files | grep -iE '(\.env$|\.env\.|secrets\.json|\.pem$|\.pfx$|\.key$|\.sqlite$|\.db$)' | grep -v -iE '(\.example$|\.template$)' || true)
+            
+            if [ -n "$SENSITIVE_FILES" ]; then
+              echo "::error::Sensitive files detected in the repository!"
+              echo "$SENSITIVE_FILES"
+              echo "Remove these files from version control and add them to .gitignore."
+              exit 1
+            fi
+            echo "No sensitive files detected."
+
   backend:
     name: .NET Backend Build & Test
     runs-on: ubuntu-latest
@@ -32,7 +52,7 @@ jobs:
         run: dotnet test MachineryCRM.UnitTests/MachineryCRM.UnitTests.csproj --no-build --configuration Release --verbosity normal
 
   frontend:
-    name: React Frontend Build
+    name: React Frontend Build & Test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -44,12 +64,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22.x'
           cache: 'npm'
           cache-dependency-path: './frontend/package-lock.json'
           
       - name: Install dependencies
         run: npm ci
+        
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
         
       - name: Build (TypeScript & Vite)
         run: npm run build

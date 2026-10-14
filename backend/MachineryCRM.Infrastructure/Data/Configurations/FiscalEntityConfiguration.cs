@@ -44,6 +44,9 @@ public class FiscalEntityConfiguration : IEntityTypeConfiguration<FiscalEntity>
             a.Property(p => p.CountryCode).HasColumnName("ShippingCountryCode").HasMaxLength(10);
         });
 
-        builder.HasMany(f => f.Contacts).WithOne().HasForeignKey(c => c.FiscalEntityId).OnDelete(DeleteBehavior.SetNull);
+        builder.HasMany(f => f.Contacts)
+            .WithOne()
+            .HasForeignKey(c => c.FiscalEntityId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -5,10 +5,16 @@
 }
 
 :root {
-  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    'IBM Plex Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   color-scheme: light;
-  color: #23291F;
-  background-color: #F2F0E9;
+  color: #23291f;
+  background-color: #f2f0e9;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -21,9 +27,13 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
-  background-color: #F2F0E9;
-  color: #23291F;
-  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f2f0e9;
+  color: #23291f;
+  font-family:
+    'IBM Plex Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
 }
 
 #root {
@@ -55,7 +65,7 @@ p {
   font-size: 22px;
   font-weight: 700;
   margin: 0;
-  color: #23291F;
+  color: #23291f;
 }
 
 .crm-section-header {
@@ -69,30 +79,30 @@ p {
   font-size: 18px;
   font-weight: 700;
   margin: 0;
-  color: #23291F;
+  color: #23291f;
 }
 
 .crm-card-accent {
-  background: #FFFFFF;
+  background: #ffffff;
   padding: 22px 24px;
   margin-bottom: 24px;
-  border-left: 4px solid #1F3B2C;
+  border-left: 4px solid #1f3b2c;
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .crm-card {
-  background: #FFFFFF;
+  background: #ffffff;
   padding: 20px 24px;
   margin-bottom: 16px;
   border-radius: 4px;
-  border: 1px solid #EAE8DD;
+  border: 1px solid #eae8dd;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .crm-card-divider {
   margin-top: 16px;
-  border-top: 1px solid #EAE8DD;
+  border-top: 1px solid #eae8dd;
   padding-top: 14px;
 }
 
@@ -100,30 +110,30 @@ p {
   display: block;
   font-size: 12px;
   font-weight: 600;
-  color: #6E6C61;
+  color: #6e6c61;
   margin-bottom: 6px;
 }
 
 .crm-input {
   width: 100%;
   padding: 9px 12px;
-  background: #F2F0E9;
-  border: 1px solid #DEDCD0;
+  background: #f2f0e9;
+  border: 1px solid #dedcd0;
   border-radius: 4px;
   font-size: 14px;
-  color: #23291F;
+  color: #23291f;
   font-family: inherit;
   outline: none;
 }
 
 .crm-input:focus {
-  border-color: #1F3B2C;
-  background: #FFFFFF;
+  border-color: #1f3b2c;
+  background: #ffffff;
 }
 
 .crm-btn-primary {
-  background: #1F3B2C;
-  color: #FFFFFF;
+  background: #1f3b2c;
+  color: #ffffff;
   border: none;
   padding: 9px 16px;
   border-radius: 4px;
@@ -143,9 +153,9 @@ p {
 }
 
 .crm-btn-outline {
-  background: #FFFFFF;
-  border: 1px solid #DEDCD0;
-  color: #23291F;
+  background: #ffffff;
+  border: 1px solid #dedcd0;
+  color: #23291f;
   padding: 5px 12px;
   border-radius: 4px;
   cursor: pointer;
@@ -161,7 +171,7 @@ p {
   background: none;
   border: none;
   cursor: pointer;
-  color: #6E6C61;
+  color: #6e6c61;
   padding: 4px;
   display: inline-flex;
   align-items: center;
@@ -176,7 +186,7 @@ p {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #6E6C61;
+  color: #6e6c61;
   margin-bottom: 18px;
   padding: 0;
   font-size: 13.5px;
@@ -184,10 +194,10 @@ p {
 }
 
 .crm-table-wrapper {
-  background: #FFFFFF;
+  background: #ffffff;
   border-radius: 4px;
   overflow-x: auto;
-  border: 1px solid #EAE8DD;
+  border: 1px solid #eae8dd;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -199,19 +209,19 @@ p {
 }
 
 .crm-table thead tr {
-  background: #F8F7F2;
-  border-bottom: 2px solid #DEDCD0;
+  background: #f8f7f2;
+  border-bottom: 2px solid #dedcd0;
 }
 
 .crm-table th {
   padding: 12px 16px;
-  color: #6E6C61;
+  color: #6e6c61;
   font-weight: 600;
   font-size: 13px;
 }
 
 .crm-table tbody tr {
-  border-bottom: 1px solid #EAE8DD;
+  border-bottom: 1px solid #eae8dd;
 }
 
 .crm-table tbody tr:last-child {
@@ -220,39 +230,39 @@ p {
 
 .crm-table td {
   padding: 12px 16px;
-  color: #23291F;
+  color: #23291f;
 }
 
 .crm-table-empty {
   padding: 20px 16px;
   text-align: center;
-  color: #6E6C61;
+  color: #6e6c61;
   font-style: italic;
 }
 
 .crm-mono-id {
   font-family: monospace;
   font-size: 12px;
-  color: #8C897E;
+  color: #8c897e;
 }
 
 .crm-empty-hint {
   font-style: italic;
-  color: #8C897E;
+  color: #8c897e;
   font-size: 13px;
   padding: 4px 0;
 }
 
 .crm-status {
   font-size: 14px;
-  color: #6E6C61;
+  color: #6e6c61;
   padding: 4px 0;
 }
 
 .crm-error {
-  background: #F5E6E4;
-  color: #9E3F33;
-  border: 1px solid #E5C5C0;
+  background: #f5e6e4;
+  color: #9e3f33;
+  border: 1px solid #e5c5c0;
   padding: 10px 14px;
   border-radius: 4px;
   font-size: 13px;
@@ -271,10 +281,10 @@ p {
 }
 
 .crm-modal {
-  background: #FFFFFF;
+  background: #ffffff;
   width: 100%;
   max-width: 420px;
-  border-left: 4px solid #1F3B2C;
+  border-left: 4px solid #1f3b2c;
   border-radius: 4px;
   padding: 24px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
@@ -294,7 +304,7 @@ p {
 
 .crm-modal-title {
   margin: 0;
-  color: #23291F;
+  color: #23291f;
   font-size: 16px;
   font-weight: 700;
 }
