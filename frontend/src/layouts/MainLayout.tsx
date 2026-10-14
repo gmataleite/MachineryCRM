@@ -22,7 +22,7 @@ export function MainLayout() {
   const { role, logout } = useAuth();
   const navigate = useNavigate();
   const canManageUsers = role === 'Admin' || role === 'Manager';
-  
+
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 700px)').matches);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,13 +45,23 @@ export function MainLayout() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100%', position: 'relative', overflow: 'hidden' }}>
-      
+    <div
+      style={{
+        display: 'flex',
+        height: '100vh',
+        width: '100%',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
       {/* Overlay escuro para quando o menu está aberto em ecrãs móveis */}
       {isMobile && isOpen && (
-        <div 
+        <div
           style={{
-            position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 40
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            zIndex: 40
           }}
           onClick={() => setIsOpen(false)}
         />
@@ -64,7 +74,7 @@ export function MainLayout() {
           top: 0,
           left: 0,
           height: '100vh',
-          width: isOpen ? 240 : 0, 
+          width: isOpen ? 240 : 0,
           flexShrink: 0,
           backgroundColor: '#1F3B2C',
           color: '#FFFFFF',
@@ -75,7 +85,15 @@ export function MainLayout() {
           boxShadow: isOpen && isMobile ? '4px 0 16px rgba(0,0,0,0.2)' : 'none'
         }}
       >
-        <div style={{ width: 240, height: '100%', display: 'flex', flexDirection: 'column', padding: '16px 10px' }}>
+        <div
+          style={{
+            width: 240,
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '16px 10px'
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -150,7 +168,7 @@ export function MainLayout() {
               </NavLink>
             ))}
           </nav>
-          
+
           <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
             <NavLink
               to="/change-password"
@@ -210,12 +228,12 @@ export function MainLayout() {
         }}
       >
         {/* Barra Superior (Header) */}
-        <header 
-          style={{ 
-            height: 64, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'flex-start', 
+        <header
+          style={{
+            height: 64,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
             gap: 16,
             padding: '0 28px',
             flexShrink: 0
@@ -239,18 +257,18 @@ export function MainLayout() {
             <Menu size={26} />
           </button>
 
-          <Link 
+          <Link
             to="/"
-            style={{ 
-              fontSize: 18, 
-              fontWeight: 700, 
-              color: '#1F3B2C', 
-              opacity: isOpen ? 0 : 1, 
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: '#1F3B2C',
+              opacity: isOpen ? 0 : 1,
               transition: 'opacity 0.2s',
               textDecoration: 'none'
             }}
           >
-            {!isOpen && "MachineryCRM"}
+            {!isOpen && 'MachineryCRM'}
           </Link>
         </header>
 

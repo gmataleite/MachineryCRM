@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { APIProvider, useMapsLibrary } from '@vis.gl/react-google-maps';
-import { addFiscalEntityToCustomer, updateFiscalEntity, type FiscalEntityDto, type AddressDto } from '../services/customerService';
+import {
+  addFiscalEntityToCustomer,
+  updateFiscalEntity,
+  type FiscalEntityDto,
+  type AddressDto
+} from '../services/customerService';
 import { normalizeTaxId, validateTaxId, formatTaxId } from '../utils/taxId';
 import { X } from 'lucide-react';
 

@@ -1205,7 +1205,7 @@ export function CustomerDetail() {
                   <div style={{ fontWeight: 700, fontSize: 16, color: '#23291F' }}>
                     {fiscal.name}
                   </div>
-                  
+
                   {/* Renderização da Máscara do Documento e "Documento:" em Negrito */}
                   {fiscal.taxId?.value && (
                     <div style={{ fontSize: 13, color: '#6E6C61', marginTop: 8 }}>
