@@ -1,71 +1,71 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Building2 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import { api } from "../services/api";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Building2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { api } from '../services/api';
 
 export function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [remember, setRemember] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     try {
-      const response = await api.post("/auth/login", { email, password });
+      const response = await api.post('/auth/login', { email, password });
 
       if (response.data && response.data.token) {
         login(response.data.token, remember);
-        navigate(response.data.mustChangePassword ? "/change-password" : "/");
+        navigate(response.data.mustChangePassword ? '/change-password' : '/');
       }
-    } catch (err) {
-      setError("Credenciais inválidas ou falha de comunicação com o servidor.");
+    } catch {
+      setError('Credenciais inválidas ou falha de comunicação com o servidor.');
     }
   };
 
   return (
     <div
       style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        backgroundColor: "#F2F0E9",
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#F2F0E9',
         fontFamily: "'IBM Plex Sans', sans-serif",
-        color: "#23291F",
+        color: '#23291F',
         padding: 16,
-        boxSizing: "border-box",
+        boxSizing: 'border-box'
       }}
     >
       <form
         onSubmit={handleSubmit}
         style={{
-          padding: "28px 26px",
-          background: "#FFFFFF",
-          borderLeft: "4px solid #1F3B2C",
+          padding: '28px 26px',
+          background: '#FFFFFF',
+          borderLeft: '4px solid #1F3B2C',
           borderRadius: 4,
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.06)",
-          width: "100%",
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
+          width: '100%',
           maxWidth: 360,
-          boxSizing: "border-box",
-          textAlign: "left",
+          boxSizing: 'border-box',
+          textAlign: 'left'
         }}
       >
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
+            display: 'flex',
+            alignItems: 'center',
             gap: 8,
-            marginBottom: 22,
+            marginBottom: 22
           }}
         >
           <Building2 size={22} color="#1F3B2C" />
-          <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: "#23291F" }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: '#23291F' }}>
             MachineryCRM
           </h2>
         </div>
@@ -73,13 +73,13 @@ export function Login() {
         {error && (
           <div
             style={{
-              background: "#F5E6E4",
-              color: "#9E3F33",
-              border: "1px solid #E5C5C0",
-              padding: "9px 12px",
+              background: '#F5E6E4',
+              color: '#9E3F33',
+              border: '1px solid #E5C5C0',
+              padding: '9px 12px',
               borderRadius: 4,
               marginBottom: 16,
-              fontSize: 13,
+              fontSize: 13
             }}
           >
             {error}
@@ -89,11 +89,11 @@ export function Login() {
         <div style={{ marginBottom: 16 }}>
           <label
             style={{
-              display: "block",
+              display: 'block',
               fontSize: 12,
               fontWeight: 600,
-              color: "#6E6C61",
-              marginBottom: 6,
+              color: '#6E6C61',
+              marginBottom: 6
             }}
           >
             Email
@@ -103,15 +103,15 @@ export function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             style={{
-              width: "100%",
-              padding: "9px 12px",
-              background: "#F2F0E9",
-              border: "1px solid #DEDCD0",
+              width: '100%',
+              padding: '9px 12px',
+              background: '#F2F0E9',
+              border: '1px solid #DEDCD0',
               borderRadius: 4,
               fontSize: 14,
-              color: "#23291F",
-              fontFamily: "inherit",
-              boxSizing: "border-box",
+              color: '#23291F',
+              fontFamily: 'inherit',
+              boxSizing: 'border-box'
             }}
             required
           />
@@ -120,11 +120,11 @@ export function Login() {
         <div style={{ marginBottom: 22 }}>
           <label
             style={{
-              display: "block",
+              display: 'block',
               fontSize: 12,
               fontWeight: 600,
-              color: "#6E6C61",
-              marginBottom: 6,
+              color: '#6E6C61',
+              marginBottom: 6
             }}
           >
             Senha
@@ -134,22 +134,38 @@ export function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={{
-              width: "100%",
-              padding: "9px 12px",
-              background: "#F2F0E9",
-              border: "1px solid #DEDCD0",
+              width: '100%',
+              padding: '9px 12px',
+              background: '#F2F0E9',
+              border: '1px solid #DEDCD0',
               borderRadius: 4,
               fontSize: 14,
-              color: "#23291F",
-              fontFamily: "inherit",
-              boxSizing: "border-box",
+              color: '#23291F',
+              fontFamily: 'inherit',
+              boxSizing: 'border-box'
             }}
             required
           />
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
-          <label style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13, color: "#6E6C61", cursor: "pointer" }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 22
+          }}
+        >
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 9,
+              fontSize: 13,
+              color: '#6E6C61',
+              cursor: 'pointer'
+            }}
+          >
             <button
               type="button"
               role="switch"
@@ -159,20 +175,23 @@ export function Login() {
                 width: 38,
                 height: 21,
                 padding: 2,
-                border: "none",
+                border: 'none',
                 borderRadius: 20,
-                background: remember ? "#1F3B2C" : "#B8B6AB",
-                cursor: "pointer",
-                display: "flex",
-                justifyContent: remember ? "flex-end" : "flex-start",
-                alignItems: "center",
+                background: remember ? '#1F3B2C' : '#B8B6AB',
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: remember ? 'flex-end' : 'flex-start',
+                alignItems: 'center'
               }}
             >
-              <span style={{ width: 17, height: 17, borderRadius: "50%", background: "#FFFFFF" }} />
+              <span style={{ width: 17, height: 17, borderRadius: '50%', background: '#FFFFFF' }} />
             </button>
             Salvar senha
           </label>
-          <Link to="/forgot-password" style={{ color: "#1F3B2C", fontSize: 12, textDecoration: "none", fontWeight: 600 }}>
+          <Link
+            to="/forgot-password"
+            style={{ color: '#1F3B2C', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}
+          >
             Esqueci a senha
           </Link>
         </div>
@@ -180,16 +199,16 @@ export function Login() {
         <button
           type="submit"
           style={{
-            width: "100%",
-            padding: "10px 16px",
-            backgroundColor: "#1F3B2C",
-            color: "#FFFFFF",
-            border: "none",
+            width: '100%',
+            padding: '10px 16px',
+            backgroundColor: '#1F3B2C',
+            color: '#FFFFFF',
+            border: 'none',
             borderRadius: 4,
-            cursor: "pointer",
+            cursor: 'pointer',
             fontSize: 14,
             fontWeight: 600,
-            fontFamily: "inherit",
+            fontFamily: 'inherit'
           }}
         >
           Entrar

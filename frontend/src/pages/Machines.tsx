@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Wrench } from "lucide-react";
-import { getMachines, type MachineDto } from "../services/machineService";
+import { useEffect, useState } from 'react';
+import { Wrench } from 'lucide-react';
+import { getMachines, type MachineDto } from '../services/machineService';
 
 export function Machines() {
   const [machines, setMachines] = useState<MachineDto[]>([]);
@@ -12,8 +12,8 @@ export function Machines() {
       try {
         const data = await getMachines();
         setMachines(data);
-      } catch (err) {
-        setError("Falha ao carregar os dados dos equipamentos.");
+      } catch {
+        setError('Falha ao carregar os dados dos equipamentos.');
       } finally {
         setLoading(false);
       }
@@ -38,7 +38,7 @@ export function Machines() {
             <tr>
               <th>Número de Série</th>
               <th>Modelo</th>
-              <th style={{ textAlign: "center" }}>Ano</th>
+              <th style={{ textAlign: 'center' }}>Ano</th>
             </tr>
           </thead>
           <tbody>
@@ -51,11 +51,14 @@ export function Machines() {
             ) : (
               machines.map((machine) => (
                 <tr key={machine.id}>
-                  <td className="crm-mono-id" style={{ fontSize: 13, color: "#23291F", fontWeight: 600 }}>
+                  <td
+                    className="crm-mono-id"
+                    style={{ fontSize: 13, color: '#23291F', fontWeight: 600 }}
+                  >
                     {machine.serialNumber}
                   </td>
                   <td>{machine.model}</td>
-                  <td style={{ textAlign: "center" }}>{machine.year}</td>
+                  <td style={{ textAlign: 'center' }}>{machine.year}</td>
                 </tr>
               ))
             )}

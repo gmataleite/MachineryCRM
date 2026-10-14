@@ -1,15 +1,15 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import { MainLayout } from "./layouts/MainLayout";
-import { Dashboard } from "./pages/Dashboard";
-import { Machines } from "./pages/Machines";
-import { Login } from "./pages/Login";
-import { Customers } from "./pages/Customers";
-import { CustomerDetail } from "./pages/CustomerDetail";
-import { CreateUser } from "./pages/CreateUser";
-import { ChangePassword } from "./pages/ChangePassword";
-import { ForgotPassword } from "./pages/ForgotPassword";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { MainLayout } from './layouts/MainLayout';
+import { Dashboard } from './pages/Dashboard';
+import { Machines } from './pages/Machines';
+import { Login } from './pages/Login';
+import { Customers } from './pages/Customers';
+import { CustomerDetail } from './pages/CustomerDetail';
+import { Users } from './pages/Users';
+import { ChangePassword } from './pages/ChangePassword';
+import { ForgotPassword } from './pages/ForgotPassword';
 
 export default function App() {
   return (
@@ -26,8 +26,8 @@ export default function App() {
               <Route path="customers" element={<Customers />} />
               <Route path="customers/:id" element={<CustomerDetail />} />
               <Route path="change-password" element={<ChangePassword />} />
-              <Route element={<ProtectedRoute roles={["Admin", "Manager"]} />}>
-                <Route path="users/new" element={<CreateUser />} />
+              <Route element={<ProtectedRoute roles={['Admin', 'Manager']} />}>
+                <Route path="users" element={<Users />} />
               </Route>
             </Route>
           </Route>
