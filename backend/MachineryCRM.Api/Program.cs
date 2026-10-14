@@ -175,7 +175,7 @@ void ConfigurePipeline(WebApplication app)
 
     app.UseHttpsRedirection();
     app.UseRouting();
-    app.UseCors("AllowFrontend"); 
+    app.UseCors("ProductionCors"); 
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();
