@@ -5,9 +5,9 @@ import { api } from './api';
 // ============================================================================
 
 export const GeoLocationType = {
-  Office: 0,
-  MachineLocation: 1,
-  Waypoint: 2
+  Office: 'Office',
+  MachineLocation: 'MachineLocation',
+  Waypoint: 'Waypoint'
 } as const;
 
 export type GeoLocationType = (typeof GeoLocationType)[keyof typeof GeoLocationType];
