@@ -181,7 +181,9 @@ export function GeoPointMapModal({
                 <label className="crm-label">Tipo de Ponto</label>
                 <select
                   value={locationType}
-                  onChange={(e) => setLocationType(Number(e.target.value) as GeoLocationType)}
+                  onChange={(e) =>
+                    setLocationType(Number(e.target.value) as unknown as GeoLocationType)
+                  }
                   className="crm-input"
                 >
                   <option value={GeoLocationType.Office}>Escritório</option>
